@@ -1,5 +1,3 @@
-<!-- index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,6 +59,11 @@
             bottom: 0;
             width: 100%;
         }
+        #hairstyleOptions img {
+            cursor: pointer;
+            margin: 10px;
+            max-width: 100px;
+        }
     </style>
 </head>
 <body>
@@ -70,44 +73,26 @@
     <h2>Transform Your Look with a Click</h2>
 </header>
 
-
-
-
- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
-    <title>My Website</title>
-</head>
-<body>
-    <h1>Generate Hairstyles with AI!</h1>
-    <script src="script.js"></script> <!-- Optional: Link to your JS file -->
-</body>
-</html>
-
-<input type="file" id="imageUpload" accept="image/*">
-<img id="uploadedImage" src="#" alt="Uploaded Image" style="display:none; max-width:300px;">
-
-<!-- index.html -->
-<div id="hairstyleOptions">
-  <img src="hairstyle1.jpg" alt="Hairstyle 1" data-hairstyle="hairstyle1.jpg">
-  <img src="hairstyle2.jpg" alt="Hairstyle 2" data-hairstyle="hairstyle2.jpg">
-  </div>
-
-
-<!-- index.html -->
-<canvas id="imageCanvas" width="300" height="400"></canvas>
-
 <div class="content">
     <p>Experience cutting-edge technology that lets you try on different hairstyles instantly. Upload your photo and explore endless possibilities!</p>
+    <input type="file" id="imageUpload" accept="image/*">
+    <img id="uploadedImage" src="#" alt="Uploaded Image" style="display:none; max-width:300px;">
+
+    <div id="hairstyleOptions">
+        <img src="hairstyle1.jpg" alt="Hairstyle 1" data-hairstyle="hairstyle1.jpg">
+        <img src="hairstyle2.jpg" alt="Hairstyle 2" data-hairstyle="hairstyle2.jpg">
+    </div>
+
+    <canvas id="imageCanvas" width="300" height="400"></canvas>
+    
     <a class="button" href="#upload">Get Started</a>
 </div>
 
 <footer>
     <p>&copy; 2023 AI Hair Styler. All Rights Reserved.</p>
 </footer>
+
+<script src="script.js"></script> <!-- Link to your JS file -->
 
 </body>
 </html>
