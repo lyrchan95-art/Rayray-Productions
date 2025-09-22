@@ -36,25 +36,9 @@
 <button id="getDraft">Draft a Prenup</button>
 <div id="result"></div>
 
-<script>
-    fetch ('api.js') then (res=> { console,log (res)};
-
-    document.getElementById('getDraft').addEventListener('click', async () => {
-        const response = await fetch('/api/draft-prenup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            document.getElementById('result').innerText = data.result; // Display the AI's response
-        } else {
-            document.getElementById('result').innerText = 'Error: ' + response.statusText;
-        }
-    });
-</script>
+<h1> AI result </h1>
+<div id="output"></div>
+<script src="api2.js"></script> 
 
 </body>
 </html>
