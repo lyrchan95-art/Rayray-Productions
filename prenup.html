@@ -38,19 +38,18 @@
 
 <script>
     document.getElementById('getDraft').addEventListener('click', async () => {
-        const prompt = "Write a prenup."; // Define your prompt here
-
         const response = await fetch('/api/draft-prenup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ content: prompt }) // Send the prompt as part of the request body
+            // No need to send user input since it's predefined in api.js
+            body: JSON.stringify({}) // Sending an empty body
         });
 
         if (response.ok) {
             const data = await response.json();
-            document.getElementById('result').innerText = data.result; // Adjust according to your API response
+            document.getElementById('result').innerText = data.result; // Display the AI's response
         } else {
             document.getElementById('result').innerText = 'Error: ' + response.statusText;
         }
