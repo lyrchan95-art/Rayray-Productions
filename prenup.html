@@ -28,37 +28,29 @@
         button:hover {
             background-color: #fc5185;
         }
-        textarea {
-            width: 100%;
-            height: 200px; /* Adjust height as needed */
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            resize: vertical; /* Allows vertical resizing */
-        }
     </style>
 </head>
 <body>
 
 <h1>AIML API Prenup Draft</h1>
-<textarea id="userInput" placeholder="Type your prenup details here, up to 5000 words..."></textarea>
 <button id="getDraft">Draft a Prenup</button>
 <div id="result"></div>
 
 <script>
     document.getElementById('getDraft').addEventListener('click', async () => {
+        const prompt = "Write a prenup."; // Define your prompt here
+
         const response = await fetch('/api/draft-prenup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ content: prompt }) // Send the prompt as part of the request body
         });
 
         if (response.ok) {
             const data = await response.json();
-            document.getElementById('result').innerText = data.result;
+            document.getElementById('result').innerText = data.result; // Adjust according to your API response
         } else {
             document.getElementById('result').innerText = 'Error: ' + response.statusText;
         }
