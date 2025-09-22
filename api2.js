@@ -14,7 +14,7 @@ const api = new OpenAI({
 router.use(bodyParser.json());
 
 // Endpoint to draft a prenup
-router.post('/draft-prenup', async (req, res) => {
+router.post('/draft-prenup2', async (req, res) => {
     const userInput = "Draft a prenup contract. Create a comprehensive prenuptial agreement that includes asset identification, debt responsibility, income division, spousal support terms, dispute resolution methods, and amendment procedures. Ensure it outlines the governing law and emphasizes the need for independent legal advice for both parties to ensure fairness and enforceability.";
 
     const systemPrompt = "You are a lawyer. Be descriptive and helpful";
