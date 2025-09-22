@@ -11,7 +11,7 @@ async function askAIML(userPrompt, systemPrompt = "You are a travel agent. Be de
                 'Authorization': `Bearer ${AIML_API_KEY}`
             },
             body: JSON.stringify({
-                model: "gpt-4o",
+                model: "gpt-4o-mini",
                 messages: [
                     {
                         role: "system",
