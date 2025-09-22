@@ -1,44 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIML API Prenup Draft</title>
+    <title>AIML API Travel Agent</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f5f5f5;
         }
-        #result {
-            margin-top: 20px;
-            padding: 10px;
+        .chat-container { 
             background: white;
-            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #response { 
+            margin-top: 15px; 
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            min-height: 50px;
+            border-left: 4px solid #007bff;
+        }
+        input, button, select { 
+            padding: 10px; 
+            margin: 5px;
+            border: 1px solid #ddd;
             border-radius: 5px;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #6a82fb;
+        button { 
+            background: #007bff;
             color: white;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #fc5185;
+            background: #0056b3;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
+    <h1>🌍 Travel Assistant</h1>
+    <p>Ask me about travel destinations, tips, and recommendations!</p>
+    
+    <div class="chat-container">
+        <div>
+            <select id="agentType">
+                <option value="You are a travel agent. Be descriptive and helpful">Travel Agent</option>
+                <option value="You are a budget travel expert. Focus on saving money">Budget Travel Expert</option>
+                <option value="You are a luxury travel consultant. Focus on premium experiences">Luxury Travel Consultant</option>
+            </select>
+            
+            <input type="text" id="questionInput" placeholder="Ask about any destination..." style="width: 300px;">
+            <button onclick="askQuestion()">Ask</button>
+            <button onclick="testAPI()">Test API</button>
+        </div>
+        
+        <div id="response">Welcome! I'm your travel assistant. Ask me about any destination!</div>
+    </div>
 
-<h1>AIML API Prenup Draft</h1>
-<button id="getDraft">Draft a Prenup</button>
-<div id="result"></div>
-
-<h1> AI result </h1>
-<div id="output"></div>
-<script src="api2.js"></script> 
-
+    <!-- Include your API script -->
+    <script src="api.js"></script>
+    
+    <script>
+        async function askQuestion() {
+            const question = document.getElementById('questionInput').value;
+            const agentType = document.getElementById('agentType').value;
+            const responseDiv = document.getElementById('response');
+            
+            if (!question.trim()) {
+                responseDiv.innerHTML = 'Please enter a question about travel.';
+                return;
+            }
+            
+            responseDiv.innerHTML = '<span class="loading">Researching travel information...</span>';
+            
+            try {
+                const answer = await askAIML(question, agentType);
+                responseDiv.innerHTML = `<strong>🌍 Travel Advice:</strong><br>${answer}`;
+            } catch (error) {
+                responseDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function testAPI() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<span class="loading">Testing API connection...</span>';
+            
+            try {
+                const testResult = await askAIML("Tell me about San Francisco in 2 sentences");
+                responseDiv.innerHTML = `<strong>✅ API Test Successful:</strong><br>${testResult}`;
+            } catch (error) {
+                responseDiv.innerHTML = `❌ API Test Failed: ${error.message}`;
+            }
+        }
+        
+        // Allow pressing Enter to submit
+        document.getElementById('questionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+        
+        // Clear input when page loads
+        document.getElementById('questionInput').value = '';
+    </script>
 </body>
 </html>

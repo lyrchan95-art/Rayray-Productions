@@ -1,36 +1,56 @@
-const { OpenAI } = require("openai");
+// api.js - Browser-compatible version
+const AIML_API_URL = "https://api.aimlapi.com/v1";
+const AIML_API_KEY = "374c551f9f6e47eeb657000c5b1de2e5";
 
-const baseURL = "https://api.aimlapi.com/v1";
-const apiKey = "374c551f9f6e47eeb657000c5b1de2e5";
-const systemPrompt = "You are a travel agent. Be descriptive and helpful";
-const userPrompt = "Tell me about San Francisco";
+async function askAIML(userPrompt, systemPrompt = "You are a travel agent. Be descriptive and helpful") {
+    try {
+        const response = await fetch(`${AIML_API_URL}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AIML_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: systemPrompt
+                    },
+                    {
+                        role: "user",
+                        content: userPrompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 256
+            })
+        });
 
-const api = new OpenAI({
-  apiKey,
-  baseURL,
-});
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
 
-const main = async () => {
-  const completion = await api.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      {
-        role: "system",
-        content: systemPrompt,
-      },
-      {
-        role: "user",
-        content: userPrompt,
-      },
-    ],
-    temperature: 0.7,
-    max_tokens: 256,
-  });
+        const completion = await response.json();
+        const aiResponse = completion.choices[0].message.content;
 
-  const response = completion.choices[0].message.content;
+        // For debugging - shows in browser console
+        console.log("User:", userPrompt);
+        console.log("AI:", aiResponse);
 
-  console.log("User:", userPrompt);
-  console.log("AI:", response);
+        return aiResponse;
+    } catch (error) {
+        console.error('Error calling AIML API:', error);
+        return 'Sorry, I encountered an error. Please try again.';
+    }
+}
+
+// Make function available globally
+window.askAIML = askAIML;
+
+// Optional: Add a simple test function
+window.testAIML = async function() {
+    const testResponse = await askAIML("Tell me about San Francisco");
+    console.log("Test response:", testResponse);
+    return testResponse;
 };
-
-main();
