@@ -17,7 +17,7 @@ router.use(bodyParser.json());
 router.post('/draft-prenup', async (req, res) => {
     const userInput = "Draft a prenup contract. Create a comprehensive prenuptial agreement that includes asset identification, debt responsibility, income division, spousal support terms, dispute resolution methods, and amendment procedures. Ensure it outlines the governing law and emphasizes the need for independent legal advice for both parties to ensure fairness and enforceability.";
 
-    const systemPrompt = "You are a lawyer. Be descriptive and helpful"; // Updated system prompt
+    const systemPrompt = "You are a lawyer. Be descriptive and helpful";
 
     try {
         const completion = await api.chat.completions.create({
@@ -29,17 +29,17 @@ router.post('/draft-prenup', async (req, res) => {
                 },
                 {
                     role: "user",
-                    content: userInput, // Using the predefined user input
+                    content: userInput,
                 },
             ],
             temperature: 0.7,
-            max_tokens: 1024, // Increased max tokens for a more comprehensive response
+            max_tokens: 1024,
         });
 
-        const response = completion.choices[0].message.content; // Get the AI's response
-        res.json({ result: response }); // Send the response back to the client
+        const response = completion.choices[0].message.content;
+        res.json({ result: response });
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error(error);
         res.status(500).json({ error: 'Error occurred while calling the API' });
     }
 });
