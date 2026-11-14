@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14111f">
+  <title>Lyric Reel</title>
+  <meta name="description" content="Make singalong lyric videos from your song and your own footage.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="logo" aria-hidden="true">♪</span> Lyric Reel</div>
+    <nav class="steps" aria-label="Steps">
+      <button data-step="song" class="active"><b>1</b><span>Song</span></button>
+      <button data-step="lyrics"><b>2</b><span>Lyrics</span></button>
+      <button data-step="footage"><b>3</b><span>Footage</span></button>
+      <button data-step="make"><b>4</b><span>Video</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 1. SONG -->
+    <section id="step-song" class="step active">
+      <h1>Pick your song</h1>
+      <p class="hint">Choose an audio file from your phone. It never leaves your device.</p>
+      <label class="drop" id="audioDrop">
+        <input type="file" id="audioFile" accept="audio/*">
+        <span class="drop-icon" aria-hidden="true">🎵</span>
+        <span id="audioLabel">Tap to choose a song</span>
+      </label>
+      <audio id="audio" preload="auto"></audio>
+      <div class="fields">
+        <label>Title <input id="title" autocomplete="off" placeholder="Song title"></label>
+        <label>Artist <input id="artist" autocomplete="off" placeholder="Artist"></label>
+      </div>
+      <button class="primary" id="findBtn" disabled>Find lyrics</button>
+      <p class="status" id="songStatus" role="status"></p>
+    </section>
+
+    <!-- 2. LYRICS -->
+    <section id="step-lyrics" class="step">
+      <h1>Lyrics</h1>
+      <p class="status" id="lyricsStatus" role="status"></p>
+      <div id="results" class="results"></div>
+      <label class="lrc-label">Timed lyrics <span id="syncBadge" class="badge"></span>
+        <textarea id="lrc" spellcheck="false" placeholder="[00:12.30] First line of the song&#10;[00:16.80] Second line…&#10;&#10;No match? Paste plain lyrics here, then use Tap to sync."></textarea>
+      </label>
+      <div class="row">
+        <button id="tapSyncBtn">Tap to sync</button>
+        <button class="primary" id="toFootage">Next: footage</button>
+      </div>
+      <div id="tapPanel" class="tap-panel" hidden>
+        <p class="hint">Tap the big button the moment each line starts.</p>
+        <p class="tap-now" id="tapNow"></p>
+        <p class="tap-next" id="tapNext"></p>
+        <button class="tap-big" id="tapBig">Tap</button>
+        <div class="row"><button id="tapUndo">Undo</button><button id="tapStop">Done</button></div>
+      </div>
+    </section>
+
+    <!-- 3. FOOTAGE -->
+    <section id="step-footage" class="step">
+      <h1>Your footage</h1>
+      <p class="hint">Add videos or photos. They play in order under the lyrics and loop to fill the song. Skip this for an animated background.</p>
+      <label class="drop">
+        <input type="file" id="footageFile" accept="video/*,image/*" multiple>
+        <span class="drop-icon" aria-hidden="true">🎬</span>
+        <span>Add clips or photos</span>
+      </label>
+      <ul id="clips" class="clips"></ul>
+      <label class="inline">Switch clips
+        <select id="cutMode">
+          <option value="lines">On every lyric line</option>
+          <option value="2">Every 2 seconds</option>
+          <option value="4" selected>Every 4 seconds</option>
+          <option value="8">Every 8 seconds</option>
+        </select>
+      </label>
+      <button class="primary" id="toMake">Next: make video</button>
+    </section>
+
+    <!-- 4. MAKE -->
+    <section id="step-make" class="step">
+      <div class="stage"><canvas id="canvas" aria-label="Video preview"></canvas></div>
+      <div class="transport">
+        <button id="playBtn" class="round" aria-label="Play">▶</button>
+        <input type="range" id="scrub" min="0" max="1" step="0.01" value="0" aria-label="Position">
+        <span id="clock" class="clock">0:00</span>
+      </div>
+      <details open class="panel">
+        <summary>Style &amp; sync</summary>
+        <div class="swatches" id="swatches" role="radiogroup" aria-label="Highlight color"></div>
+        <label>Sync nudge <output id="offsetOut">0.00 s</output>
+          <input type="range" id="offset" min="-2" max="2" step="0.05" value="0">
+        </label>
+      </details>
+      <details open class="panel">
+        <summary>Export</summary>
+        <div class="fields two">
+          <label>Start (s) <input type="number" id="trimStart" min="0" step="0.5" value="0"></label>
+          <label>End (s) <input type="number" id="trimEnd" min="0" step="0.5" value="0"></label>
+        </div>
+        <div class="row">
+          <button id="setStart">Start = playhead</button>
+          <button id="setEnd">End = playhead</button>
+        </div>
+        <p class="hint">Recording runs in real time — keep this screen open. Tip: 15–60 s works best for Reels/TikTok.</p>
+        <button class="primary" id="exportBtn">Export video</button>
+        <progress id="exportProg" max="1" value="0" hidden></progress>
+        <div id="result" class="result" hidden>
+          <video id="resultVideo" controls playsinline></video>
+          <div class="row">
+            <a id="downloadLink" class="btn primary" download>Download</a>
+            <button id="shareBtn" hidden>Share</button>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer class="foot">
+    Lyrics from <a href="https://lrclib.net" target="_blank" rel="noopener">LRCLIB</a>, an open lyrics database.
+    Word timing is estimated unless the lyrics include word tags. Make sure you have the rights to share the music you use.
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
