@@ -6,6 +6,7 @@ export class OpenAICompatibleProvider implements ModelProvider {
     readonly id: string,
     private baseUrl: string,
     private apiKey: string,
+    private extraHeaders: Record<string, string> = {},
   ) {}
 
   private body(req: CompletionRequest, stream: boolean) {
@@ -22,7 +23,7 @@ export class OpenAICompatibleProvider implements ModelProvider {
   private async post(req: CompletionRequest, stream: boolean) {
     const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/chat/completions`, {
       method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${this.apiKey}` },
+      headers: { "content-type": "application/json", authorization: `Bearer ${this.apiKey}`, ...this.extraHeaders },
       body: this.body(req, stream),
       signal: req.signal,
     });

@@ -1,0 +1,633 @@
+<title>Idea2Proto Live</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: one-thumb mobile app; capture → spec → workspace (chat + full-screen preview) → journal. Desktop splits chat | preview. */
+:root{
+  --bg:#f7f6f3;--surface:#fff;--surface-2:#efede8;--surface-3:#e6e3dc;--fg:#1d1c1a;--muted:#636058;--faint:#8a867d;
+  --border:#e1ddd5;--accent:#0e7c66;--accent-strong:#0a5f4e;--accent-soft:#dcefe9;--on-accent:#fff;--bubble:#eae7e0;--danger:#b42318;--scrim:rgba(20,19,17,.42);
+  --serif:"Source Serif 4","Noto Serif TC","Songti TC",Georgia,serif;--sans:Inter,"Noto Sans TC","PingFang HK",system-ui,sans-serif;--mono:ui-monospace,Menlo,monospace;
+  --r-md:10px;--r-lg:16px;--r-xl:24px;--shadow:0 4px 20px rgba(29,28,26,.07),0 0 0 1px var(--border);--ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1917;--surface:#24231f;--surface-2:#2c2a26;--surface-3:#36342f;--fg:#eeebe5;--muted:#aaa59c;--faint:#868178;--border:#3a3832;--accent:#4cc2a4;--accent-strong:#74d8be;--accent-soft:#1d3a33;--on-accent:#0a1f1a;--bubble:#34322d;--danger:#f0857a;--scrim:rgba(0,0,0,.55);--shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 1px var(--border);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1a1917;--surface:#24231f;--surface-2:#2c2a26;--surface-3:#36342f;--fg:#eeebe5;--muted:#aaa59c;--faint:#868178;--border:#3a3832;--accent:#4cc2a4;--accent-strong:#74d8be;--accent-soft:#1d3a33;--on-accent:#0a1f1a;--bubble:#34322d;--danger:#f0857a;--scrim:rgba(0,0,0,.55);--shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 1px var(--border);color-scheme:dark}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.app{height:100%;display:flex;flex-direction:column;max-width:1200px;margin:0 auto}
+.top{display:flex;align-items:center;gap:8px;min-height:52px;padding-block:4px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.brand{font-family:var(--serif);font-weight:600;font-size:19px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.brand b{color:var(--accent);font-weight:600}
+.main{flex:1;min-height:0;overflow-y:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.nav{display:flex;border-top:1px solid var(--border);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{flex:1;min-height:56px;border:0;background:none;color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);font-weight:500;font-size:14px;transition:background .12s var(--ease)}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{background:var(--accent-strong)}
+.btn.ghost{background:none;border-color:transparent}
+.btn.block{width:100%}.btn.lg{min-height:52px;font-size:15px;border-radius:var(--r-lg)}
+.ib{width:44px;height:44px;border:0;background:none;border-radius:var(--r-md);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ib:hover{background:var(--surface-2);color:var(--fg)}
+.ib.sm{width:34px;height:34px}
+svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:var(--r-md);padding:3px;gap:2px}
+.seg button{border:0;background:none;min-height:34px;padding:0 10px;border-radius:7px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.input,.ta{width:100%;min-height:44px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);font-size:16px}
+.input:focus,.ta:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.ta{resize:none;line-height:1.5}
+.label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.field{margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
+.muted{color:var(--muted)}.faint{color:var(--faint)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-strong);font-weight:500}
+
+/* capture */
+.capture{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-block:20px 28px}
+.hero{text-align:center;margin:auto 0 28px}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,8vw,38px);line-height:1.15;margin:0 0 6px;text-wrap:balance;letter-spacing:-.015em}
+.hero p{margin:0;color:var(--muted)}
+.voice{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px}
+.mic{position:relative;width:112px;height:112px;border-radius:50%;border:0;background:var(--accent);color:var(--on-accent);box-shadow:0 2px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:transform .12s var(--ease),background .12s var(--ease)}
+.mic svg{width:44px;height:44px;stroke-width:1.6}
+.mic:active{transform:scale(.96)}
+.mic[data-state="listening"]{background:var(--danger)}
+.mic[data-state="listening"]::before{content:"";position:absolute;inset:-10px;border-radius:50%;border:3px solid var(--danger);animation:pulse 1.2s var(--ease) infinite}
+.mic:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
+@keyframes pulse{from{transform:scale(.9);opacity:.6}to{transform:scale(1.15);opacity:0}}
+.hint{font-size:14px;color:var(--muted);min-height:1.5em;text-align:center;max-width:36ch}
+.alt{display:flex;gap:8px;align-items:flex-end}
+.alt .ta{min-height:52px;max-height:40vh;border-radius:var(--r-lg)}
+.send{width:52px;height:52px;flex-shrink:0;border:0;border-radius:var(--r-lg);background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center}
+.send:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
+.examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;justify-content:center}
+.examples button{font-size:13px}
+.spec h2{font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 4px}
+
+/* workspace */
+.ws{display:flex;height:100%;min-height:0}
+.chat{flex:1;min-width:0;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto}
+.col{max-width:720px;margin:0 auto;padding-block:12px 20px}
+.summary{margin-bottom:20px}
+.summary p{font-family:var(--serif);font-size:17px;margin:8px 0 0}
+.summary dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:10px 0 0;font-size:13px}
+.summary dt{color:var(--faint)}.summary dd{margin:0}
+.msg{margin-bottom:22px}
+.msg.user{display:flex;flex-direction:column;align-items:flex-end}
+.bubble{background:var(--bubble);padding:10px 14px;border-radius:16px 16px 6px 16px;max-width:85%;white-space:pre-wrap;word-wrap:break-word}
+.prose{font-family:var(--serif);font-size:17px;line-height:1.65;word-wrap:break-word}
+.prose p{margin:0 0 10px}.prose p:last-child{margin:0}
+.prose code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+.route{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.route svg{width:14px;height:14px}
+.acts{display:flex;gap:2px;margin-top:4px}
+.acts svg{width:16px;height:16px}
+.acard{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;padding:12px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--surface);text-align:left;font-size:14px}
+.acard:hover{border-color:var(--accent)}
+.acard .ico{width:44px;height:44px;border-radius:var(--r-md);background:var(--accent-soft);color:var(--accent-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dots{display:inline-flex;gap:4px;padding:8px 0}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--faint);animation:blink 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes blink{50%{opacity:.25}}
+.prog{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.composer-wrap{padding-block:0 12px}
+.composer{max-width:720px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:8px 8px 8px 12px}
+.composer:focus-within{box-shadow:var(--shadow),0 0 0 3px var(--accent-soft)}
+.composer textarea{display:block;width:100%;border:0;background:none;resize:none;outline:none;padding:8px 4px;max-height:30vh;font-size:16px}
+.crow{display:flex;align-items:center;gap:4px}
+.model{flex:1;min-width:0;font-size:12px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+.sbtn{width:38px;height:38px;border:0;border-radius:var(--r-md);background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center}
+.sbtn:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
+.preview{display:flex;flex-direction:column;background:var(--surface)}
+@media (max-width:899px){.preview{position:fixed;inset:0;z-index:50;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:rise .18s var(--ease)}}
+@media (min-width:900px){.preview{width:min(46vw,560px);flex-shrink:0;border-left:1px solid var(--border)}}
+@keyframes rise{from{transform:translateY(24px);opacity:0}}
+.pbar{display:flex;align-items:center;gap:4px;min-height:52px;padding:0 8px;border-bottom:1px solid var(--border);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.pbar .t{flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+.pbar select{min-height:34px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);padding:0 6px;font-size:13px}
+.stage{flex:1;min-height:0;display:flex;justify-content:center;background:var(--surface-2)}
+.stage iframe{flex:1;width:100%;border:0;background:#fff;display:block}
+@media (min-width:900px){.stage{padding:16px}.stage iframe{max-width:430px;border-radius:var(--r-lg);box-shadow:0 2px 10px rgba(0,0,0,.1)}}
+
+/* journal */
+.journal{max-width:720px;margin:0 auto;padding-block:8px 28px}
+.journal h1{font-family:var(--serif);font-weight:400;font-size:28px;margin:4px 0 14px}
+.filters{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+.entry{display:block;width:100%;text-align:left;padding:14px 16px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--surface);margin-bottom:8px}
+.entry:hover{border-color:var(--faint)}
+.entry b{display:block;font-weight:600}
+.entry span.sub{display:block;font-size:13px;color:var(--muted);margin:2px 0 8px}
+.meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--faint);flex-wrap:wrap}
+.empty{text-align:center;padding:48px 16px;color:var(--muted)}
+.group{font-size:12px;color:var(--faint);font-weight:500;margin:16px 0 6px}
+
+/* sheet + toast */
+.scrim{position:fixed;inset:0;z-index:60;background:var(--scrim)}
+.sheet{position:fixed;z-index:61;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding-block:8px calc(24px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));animation:rise .18s var(--ease)}
+.sheet h2{font-size:20px;margin:4px 0 14px}
+.handle{width:36px;height:4px;border-radius:99px;background:var(--surface-3);margin:4px auto 10px}
+@media (min-width:640px){.sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(480px,92vw);transform:translate(-50%,-50%);border-radius:var(--r-xl);animation:none}.handle{display:none}}
+.toast{position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;max-width:calc(100vw - 32px)}
+.note{font-size:12px;color:var(--faint);text-align:center;margin-top:10px}
+</style>
+
+<div class="app" id="app"></div>
+<div id="overlay"></div>
+
+<script>
+(() => {
+"use strict";
+/* ───────── icons ───────── */
+const ic = {
+  mic:'<path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  stop:'<rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/>',
+  send:'<path d="M12 19V5M5 12l7-7 7 7"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  book:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>', x:'<path d="M6 6l12 12M18 6 6 18"/>', play:'<path d="M7 4v16l13-8z"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>', pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  up:'<path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.3 20H7"/>',
+  down:'<path d="M17 13V4h3v9zM17 13l-4 8a2 2 0 0 1-2-2v-4H5.5a2 2 0 0 1-2-2.3l1.2-7A2 2 0 0 1 6.7 4H17"/>',
+  save:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  game:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 12h.01M18 13h.01"/>',
+  layers:'<path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/>', chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  lang:'<path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-4 7-6 8M13 21l4-10 4 10M14.5 17h5"/>',
+};
+const svg = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ic[n]}</svg>`;
+const skillIcon = (s) => svg(s === "game-prototype" ? "game" : s === "design-variants" ? "layers" : s === "chat" ? "chat" : "globe");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ───────── i18n ───────── */
+const T = {
+  heroTitle:["講出你個 idea","Say your idea"], heroSub:["一分鐘內變成可以試嘅原型","Get a working prototype in under a minute"],
+  tap:["撳一下開始講","Tap to start talking"], listening:["聽緊… 再撳一下完成","Listening… tap again to finish"],
+  structuring:["整理緊個 idea…","Structuring your idea…"], typeInstead:["或者打字講你個 idea…","Or type your idea…"],
+  review:["睇下啱唔啱","Check the spec"], reviewSub:["改好先生成——呢步最影響質素","Edit before generating — this matters most"],
+  title:["名","Title"], one:["一句講晒","One-liner"], core:["核心互動","Core interaction"], user:["目標用戶","Target user"], buildAs:["整成","Build as"],
+  generate:["生成原型","Generate prototype"], over:["重新嚟過","Start over"], journal:["日誌","Journal"], newIdea:["新 idea","New idea"],
+  search:["搜尋 idea…","Search ideas…"], all:["全部","All"], none:["未有 idea。返去首頁講一個啦。","No ideas yet. Go to New idea and say one."],
+  nomatch:["搵唔到。","No matches."], message:["想點改？例如「啲掣大啲」","What should change? e.g. “bigger buttons”"],
+  version:["版本","Version"], current:["目前","current"], revert:["還原","Revert"], building:["砌緊原型","Building prototype"],
+  copied:["已複製","Copied"], language:["回覆語言","Reply language"], save:["儲存並重新執行","Save & rerun"], cancel:["取消","Cancel"],
+  saveFile:["下載 HTML","Download HTML"], noModel:["呢個畫面用唔到 AI 模型。請喺 claude.ai 開啟並允許。","The AI model isn't available in this view. Open it on claude.ai and allow access."],
+  denied:["你未允許使用 AI 模型，所以生成唔到。","AI access was declined, so nothing can be generated."], busyRate:["太多請求，等陣再試。","Too many requests — wait a moment and try again."],
+  first:["根據呢個 spec 整第一版原型。","Build the first prototype from this spec."], del:["刪除","Delete"], confirmDel:["再撳一次確認刪除","Tap again to delete"],
+  micNA:["呢度用唔到語音輸入（需要 Chrome 或桌面 app），請打字。","Voice input isn't available here (needs Chrome or the desktop app). Type instead."],
+  today:["今日","Today"], yesterday:["尋日","Yesterday"], week:["過去 7 日","Previous 7 days"], older:["更早","Older"],
+  note:["測試版：idea 只儲存喺你呢部機嘅瀏覽器。","Test build: ideas are saved only in this browser."],
+};
+const SKILL_LABEL = {"prototype-html":["網頁原型","Web prototype"],"game-prototype":["小遊戲","Game prototype"],"design-variants":["設計方向","Design variants"],"chat":["傾偈","Chat"]};
+
+/* ───────── storage (per-viewer, guarded) ───────── */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+};
+
+/* ───────── state ───────── */
+const S = {
+  view: "capture", register: LS.get("i2p.register", "yue"), ideas: LS.get("i2p.ideas", []),
+  ideaId: null, draft: "", spec: null, busy: false, status: "", pending: null, previewOpen: false, viewN: null,
+  editing: null, q: "", filter: "", listening: false, partial: "", confirmDel: false,
+};
+const lang = () => (S.register === "en" ? 1 : 0);
+const t = (k) => T[k][lang()];
+const sl = (s) => SKILL_LABEL[s]?.[lang()] ?? s;
+const idea = () => S.ideas.find((i) => i.id === S.ideaId);
+const persist = () => { if (!LS.set("i2p.ideas", S.ideas)) { // quota: drop oldest versions' html but keep the latest
+  for (const i of S.ideas) i.versions.slice(0, -2).forEach((v) => (v.html = v.html ? "" : v.html)); LS.set("i2p.ideas", S.ideas); } };
+
+/* ───────── model access ───────── */
+let samplerP = null;
+const sampler = () => (samplerP ??= (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)));
+function modelError(e) {
+  const c = e?.code;
+  if (c === "not_granted") return t("denied");
+  if (c === "rate_limited") return t("busyRate");
+  return e?.message || String(e);
+}
+
+const REGISTER = {
+  yue: "Reply in Hong Kong Cantonese (colloquial, Traditional Chinese characters), naturally mixing common English product words. Text inside the prototype is also Cantonese/Traditional Chinese.",
+  mixed: "Reply in natural Hong Kong 中英夾雜: Cantonese sentence structure, Traditional Chinese, English for product/tech terms. Prototype text may mix both.",
+  en: "Reply in clear, friendly English. Prototype text in English.",
+};
+
+/* ───────── skill router (zero-cost keyword classifier, ported from the app) ───────── */
+const R = {
+  game:[[/\b(game|games|arcade|platformer|puzzle|runner|shooter|snake|flappy|clicker|quiz game)\b/i,3],[/\b(score|high ?score|level|lives|enemy|enemies|boss|jump|dodge|tap to|swipe to|collect|obstacle)s?\b/i,1.5],[/(遊戲|游戏|打機|玩法|關卡|分數|得分|過關|小遊戲|手遊|跳躍|閃避|射擊|拼圖|打怪|接住|彈|躲)/,3],[/(玩|跳|射|撞|食|追)/,.8]],
+  variants:[[/\b(variants?|variations?|styles?|design directions?|directions|moodboard|mood|look and feel|aesthetics?|palettes?|colou?r schemes?|themes|alternatives)\b/i,2.5],[/\b(three|3|five|5|several|different|multiple|a few)\s+(versions|looks|styles|designs|options|takes)\b/i,3],[/(風格|设计方向|設計方向|幾個版本|唔同款|唔同style|多款|配色|色調|視覺方向|視覺|感覺|款式|三個版本|3個版本|幾款)/,3]],
+  html:[[/\b(landing page|web ?page|website|site|web app|app|form|tool|dashboard|calculator|tracker|booking|checkout|signup|menu|portfolio|todo|timer|converter|planner|prototype|mockup|ui|screen|page)\b/i,1.6],[/\b(build|make|create|generate|design|prototype|mock up|show me)\b/i,1],[/(網頁|網站|頁面|落地頁|工具|表格|計算機|記帳|預約|訂餐|清單|原型|介面|界面|畫面|整個|整一個|做個|做一個|幫我整|生成)/,1.6]],
+  tweak:[[/\b(bigger|smaller|larger|more|less|darker|lighter|brighter|playful|serious|minimal|bolder|faster|slower|change|make it|make the|add|remove|replace|swap|move|increase|decrease|fix|tweak|instead|colou?r|font|button|spacing|padding|background|title|text|in cantonese|in english|dark mode)\b/i,1.4],[/(大啲|細啲|多啲|少啲|快啲|慢啲|再.{0,6}啲|改|加|刪|轉|換|移|顏色|字體|掣|按鈕|背景|標題|用廣東話|英文|深色|淺色|好玩啲|簡潔啲|活潑啲|復古|風)/,1.4]],
+  chat:[[/\?\s*$|？\s*$/,1.6],[/^(what|how|why|should|can you explain|is it|is there|do you|does|which|who|when|where)\b/i,1.8],[/\b(explain|advice|recommend|compare|pros and cons|market|pricing|competitors?|thoughts on|opinion)\b/i,1.4],[/(點解|點樣|係咪|有冇|咩|嗎|建議|意見|比較|市場|定價|對手|你覺得)/,1.6]],
+};
+const sc = (rs, x) => rs.reduce((s, [re, w]) => (re.test(x) ? s + w : s), 0);
+function route(text, artifactSkill) {
+  const s = {"game-prototype":sc(R.game,text),"design-variants":sc(R.variants,text),"prototype-html":sc(R.html,text),chat:sc(R.chat,text)};
+  const tw = sc(R.tweak, text);
+  if (artifactSkill && tw > 0) s[artifactSkill] += tw + 1;
+  if (s["game-prototype"] >= 3) s["prototype-html"] *= .5;
+  if (s["design-variants"] >= 2.5) s["prototype-html"] *= .6;
+  const e = Object.entries(s).sort((a, b) => b[1] - a[1]);
+  const tot = e.reduce((a, [, v]) => a + v, 0);
+  if (!e[0][1]) return { skill: "chat", confidence: .3 };
+  const conf = Math.round((.6 * e[0][1] / tot + .4 * Math.min(1, e[0][1] / 3)) * 100) / 100;
+  return conf < .55 ? { skill: "chat", confidence: conf } : { skill: e[0][0], confidence: conf };
+}
+
+/* ───────── skill prompts (same shape as the app's registry) ───────── */
+const RULES = `Output rules (strict):
+- First, 1–2 short sentences to the user about what you built or changed. No headings, no lists.
+- Then ONE fenced \`\`\`html block with a COMPLETE single-file HTML document.
+- All CSS in <style>, all JS in <script>. No external scripts, no network requests, no CDNs, no external images (use CSS, emoji or inline SVG).
+- Mobile-first portrait (360–430px), viewport meta, 100dvh, touch targets ≥ 44px, no hover-only interactions. No alert/confirm/prompt.
+- localStorage is allowed. Keep it compact: under ~250 lines, never truncate.`;
+const SKILL_PROMPT = {
+  "prototype-html": "You are a senior product designer-engineer. Build a working, clickable, mobile-first prototype of the idea as one HTML file. Make the core interaction actually work with realistic sample data. Polished, modern, generous spacing, one accent colour.",
+  "game-prototype": "You are a mobile game prototyper. Build a playable PORTRAIT game on a full-screen <canvas>. Pointer events for touch (tap/drag) that work with one thumb, also mouse. touch-action:none, devicePixelRatio, resize, requestAnimationFrame. Start screen → play → game over with score and tap-to-restart; best score in localStorage. Gentle difficulty ramp, light juicy feedback.",
+  "design-variants": "You are a brand and UI art director. Produce THREE or FOUR distinctly different visual directions for the SAME key screen, as horizontally swipeable full-screen panels (CSS scroll-snap, each 100vw). Each panel labelled 'n/N · direction name'. Directions must differ in palette, type, radius, density and imagery style — not just colour swaps.",
+};
+const specBlock = (sp) => `<spec>${JSON.stringify(sp)}</spec>`;
+
+function buildMessages(skill, it, input, currentHtml) {
+  const hist = [];
+  let budget = 12000;
+  for (let i = it.messages.length - 1; i >= 0 && hist.length < 12; i--) {
+    const m = it.messages[i];
+    const c = m.versionN ? `${m.content}\n[produced prototype v${m.versionN}]` : m.content;
+    if ((budget -= c.length) < 0) break;
+    hist.unshift({ role: m.role, content: c });
+  }
+  while (hist.length && hist[0].role !== "user") hist.shift();
+  const sys = skill === "chat"
+    ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\nThe idea: ${specBlock(it.spec)}`
+    : `${SKILL_PROMPT[skill]}\n${RULES}\n${REGISTER[S.register]}\n${specBlock(it.spec)}`;
+  const iter = currentHtml ? `\n\nCURRENT PROTOTYPE (modify it — keep everything not asked to change, return the full updated document):\n\`\`\`html\n${currentHtml}\n\`\`\`` : "";
+  const msgs = [...hist, { role: "user", content: input + iter }];
+  // System instructions ride in the first user turn (memoryless sampler).
+  msgs[0] = { role: "user", content: `[Instructions]\n${sys}\n[/Instructions]\n\n${msgs[0].content}` };
+  return msgs;
+}
+
+function extract(reply) {
+  const f = reply.match(/```(?:html)?\s*\n([\s\S]*?)(?:\n```|$)/i);
+  let html = null, note = reply;
+  if (f && /<(html|body|!doctype|canvas|div|section)/i.test(f[1])) { html = f[1].trim(); note = reply.slice(0, f.index).trim(); }
+  else { const r = reply.match(/<!doctype html[\s\S]*?(<\/html>|$)/i); if (r) { html = r[0]; note = reply.slice(0, r.index).trim(); } }
+  if (html) {
+    if (!/<!doctype/i.test(html)) html = "<!doctype html>\n" + html;
+    const o = (html.match(/<script\b/gi) || []).length, c = (html.match(/<\/script>/gi) || []).length;
+    if (o > c) html += "\n<\/script>";
+    if (!/<\/body>/i.test(html)) html += "\n</body>";
+    if (!/<\/html>/i.test(html)) html += "\n</html>";
+  }
+  return { note, html };
+}
+
+/* storage shim injected into every prototype: sandboxed frames have no usable localStorage */
+const SHIM = `<script>(function(){var seed=__SEED__;function mk(init,sync){var d=Object.assign({},init),a={getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null},setItem:function(k,v){d[String(k)]=String(v);sync&&sync(d)},removeItem:function(k){delete d[String(k)];sync&&sync(d)},clear:function(){d={};sync&&sync(d)},key:function(i){return Object.keys(d)[i]||null}};Object.defineProperty(a,'length',{get:function(){return Object.keys(d).length}});return a}
+function ok(s){try{window[s].setItem('__t','1');window[s].removeItem('__t');return true}catch(e){return false}}
+if(!ok('localStorage'))try{Object.defineProperty(window,'localStorage',{configurable:true,value:mk(seed,function(d){parent.postMessage({ch:'i2p-store',d:d},'*')})})}catch(e){}
+if(!ok('sessionStorage'))try{Object.defineProperty(window,'sessionStorage',{configurable:true,value:mk({})})}catch(e){}})();<\/script>`;
+function wrap(html, seed) {
+  const head = SHIM.replace("__SEED__", JSON.stringify(seed || {}).replace(/</g, "\\u003c"));
+  return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => m + head) : head + html;
+}
+window.addEventListener("message", (e) => {
+  const fr = document.getElementById("pframe");
+  if (!fr || e.source !== fr.contentWindow || e.data?.ch !== "i2p-store") return;
+  const it = idea(); if (!it) return;
+  it.store = e.data.d; persist();
+});
+
+/* ───────── actions ───────── */
+let toastTimer;
+function toast(msg) {
+  const o = document.getElementById("overlay");
+  o.querySelector(".toast")?.remove();
+  const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg; o.appendChild(el);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 2800);
+}
+
+async function structure(raw) {
+  const sample = await sampler();
+  if (!sample) return toast(t("noModel"));
+  S.busy = true; S.status = t("structuring"); render();
+  try {
+    const sp = await sample.json(`You turn a founder's raw, possibly spoken, possibly Cantonese/中英夾雜 idea into a compact product spec.
+Return ONLY JSON with keys: "title" (≤6 words, user's language), "oneLiner" (≤20 words), "coreInteraction" (the ONE thing a user does, ≤20 words), "targetUser" (≤12 words), "suggestedSkill": "prototype-html" | "game-prototype" | "design-variants".
+Pick game-prototype for anything playable, design-variants when they want to explore looks/styles, else prototype-html. Fix speech-to-text errors silently. Don't invent features.
+${REGISTER[S.register]}
+
+<raw>${raw}</raw>`, { modelTier: "quick" });
+    const ok = ["prototype-html", "game-prototype", "design-variants"];
+    S.spec = {
+      title: String(sp.title || raw.slice(0, 30)), oneLiner: String(sp.oneLiner || ""), coreInteraction: String(sp.coreInteraction || ""),
+      targetUser: String(sp.targetUser || ""), suggestedSkill: ok.includes(sp.suggestedSkill) ? sp.suggestedSkill : "prototype-html",
+    };
+  } catch (e) { toast(modelError(e)); }
+  S.busy = false; S.status = ""; render();
+}
+
+function createIdea() {
+  const now = Date.now();
+  const it = { id: "i" + now.toString(36), spec: S.spec, raw: S.draft, messages: [], versions: [], currentVersion: null, store: {}, createdAt: now, updatedAt: now };
+  S.ideas.unshift(it); persist();
+  S.ideaId = it.id; S.spec = null; S.draft = ""; S.view = "idea"; S.viewN = null; S.previewOpen = false;
+  render();
+  turn({ input: t("first"), forceSkill: it.spec.suggestedSkill });
+}
+
+let abort = null;
+async function turn({ input, forceSkill, regenerate, editIndex }) {
+  const it = idea(); if (!it || S.pending) return;
+  const sample = await sampler();
+  if (!sample) return toast(t("noModel"));
+  if (regenerate) {
+    const i = it.messages.map((m) => m.role).lastIndexOf("user");
+    if (i < 0) return;
+    input = it.messages[i].content; forceSkill = it.messages[i].skill; it.messages = it.messages.slice(0, i);
+  } else if (editIndex != null) it.messages = it.messages.slice(0, editIndex);
+
+  const cur = it.versions.find((v) => v.n === it.currentVersion);
+  const r = forceSkill ? { skill: forceSkill, confidence: 1 } : route(input, cur?.skill);
+  const skill = r.skill;
+  const iterating = skill !== "chat" && cur && cur.skill === skill && cur.html;
+  const msgs = buildMessages(skill, it, input, iterating ? cur.html : null);
+  it.messages.push({ role: "user", content: input, skill });
+  S.pending = { skill, text: "", chars: 0, confidence: r.confidence };
+  render(); scrollEnd();
+
+  abort = new AbortController();
+  let full = "";
+  try {
+    const res = await sample(msgs, {
+      signal: abort.signal, cache: false, modelTier: skill === "chat" ? "quick" : "default",
+      onText: ({ text }) => {
+        full = text;
+        const f = text.search(/```|<!doctype|<html/i);
+        S.pending.text = f >= 0 ? text.slice(0, f) : text;
+        S.pending.chars = f >= 0 ? text.length - f : 0;
+        renderPending();
+      },
+    });
+    full = res.text || full;
+    let content = full.trim(), versionN = null, outSkill = skill;
+    if (skill !== "chat") {
+      const { note, html } = extract(full);
+      if (html) {
+        versionN = (it.versions.at(-1)?.n || 0) + 1;
+        it.versions.push({ n: versionN, html, skill, note: note.slice(0, 300), createdAt: Date.now() });
+        it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
+        content = note || "✓";
+        if (res.truncated) toast(lang() ? "Output was cut short; it may be incomplete. Try “regenerate”." : "輸出被截短，可能唔完整。可以試下重新生成。");
+      } else outSkill = "chat";
+    }
+    it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
+  } catch (e) {
+    if (e?.name !== "AbortError" && e?.code !== "aborted") toast(modelError(e));
+    if (full.trim()) it.messages.push({ role: "assistant", content: full.trim(), skill: "chat", feedback: 0 });
+  }
+  it.updatedAt = Date.now(); S.pending = null; abort = null; persist(); render(); scrollEnd();
+}
+
+/* dictation */
+let dictP = null, dict = null;
+const dictation = () => (dictP ??= (window.claude?.use ? window.claude.use("dictation") : Promise.resolve(null)).then((d) => {
+  dict = d;
+  if (d) {
+    d.onPartial(({ text }) => { S.partial = text; renderHint(); });
+    d.onFinal(({ text }) => { S.draft = (S.draft ? S.draft + " " : "") + text; S.partial = ""; syncDraft(); });
+    d.onState(({ state }) => {
+      const was = S.listening; S.listening = state === "listening" || state === "starting";
+      if (was && state === "idle") {
+        // speech finished: go straight to structuring (the 60-second fast path)
+        if (S.view === "capture" && S.draft.trim().length > 1 && !S.spec) structure(S.draft.trim());
+        else if (S.view === "idea" && S.draft.trim()) { const v = S.draft.trim(); S.draft = ""; turn({ input: v }); }
+        else render();
+      } else render();
+    });
+  }
+  return d;
+}));
+dictation();
+function toggleMic() {
+  if (!dict) return toast(t("micNA"));
+  if (S.listening) { dict.stop().catch(() => {}); return; }
+  S.draft = S.view === "capture" ? "" : S.draft;
+  const langTag = S.register === "en" ? "en-US" : "zh-HK";
+  dict.start({ language: langTag }).catch((e) => {
+    if (e?.code === "invalid_argument") return dict.start().catch((e2) => toast(e2?.message || t("micNA")));
+    if (e?.code !== "dismissed") toast(e?.code === "not_granted" ? t("micNA") : e?.message || t("micNA"));
+  });
+}
+
+async function downloadHtml(v, it) {
+  const dl = await (window.claude?.use ? window.claude.use("downloads") : null);
+  const name = (it.spec.title || "prototype").replace(/[^\w一-鿿-]+/g, "-").slice(0, 40) + `-v${v.n}.html`;
+  if (!dl) {
+    try { await navigator.clipboard.writeText(v.html); toast(t("copied") + " (HTML)"); } catch { toast("—"); }
+    return;
+  }
+  try { await dl.save({ filename: name, data: v.html }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
+}
+
+/* ───────── rendering ───────── */
+const $app = document.getElementById("app");
+const prose = (s) => esc(s).split(/\n{2,}/).map((p) => `<p>${p.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>")}</p>`).join("");
+function scrollEnd() { requestAnimationFrame(() => { const s = document.getElementById("scroll"); if (s) s.scrollTop = s.scrollHeight; }); }
+function syncDraft() { const ta = document.getElementById("draft"); if (ta) { ta.value = S.draft; autosize(ta); } }
+function autosize(ta) { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; }
+function renderHint() {
+  const h = document.getElementById("hint"); if (!h) return;
+  h.textContent = S.listening ? (S.partial || t("listening")) : S.status || t("tap");
+}
+
+function regSeg() {
+  return `<div class="seg" role="group" aria-label="${t("language")}">${[["yue","廣東話"],["mixed","中英"],["en","EN"]].map(([k, l]) => `<button data-reg="${k}" aria-pressed="${S.register === k}">${l}</button>`).join("")}</div>`;
+}
+
+function viewCapture() {
+  if (S.spec) {
+    const f = (k, multi) => multi ? `<textarea class="ta" id="sp-${k}" rows="2" data-spec="${k}">${esc(S.spec[k])}</textarea>` : `<input class="input" id="sp-${k}" data-spec="${k}" value="${esc(S.spec[k])}">`;
+    return `<div class="capture"><section class="card spec" aria-labelledby="spec-h">
+      <p class="muted" style="margin:0 0 4px;font-size:13px">${t("reviewSub")}</p><h2 id="spec-h">${t("review")}</h2>
+      <div class="field" style="margin-top:14px"><label class="label" for="sp-title">${t("title")}</label>${f("title")}</div>
+      <div class="field"><label class="label" for="sp-oneLiner">${t("one")}</label>${f("oneLiner", 1)}</div>
+      <div class="field"><label class="label" for="sp-coreInteraction">${t("core")}</label>${f("coreInteraction", 1)}</div>
+      <div class="field"><label class="label" for="sp-targetUser">${t("user")}</label>${f("targetUser")}</div>
+      <div class="field"><span class="label">${t("buildAs")}</span><div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${["prototype-html","game-prototype","design-variants"].map((s) => `<button class="chip" data-skill="${s}" aria-pressed="${S.spec.suggestedSkill === s}">${skillIcon(s)} ${sl(s)}</button>`).join("")}</div></div>
+      <button class="btn primary lg block" id="gen">${t("generate")}</button>
+      <button class="btn ghost block" id="reset" style="margin-top:8px">${t("over")}</button></section></div>`;
+  }
+  const ex = lang() ? ["A game: catch falling egg tarts on a tray", "Landing page for a weekend hiking tour", "3 design directions for a bubble tea shop"]
+                    : ["整個小遊戲：用個盤接住跌落嚟嘅蛋撻", "幫我整個網頁介紹週末行山團", "幫一間珍珠奶茶舖出三個設計方向"];
+  return `<div class="capture">
+    <div class="hero"><h1>${t("heroTitle")}</h1><p>${t("heroSub")}</p></div>
+    <div class="voice">
+      <button class="mic" id="mic" data-state="${S.listening ? "listening" : "idle"}" ${S.busy ? "disabled" : ""} aria-label="${S.listening ? "Stop" : "Voice"}" aria-pressed="${S.listening}">${svg(S.listening ? "stop" : "mic")}</button>
+      <div class="hint" id="hint" aria-live="polite">${esc(S.listening ? S.partial || t("listening") : S.status || t("tap"))}</div>
+    </div>
+    <form class="alt" id="capform"><label class="sr" for="draft">${t("typeInstead")}</label>
+      <textarea class="ta" id="draft" rows="1" placeholder="${t("typeInstead")}" ${S.busy ? "disabled" : ""}>${esc(S.draft)}</textarea>
+      <button class="send" type="submit" aria-label="Send" ${S.busy ? "disabled" : ""}>${svg("send")}</button></form>
+    <div class="examples">${ex.map((e) => `<button class="chip" data-ex="${esc(e)}">${esc(e)}</button>`).join("")}</div>
+    <p class="note">${t("note")}</p></div>`;
+}
+
+function msgHtml(m, i, it, lastA) {
+  if (m.role === "user") {
+    if (S.editing === i) return `<div class="msg user" style="align-items:stretch"><label class="sr" for="edit">Edit</label><textarea class="ta" id="edit" rows="3">${esc(m.content)}</textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn ghost" data-act="edit-cancel">${t("cancel")}</button><button class="btn primary" data-act="edit-save" data-i="${i}">${t("save")}</button></div></div>`;
+    return `<div class="msg user"><div class="bubble">${esc(m.content)}</div><div class="acts">
+      <button class="ib sm" data-act="copy" data-i="${i}" aria-label="Copy">${svg("copy")}</button>
+      <button class="ib sm" data-act="edit" data-i="${i}" aria-label="Edit" ${S.pending ? "disabled" : ""}>${svg("pencil")}</button></div></div>`;
+  }
+  return `<div class="msg">${m.skill && m.skill !== "chat" ? `<div class="route">${skillIcon(m.skill)} ${sl(m.skill)}</div>` : ""}
+    <div class="prose">${prose(m.content)}</div>
+    ${m.versionN ? `<button class="acard" data-act="open" data-n="${m.versionN}"><span class="ico">${skillIcon(m.skill)}</span><span style="flex:1;min-width:0"><b>${esc(it.spec.title)}</b><br><span class="muted">${t("version")} ${m.versionN}${m.versionN === it.currentVersion ? " · " + t("current") : ""}</span></span>${svg("play")}</button>` : ""}
+    <div class="acts"><button class="ib sm" data-act="copy" data-i="${i}" aria-label="Copy">${svg("copy")}</button>
+      <button class="ib sm" data-act="fb" data-v="1" data-i="${i}" aria-label="Good" aria-pressed="${m.feedback === 1}" style="${m.feedback === 1 ? "color:var(--accent)" : ""}">${svg("up")}</button>
+      <button class="ib sm" data-act="fb" data-v="-1" data-i="${i}" aria-label="Bad" aria-pressed="${m.feedback === -1}" style="${m.feedback === -1 ? "color:var(--danger)" : ""}">${svg("down")}</button>
+      ${i === lastA ? `<button class="ib sm" data-act="regen" aria-label="Regenerate" ${S.pending ? "disabled" : ""}>${svg("refresh")}</button>` : ""}</div></div>`;
+}
+
+function pendingHtml() {
+  const p = S.pending; if (!p) return "";
+  return `<div class="msg" id="pending">${p.skill !== "chat" ? `<div class="route">${skillIcon(p.skill)} ${sl(p.skill)}</div>` : ""}
+    <div class="prose" aria-live="polite" aria-busy="true">${p.text ? prose(p.text) : p.chars ? "" : `<span class="dots"><i></i><i></i><i></i></span>`}</div>
+    ${p.chars ? `<div class="prog" role="status"><span class="dots"><i></i><i></i><i></i></span>${t("building")} · ${(p.chars / 1000).toFixed(1)}k</div>` : ""}</div>`;
+}
+function renderPending() { const el = document.getElementById("pending"); if (el) { el.outerHTML = pendingHtml(); scrollEnd(); } }
+
+function viewIdea() {
+  const it = idea(); if (!it) { S.view = "journal"; return viewJournal(); }
+  const lastA = it.messages.map((m) => m.role).lastIndexOf("assistant");
+  const viewN = S.viewN ?? it.currentVersion;
+  const v = it.versions.find((x) => x.n === viewN);
+  const preview = S.previewOpen && v ? `<aside class="preview" aria-label="Prototype preview">
+      <div class="pbar"><button class="ib" data-act="close" aria-label="Close">${svg("x")}</button><span class="t">${esc(it.spec.title)}</span>
+        <label class="sr" for="ver">${t("version")}</label><select id="ver">${it.versions.map((x) => `<option value="${x.n}" ${x.n === viewN ? "selected" : ""}>v${x.n}${x.n === it.currentVersion ? " · " + t("current") : ""}</option>`).join("")}</select>
+        ${viewN !== it.currentVersion ? `<button class="btn" style="min-height:34px" data-act="revert" data-n="${viewN}">${t("revert")}</button>` : ""}
+        <button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
+      <div class="stage">${v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${viewN}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`}</div></aside>` : "";
+  const modelLabel = `${sl(S.pending?.skill || it.messages.at(-1)?.skill || it.spec.suggestedSkill)} · ${S.register === "en" ? "EN" : S.register === "yue" ? "廣東話" : "中英"}`;
+  return `<div class="ws"><div class="chat">
+    <div class="scroll" id="scroll"><div class="col">
+      <section class="card summary"><span class="tag">${skillIcon(it.spec.suggestedSkill)} ${sl(it.spec.suggestedSkill)}</span><p>${esc(it.spec.oneLiner)}</p>
+        <dl><dt>${t("core")}</dt><dd>${esc(it.spec.coreInteraction)}</dd><dt>${t("user")}</dt><dd>${esc(it.spec.targetUser)}</dd></dl></section>
+      ${it.messages.map((m, i) => msgHtml(m, i, it, lastA)).join("")}${pendingHtml()}
+    </div></div>
+    <div class="composer-wrap"><form class="composer" id="cform"><label class="sr" for="draft">${t("message")}</label>
+      <textarea id="draft" rows="1" placeholder="${esc(S.listening ? S.partial || t("listening") : t("message"))}">${esc(S.draft)}</textarea>
+      <div class="crow"><span class="model">${esc(modelLabel)}</span>
+        <button type="button" class="ib sm" id="mic" aria-label="Voice" aria-pressed="${S.listening}" ${S.pending ? "disabled" : ""} style="${S.listening ? "color:var(--danger)" : ""}">${svg(S.listening ? "stop" : "mic")}</button>
+        ${S.pending ? `<button type="button" class="sbtn" data-act="stop" aria-label="Stop">${svg("stop")}</button>` : `<button type="submit" class="sbtn" aria-label="Send" ${S.draft.trim() ? "" : "disabled"}>${svg("send")}</button>`}
+      </div></form></div></div>${preview}</div>`;
+}
+
+function viewJournal() {
+  const q = S.q.trim().toLowerCase();
+  const list = S.ideas.filter((i) => (!S.filter || i.spec.suggestedSkill === S.filter) &&
+    (!q || [i.spec.title, i.spec.oneLiner, i.raw, ...i.messages.map((m) => m.content)].join(" ").toLowerCase().includes(q)));
+  const d0 = new Date(); d0.setHours(0, 0, 0, 0); const day = 864e5;
+  const groups = [[t("today"), []], [t("yesterday"), []], [t("week"), []], [t("older"), []]];
+  list.forEach((i) => groups[i.updatedAt >= +d0 ? 0 : i.updatedAt >= d0 - day ? 1 : i.updatedAt >= d0 - 7 * day ? 2 : 3][1].push(i));
+  const fmt = new Intl.DateTimeFormat(lang() ? "en-HK" : "zh-HK", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return `<div class="journal"><h1>${t("journal")}</h1>
+    <label class="sr" for="jq">${t("search")}</label><input class="input" id="jq" type="search" placeholder="${t("search")}" value="${esc(S.q)}">
+    <div class="filters" role="group" aria-label="Filter">${["", "prototype-html", "game-prototype", "design-variants"].map((f) => `<button class="chip" data-filter="${f}" aria-pressed="${S.filter === f}">${f ? skillIcon(f) + " " + sl(f) : t("all")}</button>`).join("")}</div>
+    ${list.length ? groups.filter((g) => g[1].length).map(([label, items]) => `<h2 class="group">${label}</h2>` + items.map((i) => `<button class="entry" data-open-idea="${i.id}"><b>${esc(i.spec.title)}</b><span class="sub">${esc(i.spec.oneLiner)}</span>
+      <span class="meta"><span class="tag">${sl(i.spec.suggestedSkill)}</span>${i.currentVersion ? `<span>v${i.currentVersion}</span>` : ""}<span>${i.messages.length} ${lang() ? "messages" : "則訊息"}</span><span>${fmt.format(i.updatedAt)}</span></span></button>`).join("")).join("")
+      : `<p class="empty">${S.ideas.length ? t("nomatch") : t("none")}</p>`}</div>`;
+}
+
+function render() {
+  const inIdea = S.view === "idea";
+  const it = idea();
+  document.documentElement.lang = S.register === "en" ? "en" : "zh-HK";
+  const top = inIdea
+    ? `<div class="top"><button class="ib" data-nav="journal" aria-label="${t("journal")}">${svg("back")}</button><span class="brand" style="font-size:16px">${esc(it?.spec.title || "")}</span>
+       ${it?.currentVersion ? `<button class="ib" data-act="toggle-preview" aria-label="Preview" aria-pressed="${S.previewOpen}">${svg("play")}</button>` : ""}
+       <button class="ib" data-act="del" aria-label="${t("del")}" style="${S.confirmDel ? "color:var(--danger)" : ""}" title="${S.confirmDel ? t("confirmDel") : t("del")}">${svg("trash")}</button></div>`
+    : `<div class="top"><span class="brand">Idea2Proto<b>.</b></span>${regSeg()}</div>`;
+  const body = S.view === "capture" ? viewCapture() : S.view === "journal" ? viewJournal() : viewIdea();
+  const nav = inIdea ? "" : `<nav class="nav" aria-label="Main">
+    <button data-nav="capture" aria-current="${S.view === "capture" ? "page" : "false"}">${svg("plus")}${t("newIdea")}</button>
+    <button data-nav="journal" aria-current="${S.view === "journal" ? "page" : "false"}">${svg("book")}${t("journal")}</button></nav>`;
+  const focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
+  $app.innerHTML = top + `<main class="main" style="${inIdea ? "padding:0;overflow:hidden;display:flex;flex-direction:column" : ""}">${body}</main>` + nav;
+  if (inIdea) { const ws = $app.querySelector(".ws"); if (ws) ws.style.flex = "1"; const sc = $app.querySelector(".chat"); sc.querySelectorAll(".col,.composer-wrap").forEach((e) => { e.style.paddingLeft = "max(16px, env(safe-area-inset-left,0px))"; e.style.paddingRight = "max(16px, env(safe-area-inset-right,0px))"; }); }
+  const fr = document.getElementById("pframe");
+  if (fr && it) { const v = it.versions.find((x) => x.n === (S.viewN ?? it.currentVersion)); fr.srcdoc = wrap(v.html, it.store); }
+  const ta = document.getElementById("draft"); if (ta) autosize(ta);
+  if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch {} } }
+}
+
+/* ───────── events (delegated) ───────── */
+$app.addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id !== "mic" && b.dataset.act !== "del") S.confirmDel = false;
+  if (b.dataset.reg) { S.register = b.dataset.reg; LS.set("i2p.register", S.register); return render(); }
+  if (b.dataset.nav) { if (S.listening) dict?.stop().catch(() => {}); S.view = b.dataset.nav; S.previewOpen = false; S.editing = null; S.draft = ""; return render(); }
+  if (b.dataset.ex) { S.draft = b.dataset.ex; return structure(S.draft); }
+  if (b.dataset.skill) { S.spec.suggestedSkill = b.dataset.skill; return render(); }
+  if (b.dataset.filter != null) { S.filter = b.dataset.filter; return render(); }
+  if (b.dataset.openIdea) { S.ideaId = b.dataset.openIdea; S.view = "idea"; S.viewN = null; S.previewOpen = matchMedia("(min-width:900px)").matches && !!idea()?.currentVersion; render(); return scrollEnd(); }
+  if (b.id === "mic") return toggleMic();
+  if (b.id === "gen") return S.spec.title.trim() && createIdea();
+  if (b.id === "reset") { S.spec = null; S.draft = ""; return render(); }
+  const it = idea(); const i = +b.dataset.i;
+  switch (b.dataset.act) {
+    case "open": S.viewN = +b.dataset.n; S.previewOpen = true; return render();
+    case "close": S.previewOpen = false; return render();
+    case "toggle-preview": S.previewOpen = !S.previewOpen; S.viewN = null; return render();
+    case "revert": it.currentVersion = +b.dataset.n; it.updatedAt = Date.now(); persist(); toast(`${t("version")} ${b.dataset.n} ✓`); return render();
+    case "dl": return downloadHtml(it.versions.find((v) => v.n === +b.dataset.n), it);
+    case "copy": try { await navigator.clipboard.writeText(it.messages[i].content); toast(t("copied")); } catch {} return;
+    case "fb": { const m = it.messages[i], v = +b.dataset.v; m.feedback = m.feedback === v ? 0 : v; persist(); return render(); }
+    case "regen": return turn({ regenerate: true });
+    case "edit": S.editing = i; render(); return document.getElementById("edit")?.focus();
+    case "edit-cancel": S.editing = null; return render();
+    case "edit-save": { const v = document.getElementById("edit").value.trim(); if (!v) return; S.editing = null; return turn({ input: v, editIndex: +b.dataset.i }); }
+    case "stop": abort?.abort(); return;
+    case "del":
+      if (!S.confirmDel) { S.confirmDel = true; toast(t("confirmDel")); return render(); }
+      S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); persist(); S.confirmDel = false; S.view = "journal"; return render();
+  }
+});
+$app.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el.id === "draft") { S.draft = el.value; autosize(el); const s = $app.querySelector('.sbtn[type="submit"]'); if (s) s.disabled = !S.draft.trim(); }
+  if (el.dataset.spec) S.spec[el.dataset.spec] = el.value;
+  if (el.id === "jq") { S.q = el.value; render(); }
+});
+$app.addEventListener("change", (e) => { if (e.target.id === "ver") { S.viewN = +e.target.value; render(); } });
+$app.addEventListener("keydown", (e) => {
+  if (e.target.id === "draft" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form?.requestSubmit(); }
+});
+$app.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = S.draft.trim(); if (v.length < 2) return;
+  if (e.target.id === "capform") structure(v);
+  if (e.target.id === "cform") { S.draft = ""; turn({ input: v }); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && S.previewOpen) { S.previewOpen = false; render(); } });
+
+render();
+})();
+</script>

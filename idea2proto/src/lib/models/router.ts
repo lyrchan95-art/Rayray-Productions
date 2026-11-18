@@ -30,9 +30,33 @@ function deepseek(): ModelProvider | null {
   return key ? new OpenAICompatibleProvider("deepseek", env("DEEPSEEK_BASE_URL", "https://api.deepseek.com"), key) : null;
 }
 
+/**
+ * OpenRouter: one key reaches both GLM and DeepSeek. Used for whichever vendor has no direct key.
+ * Model slugs are env-overridable; check them against openrouter.ai/models before launch.
+ */
+function openrouter(): ModelProvider | null {
+  const key = env("OPENROUTER_API_KEY");
+  return key ? new OpenAICompatibleProvider("openrouter", env("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"), key, {
+    "HTTP-Referer": env("PUBLIC_BASE_URL", "http://localhost:3000"),
+    "X-Title": "Idea2Proto",
+  }) : null;
+}
+
 export function resolve(role: ModelRole): ResolvedModel {
-  const g = glm();
-  const d = deepseek();
+  const or = openrouter();
+  const orModel = (k: string, d: string) => env(`OPENROUTER_${k}_MODEL`, d);
+  const direct = { g: glm(), d: deepseek() };
+  const routed = resolveDirect(role, direct.g, direct.d);
+  if (!isMock(routed) || !or) return routed;
+  switch (role) {
+    case "cheap": return { provider: or, model: orModel("CHEAP", "z-ai/glm-4.5-air") };
+    case "chat": return { provider: or, model: orModel("CHAT", "z-ai/glm-4.6") };
+    case "vision": return { provider: or, model: orModel("VISION", "z-ai/glm-4.5v") };
+    case "code": return { provider: or, model: orModel("CODE", "deepseek/deepseek-chat-v3.1") };
+  }
+}
+
+function resolveDirect(role: ModelRole, g: ModelProvider | null, d: ModelProvider | null): ResolvedModel {
   switch (role) {
     case "cheap":
       return g ? { provider: g, model: env("GLM_CHEAP_MODEL", "glm-4-flash") } : { provider: mock, model: "mock" };

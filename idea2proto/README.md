@@ -50,3 +50,11 @@ Requires Node ≥ 22.5 (built-in SQLite).
 - Publishing defaults to **Pro-only** (`FREE_CAN_PUBLISH=0`), per PRD 4.9. Consider enabling it for beta users, because the 60-second "shareable" metric needs it.
 - SQLite fits a single instance. Move to Postgres before running multiple instances.
 - The PICS text is a draft. Have counsel review it.
+
+## OpenRouter
+
+Set `OPENROUTER_API_KEY` to switch on live models through one key. OpenRouter serves every role that has no direct `GLM_API_KEY` / `DEEPSEEK_API_KEY` (chat, cheap and vision → GLM slugs, code → DeepSeek slug). The slugs are set in `.env.example`; check them against openrouter.ai/models. In a cloud session, `openrouter.ai` also has to be allowed in the environment's network settings.
+
+## Test artifact
+
+`artifact/idea2proto-live.html` is a standalone, client-only version of the loop for testing on claude.ai. Artifact pages can't make outside network requests, so it runs on the artifact's built-in model access, not GLM/DeepSeek, and keeps ideas in the viewer's browser.
