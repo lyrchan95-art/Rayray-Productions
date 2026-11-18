@@ -135,7 +135,7 @@ export function IdeaWorkspace(props: WorkspaceProps) {
     if (started.current || search.get("go") !== "1" || messages.length) return;
     started.current = true;
     router.replace(`/idea/${idea.id}`, { scroll: false });
-    const prompt = lang === "zh" ? "根據呢個 spec 整第一版原型。" : "Build the first prototype from this spec.";
+    const prompt = lang === "zh" ? "按呢個 spec 整第一版原型。" : "Build the first prototype from this spec.";
     send({ input: prompt, forceSkill: idea.spec.suggestedSkill }, prompt);
   }, [idea.id, idea.spec.suggestedSkill, lang, messages.length, router, search, send]);
 
@@ -352,7 +352,7 @@ export function IdeaWorkspace(props: WorkspaceProps) {
         </div>
         <p className="muted" style={{ fontSize: "var(--text-sm)" }}>
           {lang === "zh"
-            ? "每個訊息會自動揀合適嘅技能同模型：傾偈同廣東話用 GLM，寫 code／遊戲用 DeepSeek。"
+            ? "每句嘢都會自動揀啱用嘅技能同模型：傾偈、廣東話用 GLM，寫 code、整遊戲用 DeepSeek。"
             : "Each message is routed automatically: GLM for chat and Cantonese, DeepSeek for code and games."}
         </p>
         {lastRoute && (

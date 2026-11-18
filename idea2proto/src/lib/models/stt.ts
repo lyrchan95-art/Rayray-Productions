@@ -7,7 +7,7 @@ import "server-only";
 export async function transcribe(audio: Blob, filename: string, language?: string): Promise<{ text: string; mock: boolean }> {
   const key = process.env.STT_API_KEY || process.env.GLM_API_KEY;
   if (!key) {
-    return { text: "我有個idea：一個幫打工仔揀午餐嘅小工具，撳一下就話你今日食咩", mock: true };
+    return { text: "我有個 idea：整個幫打工仔揀午餐嘅小工具，撳一下就話你今日食咩", mock: true };
   }
   const base = (process.env.STT_BASE_URL || "https://open.bigmodel.cn/api/paas/v4").replace(/\/$/, "");
   const form = new FormData();

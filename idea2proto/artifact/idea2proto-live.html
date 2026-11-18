@@ -172,22 +172,22 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":
 
 /* ───────── i18n ───────── */
 const T = {
-  heroTitle:["講出你個 idea","Say your idea"], heroSub:["一分鐘內變成可以試嘅原型","Get a working prototype in under a minute"],
-  tap:["撳一下開始講","Tap to start talking"], listening:["聽緊… 再撳一下完成","Listening… tap again to finish"],
-  structuring:["整理緊個 idea…","Structuring your idea…"], typeInstead:["或者打字講你個 idea…","Or type your idea…"],
-  review:["睇下啱唔啱","Check the spec"], reviewSub:["改好先生成——呢步最影響質素","Edit before generating — this matters most"],
-  title:["名","Title"], one:["一句講晒","One-liner"], core:["核心互動","Core interaction"], user:["目標用戶","Target user"], buildAs:["整成","Build as"],
-  generate:["生成原型","Generate prototype"], over:["重新嚟過","Start over"], journal:["日誌","Journal"], newIdea:["新 idea","New idea"],
-  search:["搜尋 idea…","Search ideas…"], all:["全部","All"], none:["未有 idea。返去首頁講一個啦。","No ideas yet. Go to New idea and say one."],
-  nomatch:["搵唔到。","No matches."], message:["想點改？例如「啲掣大啲」","What should change? e.g. “bigger buttons”"],
-  version:["版本","Version"], current:["目前","current"], revert:["還原","Revert"], building:["砌緊原型","Building prototype"],
-  copied:["已複製","Copied"], language:["回覆語言","Reply language"], save:["儲存並重新執行","Save & rerun"], cancel:["取消","Cancel"],
-  saveFile:["下載 HTML","Download HTML"], noModel:["呢個畫面用唔到 AI 模型。請喺 claude.ai 開啟並允許。","The AI model isn't available in this view. Open it on claude.ai and allow access."],
-  denied:["你未允許使用 AI 模型，所以生成唔到。","AI access was declined, so nothing can be generated."], busyRate:["太多請求，等陣再試。","Too many requests — wait a moment and try again."],
-  first:["根據呢個 spec 整第一版原型。","Build the first prototype from this spec."], del:["刪除","Delete"], confirmDel:["再撳一次確認刪除","Tap again to delete"],
-  micNA:["呢度用唔到語音輸入（需要 Chrome 或桌面 app），請打字。","Voice input isn't available here (needs Chrome or the desktop app). Type instead."],
+  heroTitle:["講出你個 idea","Say your idea"], heroSub:["唔使寫 code，一分鐘有原型","Get a working prototype in under a minute"],
+  tap:["撳一下開始講","Tap to start talking"], listening:["聽緊你講… 講完再撳一下","Listening… tap again to finish"],
+  structuring:["整理緊個 idea…","Structuring your idea…"], typeInstead:["唔方便講嘢？打字都得…","Or type your idea…"],
+  review:["睇下啱唔啱","Check the spec"], reviewSub:["諗清楚先生成，呢步最影響成品質素","Edit before generating: this matters most"],
+  title:["名稱","Title"], one:["一句講晒","One-liner"], core:["核心互動","Core interaction"], user:["目標用戶","Target user"], buildAs:["整成","Build as"],
+  generate:["即刻整原型","Generate prototype"], over:["重新嚟過","Start over"], journal:["日誌","Journal"], newIdea:["新 idea","New idea"],
+  search:["搜尋 idea…","Search ideas…"], all:["全部","All"], none:["仲未有 idea。去「新 idea」講一個啦。","No ideas yet. Go to New idea and say one."],
+  nomatch:["搵唔到相關 idea。","No matches."], message:["想點改？例如「啲掣大啲」","What should change? e.g. “bigger buttons”"],
+  version:["版本","Version"], current:["目前","current"], revert:["用返呢個版本","Revert"], building:["砌緊原型","Building prototype"],
+  copied:["已複製","Copied"], language:["回覆語言","Reply language"], save:["儲存並重新生成","Save & rerun"], cancel:["取消","Cancel"],
+  saveFile:["下載 HTML","Download HTML"], noModel:["呢度用唔到 AI 模型。請喺 claude.ai 開啟，並且畀權限。","The AI model isn't available in this view. Open it on claude.ai and allow access."],
+  denied:["你未畀權限用 AI 模型，所以生成唔到。","AI access was declined, so nothing can be generated."], busyRate:["太多人撳緊，等陣再試啦。","Too many requests — wait a moment and try again."],
+  first:["按呢個 spec 整第一版原型。","Build the first prototype from this spec."], del:["刪除","Delete"], confirmDel:["再撳一次就會刪除","Tap again to delete"],
+  micNA:["呢度用唔到語音輸入（要用 Chrome 或桌面 app），直接打字啦。","Voice input isn't available here (needs Chrome or the desktop app). Type instead."],
   today:["今日","Today"], yesterday:["尋日","Yesterday"], week:["過去 7 日","Previous 7 days"], older:["更早","Older"],
-  note:["測試版：idea 只儲存喺你呢部機嘅瀏覽器。","Test build: ideas are saved only in this browser."],
+  note:["測試版：idea 只會儲存喺你呢個瀏覽器。","Test build: ideas are saved only in this browser."],
 };
 const SKILL_LABEL = {"prototype-html":["網頁原型","Web prototype"],"game-prototype":["小遊戲","Game prototype"],"design-variants":["設計方向","Design variants"],"chat":["傾偈","Chat"]};
 
@@ -221,8 +221,8 @@ function modelError(e) {
 }
 
 const REGISTER = {
-  yue: "Reply in Hong Kong Cantonese (colloquial, Traditional Chinese characters), naturally mixing common English product words. Text inside the prototype is also Cantonese/Traditional Chinese.",
-  mixed: "Reply in natural Hong Kong 中英夾雜: Cantonese sentence structure, Traditional Chinese, English for product/tech terms. Prototype text may mix both.",
+  yue: "Write like a senior Hong Kong copywriter. Reply in colloquial Hong Kong Cantonese (Traditional Chinese): authentic HK vocabulary and sentence-final particles (啦 喎 咩 啫 㗎 喇), natural rhythm, never 書面語腔 or translationese from English, common English product words mixed in sparingly (app, feature, promo). Exact characters: 喺 嘅 咗 唔 畀 嗰. No Mandarin vocabulary (use 影片 not 視頻, 質素 not 質量, 軟件 not 軟體, 網絡 not 網路). Formal contexts (bank, legal, corporate) use 書面語 Traditional Chinese. Headlines hook with a local pain point or clear benefit; short scannable lines; one clear low-friction CTA. Text inside the prototype follows the same rules.",
+  mixed: "Reply in natural Hong Kong 中英夾雜: Cantonese sentence structure, Traditional Chinese with HK vocabulary (影片, 質素, 軟件, 網絡), English for product/tech terms, no Mandarin wording or translationese. Hook-first headlines, short scannable lines, one low-friction CTA. Prototype text may mix both.",
   en: "Reply in clear, friendly English. Prototype text in English.",
 };
 
@@ -253,6 +253,7 @@ const RULES = `Output rules (strict):
 - First, 1–2 short sentences to the user about what you built or changed. No headings, no lists.
 - Then ONE fenced \`\`\`html block with a COMPLETE single-file HTML document.
 - All CSS in <style>, all JS in <script>. No external scripts, no network requests, no CDNs, no external images (use CSS, emoji or inline SVG).
+- Write every visible line like a senior Hong Kong copywriter: hook-first headline, short lines, one clear low-friction CTA per screen, no translationese.
 - Mobile-first portrait (360–430px), viewport meta, 100dvh, touch targets ≥ 44px, no hover-only interactions. No alert/confirm/prompt.
 - localStorage is allowed. Keep it compact: under ~250 lines, never truncate.`;
 const SKILL_PROMPT = {

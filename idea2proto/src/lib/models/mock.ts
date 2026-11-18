@@ -67,17 +67,17 @@ function html(req: CompletionRequest) {
   const bg = m.dark ? "#16181d" : "#f7f7f5";
   const fg = m.dark ? "#f2f2f0" : "#1b1c1f";
   const scale = m.big ? 1.25 : 1;
-  const cta = m.yue ? "即刻試" : "Try it";
-  const done = m.yue ? "搞掂！" : "Done!";
+  const cta = m.yue ? "撳入嚟試下" : "Try it";
+  const done = m.yue ? "搞掂喇！" : "Done!";
   const css = `*{box-sizing:border-box}body{margin:0;font:${16 * scale}px/1.5 system-ui,sans-serif;background:${bg};color:${fg};min-height:100dvh;padding:calc(24px + env(safe-area-inset-top)) 20px 32px}
 h1{font-size:${1.9 * scale}em;line-height:1.15;margin:12px 0 8px}p{opacity:.8}.card{background:${m.dark ? "#22252c" : "#fff"};border-radius:${m.playful ? 24 : 14}px;padding:20px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 input{width:100%;font:inherit;padding:14px;border-radius:12px;border:1px solid #ccc;margin:6px 0 14px;background:transparent;color:inherit}
 button{width:100%;min-height:${52 * scale}px;font:inherit;font-weight:600;border:0;border-radius:${m.playful ? 999 : 12}px;background:${accent};color:#fff}
 .tag{display:inline-block;font-size:.8em;padding:4px 10px;border-radius:99px;background:${accent}22;color:${accent}}#out{font-weight:600;margin-top:14px;min-height:1.5em}`;
   const body = `<span class="tag">Prototype</span><h1>${esc(spec.title)}</h1><p>${esc(spec.oneLiner)}</p>
-<div class="card"><label>${m.yue ? "你嘅名" : "Your name"}<input id="n" placeholder="Rayray"></label><button id="b">${cta}</button><div id="out" aria-live="polite"></div></div>
+<div class="card"><label>${m.yue ? "你叫咩名？" : "Your name"}<input id="n" placeholder="Rayray"></label><button id="b">${cta}</button><div id="out" aria-live="polite"></div></div>
 <div class="card"><strong>${m.yue ? "核心互動" : "Core interaction"}</strong><p>${esc(spec.coreInteraction || "")}</p><p id="c"></p></div>`;
-  const js = `const k='visits';const v=+(localStorage.getItem(k)||0)+1;localStorage.setItem(k,v);document.getElementById('c').textContent='${m.yue ? "開咗" : "Opened"} '+v+'×';
+  const js = `const k='visits';const v=+(localStorage.getItem(k)||0)+1;localStorage.setItem(k,v);document.getElementById('c').textContent='${m.yue ? "你已經開過" : "Opened"} '+v+'×';
 document.getElementById('b').onclick=()=>{const n=document.getElementById('n').value||'friend';document.getElementById('out').textContent='${done} '+n+' 👋'};`;
   return shell(spec.title, body, css, js);
 }
@@ -96,7 +96,7 @@ function move(e){const pt=e.touches?e.touches[0]:e;p.tx=pt.clientX}c.addEventLis
 function loop(){t++;x.fillStyle='#101218';x.fillRect(0,0,W,H);if(!over){p.x+=(p.tx-p.x)*.25;if(t%Math.max(14,40-s/5|0)===0)obs.push({x:Math.random()*(W-40)+20,y:-30,r:14+Math.random()*16,v:(2.5+s/40)*${speed}});
 for(const o of obs){o.y+=o.v;if(Math.hypot(o.x-p.x,o.y-p.y)<o.r+18){over=true;if(s>hi){hi=s;localStorage.setItem('best',hi)}}}obs=obs.filter(o=>o.y<H+40);s+=1/6}
 x.fillStyle='#ff6b6b';for(const o of obs){x.beginPath();x.arc(o.x,o.y,o.r,0,7);x.fill()}x.fillStyle='${accent}';x.beginPath();x.arc(p.x,p.y,18,0,7);x.fill();
-hud.textContent=over?'${m.yue ? "輸咗！撳一下再嚟 · 最高" : "Game over — tap to retry · best"} '+hi:Math.floor(s)+' · ${m.yue ? "最高" : "best"} '+hi;requestAnimationFrame(loop)}loop();`;
+hud.textContent=over?'${m.yue ? "輸咗喎！撳一下再嚟 · 最高紀錄" : "Game over — tap to retry · best"} '+hi:Math.floor(s)+' · ${m.yue ? "最高紀錄" : "best"} '+hi;requestAnimationFrame(loop)}loop();`;
   return shell(spec.title, body, css, js);
 }
 
@@ -125,14 +125,14 @@ function variants(req: CompletionRequest) {
 function chat(req: CompletionRequest) {
   const q = lastUser(req);
   return isYue(req)
-    ? `（示範模式：未設定模型 API key）\n\n你問：「${q.slice(0, 80)}」。設定 GLM_API_KEY 之後我會用 GLM 認真答你。想整原型嘅話，講「幫我整個網頁」或者「整個小遊戲」就得。`
+    ? `（示範模式：未接駁 AI 模型）\n\n你問：「${q.slice(0, 80)}」。設定 OPENROUTER_API_KEY 或 GLM_API_KEY 之後，我就可以認真答你。想即刻整原型？講「幫我整個網頁」或者「整個小遊戲」就得。`
     : `(Demo mode — no model API key configured.)\n\nYou asked: "${q.slice(0, 80)}". Set GLM_API_KEY for real answers. To build something, say "make a landing page" or "make a small game".`;
 }
 
 function code(req: CompletionRequest) {
   const sys = textOf(req.messages[0]?.content ?? "");
   const out = /skill:game-prototype/.test(sys) ? game(req) : /skill:design-variants/.test(sys) ? variants(req) : html(req);
-  const note = isYue(req) ? "整好咗，撳預覽試下。想改咩直接講。" : "Here's your prototype — open the preview and tell me what to change.";
+  const note = isYue(req) ? "整好喇！撳預覽試下，想改邊度直接同我講。" : "Here's your prototype — open the preview and tell me what to change.";
   return `${note}\n\n\`\`\`html\n${out}\n\`\`\``;
 }
 

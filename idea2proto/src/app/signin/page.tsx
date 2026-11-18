@@ -24,7 +24,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   return (
     <main className="narrow" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <p className="brand" style={{ marginBottom: 32 }}>Idea2Proto<span className="brand-dot">.</span></p>
-      <h1>講出 idea，一分鐘有原型。</h1>
+      <h1>講出你個 idea，一分鐘有原型。</h1>
       <p className="muted" style={{ marginTop: 0 }}>Say your idea. Get a shareable prototype in under a minute.</p>
 
       {sent ? (
@@ -34,7 +34,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         </div>
       ) : (
         <div style={{ marginTop: 24 }}>
-          {error && <p className="error" role="alert">登入失敗，請再試。Sign-in failed — please try again.</p>}
+          {error && <p className="error" role="alert">登入失敗，再試一次啦。Sign-in failed — please try again.</p>}
           {googleEnabled && (
             <>
               <form action={googleAction}>
@@ -48,7 +48,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
               <label className="label" htmlFor="email">Email</label>
               <input id="email" name="email" type="email" required autoComplete="email" inputMode="email" className="input" placeholder="you@example.com" />
             </div>
-            <button className="btn btn-primary btn-lg btn-block" type="submit">寄登入連結 · Email me a link</button>
+            <button className="btn btn-primary btn-lg btn-block" type="submit">寄個登入連結畀我 · Email me a link</button>
           </form>
           {devLoginEnabled && (
             <form action={devAction} style={{ marginTop: 12 }}>

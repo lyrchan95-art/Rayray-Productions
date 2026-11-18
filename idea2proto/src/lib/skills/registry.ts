@@ -28,8 +28,8 @@ export interface Skill {
 }
 
 export const REGISTER_PROMPT: Record<Register, string> = {
-  yue: "語言：用香港廣東話口語（繁體中文）回覆，自然夾雜常用英文詞（例如 app、UI、feature）。Use Cantonese register.",
-  mixed: "Language: reply in natural Hong Kong 中英夾雜 — Cantonese sentence structure, Traditional Chinese characters, English for product/tech terms.",
+  yue: `語言與文案準則（資深香港文案）：用香港廣東話口語（繁體中文），用地道香港詞彙同句末助詞（啦、喎、咩、啫、㗎、喇），節奏自然。唔好用書面語腔，亦唔好由英文直譯（翻譯腔）。常用英文詞（app、feature、promo、budget）自然夾雜，唔好過量。用字要準：喺、嘅、咗、唔、畀、嗰；唔好出現普通話詞彙（例如「視頻」「質量」「軟體」「網路」），要用「影片」「質素」「軟件」「網絡」。若內容屬銀行、法律、企業等正式場合，改用書面語繁體中文。標題先搵一個貼地痛點或明確好處做 hook；段落短、易 scan；CTA 清楚而且門檻低（例如「撳入嚟試下」）。Use Hong Kong Cantonese register.`,
+  mixed: "Language: reply in natural Hong Kong 中英夾雜: Cantonese sentence structure, Traditional Chinese characters, English for product/tech terms, 繁體 HK vocabulary (影片, 質素, 軟件, 網絡), never Mandarin wording or translationese. Hook-first headlines, short scannable lines, one low-friction CTA.",
   en: "Language: reply in clear, friendly English. If the user writes Chinese, you may answer in Traditional Chinese.",
 };
 
@@ -41,7 +41,7 @@ const ARTIFACT_RULES = `Output rules (strict):
 - Everything inline: CSS in <style>, JS in <script>. No external scripts, no fetch/XHR, no CDNs. Google Fonts <link> is allowed.
 - Mobile-first: portrait phone (360–430px wide), <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">, 100dvh, env(safe-area-inset-*) padding, touch targets ≥ 44px, no hover-only interactions.
 - localStorage is allowed for persistence (it is shimmed). No alert/confirm/prompt dialogs.
-- Text inside the prototype follows the user's language (Traditional Chinese for Cantonese users).
+- Text inside the prototype follows the user's language (Traditional Chinese for Cantonese users). Write every visible line like a senior Hong Kong copywriter: hook-first headline, short lines, one clear low-friction call to action per screen, no translationese.
 - Never truncate. Keep it under ~400 lines.`;
 
 const iterationBlock = (html?: string | null) =>
