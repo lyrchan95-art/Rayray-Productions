@@ -1,0 +1,23 @@
+{
+ "skill": "design-variants",
+ "cases": [
+  {
+   "spec": {
+    "title": "Bubble Tea Bar",
+    "oneLiner": "Order bubble tea ahead",
+    "coreInteraction": "Pick drink and pickup time",
+    "targetUser": "Students",
+    "suggestedSkill": "design-variants"
+   },
+   "input": "Build the first prototype from this spec.",
+   "assert": {
+    "contains": [
+     "scroll-snap"
+    ],
+    "minCount": {
+     "<section": 3
+    }
+   }
+  }
+ ]
+}

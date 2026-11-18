@@ -1,0 +1,33 @@
+{
+ "skill": "idea-capture",
+ "cases": [
+  {
+   "input": "我有個idea，一個幫街坊交換二手嘢嘅平台，用 WhatsApp 咁簡單",
+   "assert": {
+    "jsonKeys": [
+     "title",
+     "oneLiner",
+     "coreInteraction",
+     "targetUser",
+     "suggestedSkill"
+    ],
+    "suggestedSkill": "prototype-html"
+   }
+  },
+  {
+   "input": "a game where you catch falling egg tarts on a tray",
+   "assert": {
+    "jsonKeys": [
+     "title"
+    ],
+    "suggestedSkill": "game-prototype"
+   }
+  },
+  {
+   "input": "show me three different visual styles for a flower shop",
+   "assert": {
+    "suggestedSkill": "design-variants"
+   }
+  }
+ ]
+}

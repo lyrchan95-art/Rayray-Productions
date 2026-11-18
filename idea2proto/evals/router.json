@@ -1,0 +1,495 @@
+{
+ "description": "Skill-router eval set. Mix of English, Cantonese (繁體), and 中英夾雜. 'artifactSkill' = skill of the idea's open prototype.",
+ "items": [
+  {
+   "text": "make a flappy bird style game where a dim sum flies",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "整個小遊戲，用手指拖住架的士避開巴士",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "I want a game where you catch falling egg tarts",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "幫我做個打機嘢，撳一下跳過障礙",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "a puzzle game about MTR lines",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "build a snake game but it's a minibus",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "做個遊戲：接住跌落嚟嘅菠蘿包，接得多分數高",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "endless runner game in Mong Kok",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "can you make a tap game for kids learning Cantonese tones",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "整個 quiz game 考人識唔識香港街名",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "shooter game with typhoon signals as enemies",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "game: dodge umbrellas on a rainy day",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "我想玩一個閃避遊戲，避開啲蚊",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "做個彈波小遊戲",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "make a clicker game where you build a cha chaan teng empire",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "一個關卡式嘅拼圖遊戲，主題係香港霓虹燈",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "arcade game with high score about catching the last ferry",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "整個射擊遊戲打怪獸",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "platformer game set on the Peak tram",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "小遊戲：追住隻貓喺天台跑",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "game where you swipe to sort recyclables",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "我想整個手遊，玩法係撳住蓄力跳",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "collect coins and avoid obstacles game",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "make it a game 呀，一路跑一路食雞蛋仔",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "show me 3 different styles for a bubble tea brand landing page",
+   "expected": "design-variants"
+  },
+  {
+   "text": "幫我出幾個設計方向，一間咖啡店嘅 app",
+   "expected": "design-variants"
+  },
+  {
+   "text": "design variants for my fitness tracker home screen",
+   "expected": "design-variants"
+  },
+  {
+   "text": "唔同style嘅 logo 頁面，我想睇下感覺",
+   "expected": "design-variants"
+  },
+  {
+   "text": "explore a few visual directions for a kindergarten booking site",
+   "expected": "design-variants"
+  },
+  {
+   "text": "moodboard style options for a vintage camera shop",
+   "expected": "design-variants"
+  },
+  {
+   "text": "我想睇下三個版本嘅風格：簡約、霓虹、復古",
+   "expected": "design-variants"
+  },
+  {
+   "text": "give me five different looks for the onboarding screen",
+   "expected": "design-variants"
+  },
+  {
+   "text": "color schemes and aesthetics for a pet grooming app",
+   "expected": "design-variants"
+  },
+  {
+   "text": "幾款配色比較下，一個瑜珈 studio 網站",
+   "expected": "design-variants"
+  },
+  {
+   "text": "design directions for a Cantonese podcast homepage",
+   "expected": "design-variants"
+  },
+  {
+   "text": "several design options for a wedding invite page",
+   "expected": "design-variants"
+  },
+  {
+   "text": "視覺方向：高級 vs 可愛 vs 街頭，用喺波鞋店",
+   "expected": "design-variants"
+  },
+  {
+   "text": "alternative styles for my portfolio hero section",
+   "expected": "design-variants"
+  },
+  {
+   "text": "try different themes for a night market guide",
+   "expected": "design-variants"
+  },
+  {
+   "text": "多款設計俾我揀，主題係本地書店",
+   "expected": "design-variants"
+  },
+  {
+   "text": "look and feel exploration for a fintech savings app",
+   "expected": "design-variants"
+  },
+  {
+   "text": "3個版本，唔同感覺，用喺花店",
+   "expected": "design-variants"
+  },
+  {
+   "text": "build a landing page for my hiking tour business",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "幫我整個網頁，介紹我嘅烘焙班",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "make a calculator for splitting dinner bills",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "整一個記帳工具，記低每日開支",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "a booking form for a hair salon",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "做個預約頁面俾私人補習老師",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "create a todo app for wedding planning",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "make a dashboard showing my cafe's daily sales",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "整個計算機計 MPF 供款",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "build me a signup page for a running club",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "做個網站展示我嘅攝影作品",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "timer app for pomodoro with Cantonese voice labels",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "a menu page for my cha chaan teng with prices",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "幫我做個訂餐表格",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "make a unit converter for HK property sizes sq ft to m2",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "prototype a tracker for my kid's homework",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "整個工具幫人揀今晚食咩",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "checkout page mockup for an online florist",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "做一個清單 app 記低要買嘅餸",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "create a planner screen for weekend trips to outlying islands",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "generate a portfolio site for a tattoo artist",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "整個落地頁介紹我個 newsletter",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "make a web app that lists free events in HK this week",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "幫我整個介面，可以輸入體重睇 BMI",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "I have an idea: an app that matches domestic helpers with families based on language",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "我有個idea，就係一個幫街坊交換二手嘢嘅平台",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "startup idea — subscription for fresh wet market vegetables delivered daily",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "諗到一個點子：俾老人家用嘅超簡單打電話介面",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "what if there was a service that queues for you at popular restaurants",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "business idea, rent out parking spaces by the hour in residential buildings",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "我諗緊一個構思，係俾學生搵 study buddy",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "side project idea: a bot that translates Cantonese slang for expats",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "呢個idea係咁嘅：好多人想學整點心但唔識，可以有個網上班",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "thinking about a concept for a reusable container deposit scheme for takeaway shops in Kowloon",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "我想做個生意，幫細公司處理 social media 嘅 content",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "an idea for a marketplace of local artists selling prints",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "brain dump: elderly loneliness, volunteers, phone calls, maybe a schedule, maybe rewards for volunteers, not sure about monetisation yet",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "有個諗法：做個 app 俾人記錄自己行山行過邊啲路線，之後可以同朋友比較，仲可以儲分換嘢，可能同戶外用品店合作",
+   "expected": "idea-capture"
+  },
+  {
+   "text": "what do you think about the pricing for a subscription like this?",
+   "expected": "chat"
+  },
+  {
+   "text": "點解啲人唔鍾意下載新 app？",
+   "expected": "chat"
+  },
+  {
+   "text": "should I build for iOS first?",
+   "expected": "chat"
+  },
+  {
+   "text": "how do I find beta users in Hong Kong?",
+   "expected": "chat"
+  },
+  {
+   "text": "你覺得呢個市場大唔大？",
+   "expected": "chat"
+  },
+  {
+   "text": "compare Stripe and AlipayHK for small merchants",
+   "expected": "chat"
+  },
+  {
+   "text": "有冇咩建議可以提高留存率？",
+   "expected": "chat"
+  },
+  {
+   "text": "is it legal to collect phone numbers for this in HK?",
+   "expected": "chat"
+  },
+  {
+   "text": "which competitors should I look at?",
+   "expected": "chat"
+  },
+  {
+   "text": "explain what a PWA is",
+   "expected": "chat"
+  },
+  {
+   "text": "點樣定價先合理？",
+   "expected": "chat"
+  },
+  {
+   "text": "係咪要先註冊公司？",
+   "expected": "chat"
+  },
+  {
+   "text": "what's a good name for this?",
+   "expected": "chat"
+  },
+  {
+   "text": "我應該搵邊類用戶做訪問？",
+   "expected": "chat"
+  },
+  {
+   "text": "how long does it usually take to validate an idea?",
+   "expected": "chat"
+  },
+  {
+   "text": "give me pros and cons of freemium",
+   "expected": "chat"
+  },
+  {
+   "text": "thanks!",
+   "expected": "chat"
+  },
+  {
+   "text": "hello",
+   "expected": "chat"
+  },
+  {
+   "text": "你好",
+   "expected": "chat"
+  },
+  {
+   "text": "ok",
+   "expected": "chat"
+  },
+  {
+   "text": "bigger buttons please",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "啲字大啲",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "make it more playful",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "change the colour to dark mode",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "加個 logo 喺上面",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "make it faster",
+   "artifactSkill": "game-prototype",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "快啲，難啲",
+   "artifactSkill": "game-prototype",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "add a high score screen",
+   "artifactSkill": "game-prototype",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "背景換成維港夜景",
+   "artifactSkill": "game-prototype",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "make the player bigger",
+   "artifactSkill": "game-prototype",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "make variant 2 more minimal",
+   "artifactSkill": "design-variants",
+   "expected": "design-variants"
+  },
+  {
+   "text": "再多一個復古風",
+   "artifactSkill": "design-variants",
+   "expected": "design-variants"
+  },
+  {
+   "text": "change the fonts in all of them",
+   "artifactSkill": "design-variants",
+   "expected": "design-variants"
+  },
+  {
+   "text": "用廣東話寫啲文字",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "remove the footer",
+   "artifactSkill": "prototype-html",
+   "expected": "prototype-html"
+  },
+  {
+   "text": "in cantonese please",
+   "artifactSkill": "game-prototype",
+   "expected": "game-prototype"
+  },
+  {
+   "text": "what do you think of it so far?",
+   "artifactSkill": "prototype-html",
+   "expected": "chat"
+  },
+  {
+   "text": "點樣先可以收費？",
+   "artifactSkill": "game-prototype",
+   "expected": "chat"
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "skill": "prototype-html",
+ "cases": [
+  {
+   "spec": {
+    "title": "Bill Splitter",
+    "oneLiner": "Split a dinner bill fairly between friends",
+    "coreInteraction": "Enter total and people, see each share",
+    "targetUser": "Friends eating out in HK",
+    "suggestedSkill": "prototype-html"
+   },
+   "input": "Build the first prototype from this spec.",
+   "assert": {
+    "contains": [
+     "<meta name=\"viewport\"",
+     "<input",
+     "<button"
+    ],
+    "notContains": [
+     "<script src=",
+     "fetch("
+    ]
+   }
+  },
+  {
+   "spec": {
+    "title": "今晚食咩",
+    "oneLiner": "撳一下幫你揀晚餐",
+    "coreInteraction": "撳掣隨機揀餐廳",
+    "targetUser": "打工仔",
+    "suggestedSkill": "prototype-html"
+   },
+   "input": "根據呢個 spec 整第一版原型。",
+   "register": "yue",
+   "assert": {
+    "contains": [
+     "<button"
+    ],
+    "containsAny": [
+     "食",
+     "餐"
+    ]
+   }
+  }
+ ]
+}

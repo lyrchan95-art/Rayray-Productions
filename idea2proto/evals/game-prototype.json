@@ -1,0 +1,28 @@
+{
+ "skill": "game-prototype",
+ "cases": [
+  {
+   "spec": {
+    "title": "Egg Tart Catch",
+    "oneLiner": "Catch falling egg tarts",
+    "coreInteraction": "Drag a tray left and right",
+    "targetUser": "Casual players",
+    "suggestedSkill": "game-prototype"
+   },
+   "input": "Build the first prototype from this spec.",
+   "assert": {
+    "contains": [
+     "<canvas",
+     "requestAnimationFrame"
+    ],
+    "containsAny": [
+     "pointerdown",
+     "touchstart"
+    ],
+    "notContains": [
+     "<script src="
+    ]
+   }
+  }
+ ]
+}
