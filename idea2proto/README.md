@@ -70,3 +70,7 @@ Not yet ported to the Next.js app (`src/`): skill packs, the gate, tips and asse
 ## UI standard
 
 The artifact's own interface follows the head-designer constitution: three tones (jade, vermilion, paper) plus ink with everything else mixed from them, no gradients or pills, radii of 8px or less, one directional shadow on the mic, paper grain, a left-weighted hero, and rows and rules instead of bordered cards. Tap targets are 44px or more and text meets AA contrast.
+
+## Output first, check in the background
+
+A prototype is delivered the moment generation finishes. While it writes, a work log shows the steps (spec read, skills applied, a live phase detected from the stream, elapsed time). The check agent then runs in the background with live steps: measure, expert review, fix, verify. A fix is saved as a new version and offered with a "switch" button; the version on screen never changes underneath you, and the preview iframe is never reloaded by the check.

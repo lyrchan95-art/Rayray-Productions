@@ -311,6 +311,20 @@ summary.label{min-height:44px;display:flex;align-items:center}
   .nav button[aria-current="page"]{background:var(--surface-2)}
 }
 .nav{background:var(--bg);border-top:1px solid var(--fg)}
+
+/* work log + background check agent */
+.chkhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px;font-family:var(--sans);font-size:14px}
+.worklog-wrap,.chkrun{margin-top:12px;padding-top:10px;border-top:2px solid var(--accent);font-family:var(--sans);font-size:14px}
+.clog,.worklog{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.clog li,.worklog li{display:flex;gap:10px;align-items:flex-start}
+.cl-body{display:flex;flex-direction:column;gap:1px;min-width:0}
+.cl-t{font-weight:600}
+.cl-o{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.clog li[data-s="pending"] .cl-t,.worklog li[data-s="pending"] .cl-t,.clog li[data-s="skip"] .cl-t{color:var(--faint);font-weight:500}
+.chkidle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;border-top:1px solid var(--border);padding-top:6px;font-family:var(--sans);font-size:14px}
+.chkpill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent-strong);white-space:nowrap;padding:0 4px}
+.chkpill[hidden]{display:none}
+.fixed-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--accent-soft);border-radius:var(--r-md);font-family:var(--sans);font-size:14px}
 </style>
 
 <div class="app" id="app"></div>
@@ -399,12 +413,23 @@ const T = {
   stage_design:["設計","Design"], stage_audit:["審查","Audit"], stage_fix:["修正","Polish"],
   coreTitle:["核心技能","Core skills"], craftTitle:["設計技能（已匯入）","Design skills (imported)"], workflowTitle:["工作流","Workflows"],
   appliesTo:["套用於","Applies to"], source:["來源","Source"], promptSrc:["睇 prompt 原文","View prompt source"],
-  packOn:["生成時套用呢個技能","Apply this skill when generating"], gateOn:["生成後先審查，過關先畀你睇","Audit before showing the result"],
+  packOn:["生成時套用呢個技能","Apply this skill when generating"], gateOn:["生成後喺背景質檢","Check quality in the background after generating"],
   workflowTag:["工作流","Workflow"], craftTag:["設計技能","Design skill"], auditCurrent:["審查目前原型","Audit current prototype"], noProto:["未有原型可以審查。","No prototype to audit yet."],
   chk_runs:["可以正常運行","Runs without errors"], chk_fit:["手機闊度冇溢出","Fits phone width"], chk_targets:["掣夠大（44px 或以上）","Tap targets 44px+"],
   chk_contrast:["字同底色對比夠","Text contrast"], chk_text:["字體唔會太細","Text size"], chk_labels:["標籤同替代文字","Labels and alt text"],
   chk_meta:["viewport 同標題","Viewport and title"], chk_offline:["冇外部連線","No external requests"], chk_dialogs:["冇 alert 彈窗","No alert dialogs"],
   chk_polish:["冇 lorem／TODO，動畫可關","No filler; motion-safe"],
+  wlTitle:["做緊嘢","Working"], wlBrief:["讀取 spec 同設計方向","Reading the spec and design direction"], wlIter:["讀取目前版本同你嘅修改","Reading the current version and your change"],
+  wlSkills:["套用技能","Applying skills"], wlGen:["生成原型","Writing the prototype"], wlHandoff:["交出原型，之後喺背景質檢","Hand over the prototype, then check in the background"],
+  phWait:["諗緊點砌","Planning the build"], phStyle:["寫緊樣式（顏色、字體、版面）","Writing styles: colour, type, layout"], phBody:["砌緊版面同內容","Building layout and content"],
+  phScript:["寫緊互動邏輯","Writing the interaction logic"], phDone:["收尾","Wrapping up"], elapsed:["已用 {s} 秒","{s}s elapsed"], noSkills:["未開任何設計技能","No design skills on"],
+  chkAgent:["質檢 Agent","Check agent"], chkRunning:["運行緊","running"], chkStepMeasure:["量度手機畫面（390px）","Measuring the phone screen (390px)"],
+  chkStepReview:["專家審查：版面、文案、可用性","Expert review: layout, copy, usability"], chkStepFix:["按問題修正","Fixing the findings"], chkStepRecheck:["驗證修正版","Verifying the fix"],
+  chkIssues:["{n} 項要留意","{n} to watch"], chkAllPass:["全部通過","All checks pass"], chkScore:["分數","Score"], chkFixing:["改緊 {n} 個問題…","Fixing {n} findings…"],
+  chkNoFix:["唔使修正","No fix needed"], chkFixRejected:["修正版冇更好，保留原版","The fix wasn't better, keeping the original"],
+  chkFixMsg:["質檢搞掂，修正版已經準備好。","The check is done and a fixed version is ready."], chkFixReady:["修正版 v{n} 準備好","Fixed version v{n} is ready"],
+  chkUse:["切換到 v{n}","Switch to v{n}"], chkUnchecked:["未質檢","Not checked yet"], chkRun:["運行質檢","Run check"], chkStop:["停止質檢","Stop check"],
+  qFixedFrom:["已自動修正（由 v{n}）","Auto-fixed from v{n}"], qFixedBy:["修正版 v{n} 已準備好","Fixed version v{n} is ready"],
 };
 const SKILL_LABEL = {"prototype-html":["網頁原型","Web prototype"],"game-prototype":["小遊戲","Game prototype"],"design-variants":["設計方向","Design variants"],"chat":["傾偈","Chat"],"idea-capture":["記低點子","Idea capture"]};
 
@@ -420,7 +445,7 @@ const S = {
   ideaId: null, draft: "", spec: null, busy: false, status: "", pending: null, previewOpen: false, viewN: null,
   editing: null, q: "", filter: "", listening: false, partial: "", confirmDel: false,
   skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [],
-  craft: LS.get("i2p.craft", {}), gate: LS.get("i2p.gate", true), assets: LS.get("i2p.assets", {}), assetSlot: "photo", auditing: false,
+  craft: LS.get("i2p.craft", {}), gate: LS.get("i2p.gate", true), assets: LS.get("i2p.assets", {}), assetSlot: "photo",
 };
 const lang = () => (S.register === "en" ? 1 : 0);
 const t = (k) => T[k][lang()];
@@ -466,7 +491,7 @@ function pickSuggestions(only) {
 S.sug = pickSuggestions();
 
 /* ───────── imported skill packs (built from skills/*.md) ───────── */
-const PACKS = [{"id":"cantonese-copywriter","name":"Cantonese copywriter","zh":"廣東話文案","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Imported from your cantonese-copywriter skill. Skipped when the reply language is English.","summary":["每一句畫面文字都似香港人寫：先講痛點或好處，短句，CTA 清楚，冇翻譯腔。","Every visible line reads native Hong Kong: hook first, short lines, a clear CTA, no translationese."],"body":"COPYWRITING (apply to every visible line, as a senior Hong Kong copywriter):\n- Pick the register. Casual B2C, lifestyle, F&B, games: colloquial Cantonese with sentence-final particles (啦 喎 咩 啫 㗎 喇) and light 中英夾雜. Banking, legal, corporate, luxury: written Chinese in Traditional characters with HK terms (軟件, 網絡, 質素).\n- Hook first: open with a relatable Hong Kong pain point, a witty question or a bold benefit. Use wordplay and four-character phrases only when they sharpen the message.\n- Short lines, scannable on a phone. One clear, low-friction CTA per screen (e.g. 「撳入嚟試下」「留言話我知你揀邊款」).\n- No translationese: rewrite from scratch, never word-for-word from English. No Mandarin vocabulary or grammar. Exact characters: 喺 嘅 咗 唔 畀 嗰.\n- Local context only when it serves the message (返工放工, 搭車, 週末好去處, 慳錢攻略). Trendy terms must fit the audience's age or they read as old-fashioned.\n- Before returning, check: does it feel conceived in Hong Kong, does it drive the action, is every character and term correct and consistent in register?"},{"id":"fable-discipline","name":"Fable discipline","zh":"Fable 品質紀律","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Imported from your Fable skill (scope, evidence, adversarial reasoning, verification, calibrated reporting), scaled down for single-file prototypes.","summary":["唔好隨便砌 generic 嘢：先講明「做到啲咩先算完成」，處理邊緣情況，交貨前自己對住 spec 檢查。","No generic scaffolding: define done first, handle real edge cases, and verify against the spec before handing over."],"body":"PROTOTYPE DISCIPLINE (from Fable):\n1. Scope: decide silently what \"done\" means for this screen: the one core interaction works end to end with realistic data. Add nothing the spec did not imply.\n2. Edge cases: name 2-3 concrete ones for THIS idea (bill split: zero people, uneven cents; booking: past dates; game: pause, resize) and handle them visibly (validation message, disabled state).\n3. Reject generic-AI tells: no lorem ipsum, no TODO or stub buttons, no grey placeholder boxes without purpose, no default unstyled controls, no boilerplate hero that ignores what the product does.\n4. Load-bearing basics: input validation with human error text, an empty state, a working state for anything that takes time, a success state. Never show raw errors.\n5. Verify before returning: walk your output against the spec and these rules. If something cannot work in one file (accounts, payments, real data), say so in one sentence instead of faking it.\n6. Report like Fable: lead with what you built, name the biggest open risk, and when a decision only the user can make blocks quality, end with that single question."},{"id":"frontend-designer","name":"Frontend designer","zh":"前端設計師","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Built from the design-system guidance (token system, type, layout, states). No `frontend-design` skill was found in the synced set.","summary":["用設計 token、字體配對、清晰層次同完整狀態（空白、載入、錯誤）整出有質素嘅介面。","Token system, type pairing, clear hierarchy and complete states (empty, loading, error) for interfaces with real polish."],"body":"FRONTEND CRAFT (apply to every screen):\n- Open the CSS with a :root token block: 4-6 named colours (bg, surface, text, muted, accent, one semantic), 2 font tokens, a 4px spacing scale, radii, one shadow. Every colour in the file comes from a token. Define light AND dark (prefers-color-scheme) unless the concept is deliberately single-theme; body always has an explicit background.\n- Type: pair one characterful display face with one clean body face via a Google Fonts <link>, with real fallbacks. One type scale (12/14/16/20/28/40). Body at least 16px on phones, line-height 1.5, headings text-wrap:balance, lines under 65 characters.\n- Neutrals lean toward the accent hue. No flat #888 greys.\n- Layout: flex/grid with gap, 16px minimum side gutter, env(safe-area-inset-*) padding, one column on phones. Put the primary action in thumb reach (lower half); use a sticky bottom action bar when a screen has one main CTA.\n- Hierarchy: one focal point per screen, summary before detail, emphasis by size/weight/space before colour.\n- Interaction: every tap target at least 44px, visible :focus-visible, nothing hover-only, pressed state, transitions 120-180ms ease-out, respect prefers-reduced-motion.\n- States: design empty, loading, error and success for every data view. Use realistic sample data marked as sample. Never lorem ipsum, never TODO or buttons that do nothing.\n- Forms: visible labels (not placeholder-only), correct type/inputmode/autocomplete, inline error text in plain words.\n- Avoid the generic-AI look: cream + serif + terracotta, near-black + one acid accent, purple-to-blue gradient hero, emoji as section markers, everything centred, rounded-lg everywhere, accent rail on rounded cards. Use cards only where an element needs to stand apart.\n- Include one detail only this subject would have: its real units, vocabulary or document conventions."},{"id":"head-designer","name":"Head designer","zh":"設計總監","kind":"craft","applies":["prototype-html","design-variants"],"on":true,"source":"Imported from your head-designer skill (constitution + four creative inputs).","summary":["編輯式、有人手感嘅美術指導：留白多、唔對稱、只用三個色調、有紙張質感，避開 AI 預設嘅閃光漸變同膠囊掣。","Editorial, human-crafted art direction: generous negative space, controlled asymmetry, exactly three tones, tactile grain. No neon gradients or pill buttons."],"body":"ART DIRECTION: HEAD DESIGNER (human-crafted, editorial). This constitution wins over generic styling where they conflict.\nThe BRIEF gives industry, tone 1, tone 2 and a reference philosophy. If a value is \"auto\", choose confidently and state the choice in one short line of your reply.\nNEVER: neon glow gradients; glossy or clay-like 3D surfaces; perfect symmetry; over-rounded containers, pill buttons or floating drop-shadow card spam; decorative glow lines; crowded layouts padded with meaningless shapes.\nALWAYS:\n- Composition: at least 40% negative space, an off-centre editorial grid (print magazine, not dashboard template).\n- Light: one directional source (soft, from upper-left), soft diffused shadows, blacks lifted slightly off pure black.\n- Texture: tactile grain (an inline SVG-noise data-URI or layered radial-gradient noise; paper, linen, matte), never a sterile flat surface.\n- Palette: exactly three tones: Tone 1, Tone 2 and one neutral background (text derives from the neutral).\n- Controls stay usable: tap targets 44px+, corners square or at most 8px radius, contrast at AA.\nTranslate the philosophy into concrete choices: Swiss International = grid-locked type, neo-grotesque sans, red/black/white. Wabi-sabi = asymmetric composition, muted earth tones, visible imperfection. Bauhaus = primary shapes and bold geometry. Mid-century editorial = serif display with sans body on warm paper. Hong Kong heritage = enamel-sign lettering, tiled-wall green and red, newsprint grain.\nSelf-check before returning: scan the result against NEVER and fix anything that crept in."},{"id":"ux-audit","name":"UI/UX quality gate","zh":"UI/UX 品質審查","kind":"workflow","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"New workflow skill, merging design-critique, accessibility-review (WCAG 2.1 AA), Fable's verification gate, the head-designer self-check and world-weaving, plus automated measurements taken in a real 390px render.","summary":["生成之後、你睇到之前，先量度（掣大細、對比、溢出、錯誤）同專家審查，自動修正一次，再畀你提示：要唔要上傳素材、要你決定啲咩。","After generation and before you see it: measure (tap targets, contrast, overflow, errors), expert review, auto-fix once, then tips on assets to upload and decisions only you can make."],"body":"UI/UX QUALITY GATE. Audit a generated single-file prototype BEFORE the user sees it.\n\nYou receive the idea spec, the design brief, the skill type, AUTOMATED MEASUREMENTS from a 390x844 render, and the HTML. Trust the measurements over your guess. Judge only what the HTML supports and never invent problems.\n\nReview lenses:\n1. First impression (2 seconds): what draws the eye, is the purpose clear, is that the right focal point?\n2. Usability and flow: can the core interaction finish in 3 taps or fewer? Is the primary action obvious and in thumb reach? Are empty, loading, error and success states present? Are edge cases handled (zero, invalid input, repeated taps)?\n3. Hierarchy and composition: reading order, emphasis, whitespace, type scale, consistent spacing, radius and colour tokens.\n4. Accessibility (WCAG 2.1 AA): contrast, 44px targets, labels, focus visibility, semantics, reduced motion.\n5. Copy: native Hong Kong voice for the register, hook first, no translationese, no lorem or TODO, a specific CTA.\n6. Spec conformance: does it do what the spec's core interaction says? Is anything faked that cannot work in one file?\n7. Art direction: if HEAD DESIGNER is on, check its NEVER list (neon glow, glossy 3D, pills, card spam, symmetry, more than 3 tones, no negative space, sterile flat). For games: first 60 seconds, the odd detail, feedback, persistence and open loop.\n8. Generic-AI tells: cream + serif + terracotta, purple-to-blue gradient hero, emoji section markers, everything centred, rounded-lg everywhere.\n\nSeverity: high = blocks the core task, badly fails AA, or looks broken. medium = noticeably lowers quality. low = polish.\nScore: start at 100; high -15, medium -7, low -3 each. verdict is \"pass\" when score is 80 or more and there is no high issue, otherwise \"revise\".\n\nTIPS are what the user can act on. At most 4, highest impact first, only things the USER can do and the model cannot:\n- asset: a real image would lift the result (slot: logo, photo, product or hero). Only when the design uses placeholders or generic shapes where a real brand or photo belongs.\n- decision: a product or design choice only the user can make, with 2-3 short options (each 14 characters or fewer), e.g. which action leads, which tone, which feature comes first.\n- content: real facts you had to invent (prices, opening hours, names, claims).\nNo generic tips such as \"add more features\". Write titles and reasons in the reply language, plainly, in one sentence each.\n\nReturn ONLY JSON:\n{\"score\":0-100,\"verdict\":\"pass|revise\",\"strengths\":[\"up to 3 short\"],\"issues\":[{\"sev\":\"high|medium|low\",\"area\":\"flow|hierarchy|a11y|copy|spec|art|states\",\"problem\":\"...\",\"fix\":\"a concrete change to the HTML\"}],\"tips\":[{\"kind\":\"asset\",\"slot\":\"logo|photo|product|hero\",\"title\":\"...\",\"why\":\"...\"},{\"kind\":\"decision\",\"title\":\"...\",\"why\":\"...\",\"options\":[\"...\",\"...\"]},{\"kind\":\"content\",\"title\":\"...\",\"why\":\"...\"}]}\nAt most 6 issues, most important first."},{"id":"world-weaving","name":"World weaving","zh":"遊戲世界設計","kind":"craft","applies":["game-prototype"],"on":true,"source":"Imported from your world-weaving skill (world before mechanics, first 60 seconds, open loop).","summary":["先砌個世界先砌玩法：頭 60 秒有一個明顯動作、一個滿足嘅回應、一個古怪細節，同一個令人明日再嚟嘅 open loop。","World before mechanics: a clear first 60 seconds, one odd handcrafted detail, and an open loop that brings players back."],"body":"WORLD-FIRST GAME DESIGN (from World Weaving):\n- Build the place before the mechanic: a 2-4 word world title, one line of backstory on the start screen, and a role for the player.\n- First 60 seconds: one obvious action, one satisfying response, zero tutorial text. Teach by invitation: the first obstacle or layout makes the right move obvious.\n- One odd, non-functional, handcrafted detail that suggests the world existed before the player (a sleeping cat on a rooftop, a sign with a pun).\n- Every action answers back: screen shake, particle burst, number pop, navigator.vibrate (guarded).\n- Difficulty is a curve, not a wall: each stage teaches then tests, and the next goal is visible.\n- Open loop and persistence: keep something the player owns (best score, streak, unlocked item) in localStorage, greet a returning player, and end each run hinting at what unlocks next.\n- One consistent visual language (flat shapes, pixel, or paper cut) and a quiet HUD that never fights the player.\n- Use Hong Kong world flavour when the spec allows (landmarks, vocabulary)."}];
+const PACKS = [{"id":"cantonese-copywriter","name":"Cantonese copywriter","zh":"廣東話文案","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Imported from your cantonese-copywriter skill. Skipped when the reply language is English.","summary":["每一句畫面文字都似香港人寫：先講痛點或好處，短句，CTA 清楚，冇翻譯腔。","Every visible line reads native Hong Kong: hook first, short lines, a clear CTA, no translationese."],"body":"COPYWRITING (apply to every visible line, as a senior Hong Kong copywriter):\n- Pick the register. Casual B2C, lifestyle, F&B, games: colloquial Cantonese with sentence-final particles (啦 喎 咩 啫 㗎 喇) and light 中英夾雜. Banking, legal, corporate, luxury: written Chinese in Traditional characters with HK terms (軟件, 網絡, 質素).\n- Hook first: open with a relatable Hong Kong pain point, a witty question or a bold benefit. Use wordplay and four-character phrases only when they sharpen the message.\n- Short lines, scannable on a phone. One clear, low-friction CTA per screen (e.g. 「撳入嚟試下」「留言話我知你揀邊款」).\n- No translationese: rewrite from scratch, never word-for-word from English. No Mandarin vocabulary or grammar. Exact characters: 喺 嘅 咗 唔 畀 嗰.\n- Local context only when it serves the message (返工放工, 搭車, 週末好去處, 慳錢攻略). Trendy terms must fit the audience's age or they read as old-fashioned.\n- Before returning, check: does it feel conceived in Hong Kong, does it drive the action, is every character and term correct and consistent in register?"},{"id":"fable-discipline","name":"Fable discipline","zh":"Fable 品質紀律","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Imported from your Fable skill (scope, evidence, adversarial reasoning, verification, calibrated reporting), scaled down for single-file prototypes.","summary":["唔好隨便砌 generic 嘢：先講明「做到啲咩先算完成」，處理邊緣情況，交貨前自己對住 spec 檢查。","No generic scaffolding: define done first, handle real edge cases, and verify against the spec before handing over."],"body":"PROTOTYPE DISCIPLINE (from Fable):\n1. Scope: decide silently what \"done\" means for this screen: the one core interaction works end to end with realistic data. Add nothing the spec did not imply.\n2. Edge cases: name 2-3 concrete ones for THIS idea (bill split: zero people, uneven cents; booking: past dates; game: pause, resize) and handle them visibly (validation message, disabled state).\n3. Reject generic-AI tells: no lorem ipsum, no TODO or stub buttons, no grey placeholder boxes without purpose, no default unstyled controls, no boilerplate hero that ignores what the product does.\n4. Load-bearing basics: input validation with human error text, an empty state, a working state for anything that takes time, a success state. Never show raw errors.\n5. Verify before returning: walk your output against the spec and these rules. If something cannot work in one file (accounts, payments, real data), say so in one sentence instead of faking it.\n6. Report like Fable: lead with what you built, name the biggest open risk, and when a decision only the user can make blocks quality, end with that single question."},{"id":"frontend-designer","name":"Frontend designer","zh":"前端設計師","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Built from the design-system guidance (token system, type, layout, states). No `frontend-design` skill was found in the synced set.","summary":["用設計 token、字體配對、清晰層次同完整狀態（空白、載入、錯誤）整出有質素嘅介面。","Token system, type pairing, clear hierarchy and complete states (empty, loading, error) for interfaces with real polish."],"body":"FRONTEND CRAFT (apply to every screen):\n- Open the CSS with a :root token block: 4-6 named colours (bg, surface, text, muted, accent, one semantic), 2 font tokens, a 4px spacing scale, radii, one shadow. Every colour in the file comes from a token. Define light AND dark (prefers-color-scheme) unless the concept is deliberately single-theme; body always has an explicit background.\n- Type: pair one characterful display face with one clean body face via a Google Fonts <link>, with real fallbacks. One type scale (12/14/16/20/28/40). Body at least 16px on phones, line-height 1.5, headings text-wrap:balance, lines under 65 characters.\n- Neutrals lean toward the accent hue. No flat #888 greys.\n- Layout: flex/grid with gap, 16px minimum side gutter, env(safe-area-inset-*) padding, one column on phones. Put the primary action in thumb reach (lower half); use a sticky bottom action bar when a screen has one main CTA.\n- Hierarchy: one focal point per screen, summary before detail, emphasis by size/weight/space before colour.\n- Interaction: every tap target at least 44px, visible :focus-visible, nothing hover-only, pressed state, transitions 120-180ms ease-out, respect prefers-reduced-motion.\n- States: design empty, loading, error and success for every data view. Use realistic sample data marked as sample. Never lorem ipsum, never TODO or buttons that do nothing.\n- Forms: visible labels (not placeholder-only), correct type/inputmode/autocomplete, inline error text in plain words.\n- Avoid the generic-AI look: cream + serif + terracotta, near-black + one acid accent, purple-to-blue gradient hero, emoji as section markers, everything centred, rounded-lg everywhere, accent rail on rounded cards. Use cards only where an element needs to stand apart.\n- Include one detail only this subject would have: its real units, vocabulary or document conventions."},{"id":"head-designer","name":"Head designer","zh":"設計總監","kind":"craft","applies":["prototype-html","design-variants"],"on":true,"source":"Imported from your head-designer skill (constitution + four creative inputs).","summary":["編輯式、有人手感嘅美術指導：留白多、唔對稱、只用三個色調、有紙張質感，避開 AI 預設嘅閃光漸變同膠囊掣。","Editorial, human-crafted art direction: generous negative space, controlled asymmetry, exactly three tones, tactile grain. No neon gradients or pill buttons."],"body":"ART DIRECTION: HEAD DESIGNER (human-crafted, editorial). This constitution wins over generic styling where they conflict.\nThe BRIEF gives industry, tone 1, tone 2 and a reference philosophy. If a value is \"auto\", choose confidently and state the choice in one short line of your reply.\nNEVER: neon glow gradients; glossy or clay-like 3D surfaces; perfect symmetry; over-rounded containers, pill buttons or floating drop-shadow card spam; decorative glow lines; crowded layouts padded with meaningless shapes.\nALWAYS:\n- Composition: at least 40% negative space, an off-centre editorial grid (print magazine, not dashboard template).\n- Light: one directional source (soft, from upper-left), soft diffused shadows, blacks lifted slightly off pure black.\n- Texture: tactile grain (an inline SVG-noise data-URI or layered radial-gradient noise; paper, linen, matte), never a sterile flat surface.\n- Palette: exactly three tones: Tone 1, Tone 2 and one neutral background (text derives from the neutral).\n- Controls stay usable: tap targets 44px+, corners square or at most 8px radius, contrast at AA.\nTranslate the philosophy into concrete choices: Swiss International = grid-locked type, neo-grotesque sans, red/black/white. Wabi-sabi = asymmetric composition, muted earth tones, visible imperfection. Bauhaus = primary shapes and bold geometry. Mid-century editorial = serif display with sans body on warm paper. Hong Kong heritage = enamel-sign lettering, tiled-wall green and red, newsprint grain.\nSelf-check before returning: scan the result against NEVER and fix anything that crept in."},{"id":"ux-audit","name":"UI/UX quality gate","zh":"UI/UX 品質審查","kind":"workflow","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"New workflow skill, merging design-critique, accessibility-review (WCAG 2.1 AA), Fable's verification gate, the head-designer self-check and world-weaving, plus automated measurements taken in a real 390px render.","summary":["原型一出就畀你睇，質檢 Agent 喺背景量度（掣大細、對比、溢出、錯誤）、專家審查，有需要就準備修正版，再畀你提示：要唔要上傳素材、要你決定啲咩。","The prototype shows up immediately; a check agent works in the background (measure tap targets, contrast, overflow, errors; expert review; a fixed version if needed), then gives tips on assets to upload and decisions only you can make."],"body":"UI/UX QUALITY GATE. Audit a generated single-file prototype. The user already has it on screen; you run in the background and your report arrives within a minute.\n\nYou receive the idea spec, the design brief, the skill type, AUTOMATED MEASUREMENTS from a 390x844 render, and the HTML. Trust the measurements over your guess. Judge only what the HTML supports and never invent problems.\n\nReview lenses:\n1. First impression (2 seconds): what draws the eye, is the purpose clear, is that the right focal point?\n2. Usability and flow: can the core interaction finish in 3 taps or fewer? Is the primary action obvious and in thumb reach? Are empty, loading, error and success states present? Are edge cases handled (zero, invalid input, repeated taps)?\n3. Hierarchy and composition: reading order, emphasis, whitespace, type scale, consistent spacing, radius and colour tokens.\n4. Accessibility (WCAG 2.1 AA): contrast, 44px targets, labels, focus visibility, semantics, reduced motion.\n5. Copy: native Hong Kong voice for the register, hook first, no translationese, no lorem or TODO, a specific CTA.\n6. Spec conformance: does it do what the spec's core interaction says? Is anything faked that cannot work in one file?\n7. Art direction: if HEAD DESIGNER is on, check its NEVER list (neon glow, glossy 3D, pills, card spam, symmetry, more than 3 tones, no negative space, sterile flat). For games: first 60 seconds, the odd detail, feedback, persistence and open loop.\n8. Generic-AI tells: cream + serif + terracotta, purple-to-blue gradient hero, emoji section markers, everything centred, rounded-lg everywhere.\n\nSeverity: high = blocks the core task, badly fails AA, or looks broken. medium = noticeably lowers quality. low = polish.\nScore: start at 100; high -15, medium -7, low -3 each. verdict is \"pass\" when score is 80 or more and there is no high issue, otherwise \"revise\".\n\nTIPS are what the user can act on. At most 4, highest impact first, only things the USER can do and the model cannot:\n- asset: a real image would lift the result (slot: logo, photo, product or hero). Only when the design uses placeholders or generic shapes where a real brand or photo belongs.\n- decision: a product or design choice only the user can make, with 2-3 short options (each 14 characters or fewer), e.g. which action leads, which tone, which feature comes first.\n- content: real facts you had to invent (prices, opening hours, names, claims).\nNo generic tips such as \"add more features\". Write titles and reasons in the reply language, plainly, in one sentence each.\n\nReturn ONLY JSON:\n{\"score\":0-100,\"verdict\":\"pass|revise\",\"strengths\":[\"up to 3 short\"],\"issues\":[{\"sev\":\"high|medium|low\",\"area\":\"flow|hierarchy|a11y|copy|spec|art|states\",\"problem\":\"...\",\"fix\":\"a concrete change to the HTML\"}],\"tips\":[{\"kind\":\"asset\",\"slot\":\"logo|photo|product|hero\",\"title\":\"...\",\"why\":\"...\"},{\"kind\":\"decision\",\"title\":\"...\",\"why\":\"...\",\"options\":[\"...\",\"...\"]},{\"kind\":\"content\",\"title\":\"...\",\"why\":\"...\"}]}\nAt most 6 issues, most important first."},{"id":"world-weaving","name":"World weaving","zh":"遊戲世界設計","kind":"craft","applies":["game-prototype"],"on":true,"source":"Imported from your world-weaving skill (world before mechanics, first 60 seconds, open loop).","summary":["先砌個世界先砌玩法：頭 60 秒有一個明顯動作、一個滿足嘅回應、一個古怪細節，同一個令人明日再嚟嘅 open loop。","World before mechanics: a clear first 60 seconds, one odd handcrafted detail, and an open loop that brings players back."],"body":"WORLD-FIRST GAME DESIGN (from World Weaving):\n- Build the place before the mechanic: a 2-4 word world title, one line of backstory on the start screen, and a role for the player.\n- First 60 seconds: one obvious action, one satisfying response, zero tutorial text. Teach by invitation: the first obstacle or layout makes the right move obvious.\n- One odd, non-functional, handcrafted detail that suggests the world existed before the player (a sleeping cat on a rooftop, a sign with a pun).\n- Every action answers back: screen shake, particle burst, number pop, navigator.vibrate (guarded).\n- Difficulty is a curve, not a wall: each stage teaches then tests, and the next goal is visible.\n- Open loop and persistence: keep something the player owns (best score, streak, unlocked item) in localStorage, greet a returning player, and end each run hinting at what unlocks next.\n- One consistent visual language (flat shapes, pixel, or paper cut) and a quiet HUD that never fights the player.\n- Use Hong Kong world flavour when the spec allows (landmarks, vocabulary)."}];
 const PACK_ICON = { "head-designer": "pencil", "frontend-designer": "grid", "fable-discipline": "check", "world-weaving": "game", "cantonese-copywriter": "lang", "ux-audit": "shield" };
 const packOn = (id) => { const p = PACKS.find((x) => x.id === id); return !p ? false : p.kind === "workflow" ? S.gate : (S.craft[id] ?? p.on); };
 const packName = (p) => (lang() ? p.name : p.zh);
@@ -538,7 +563,12 @@ function errProbe() {
 }
 function auditProbe(ID) {
   function lum(c) { var a = [c[0], c[1], c[2]].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; }
-  function parse(s) { var m = s && s.match(/rgba?\(([^)]+)\)/); if (!m) return null; var p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1]; }
+  // Resolve ANY CSS colour (rgb, hsl, oklch, color-mix, color(srgb ...)) through the browser's own canvas instead of parsing strings.
+  var cv = document.createElement("canvas"); cv.width = cv.height = 1; var cx = cv.getContext("2d", { willReadFrequently: true });
+  function parse(s) {
+    if (!s) return null; cx.clearRect(0, 0, 1, 1); cx.fillStyle = "#010203"; cx.fillStyle = s; if (cx.fillStyle === "#010203") return null;
+    cx.fillRect(0, 0, 1, 1); var d = cx.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255];
+  }
   function bgOf(el) { while (el && el.nodeType === 1) { var cs = getComputedStyle(el); if (cs.backgroundImage && cs.backgroundImage !== "none") return null; var c = parse(cs.backgroundColor); if (c && c[3] > 0.5) return c; el = el.parentElement; } return [255, 255, 255, 1]; }
   function visible(el) { var r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; }
   function nm(el) { return String(el.getAttribute("aria-label") || el.innerText || el.value || el.getAttribute("title") || el.tagName).replace(/\s+/g, " ").trim().slice(0, 24); }
@@ -654,66 +684,122 @@ async function polish(it, skill, html, checks, review, signal) {
 const fallbackTips = (it, skill) => (skill !== "game-prototype" && !(S.assets[it.id] || []).length ? [{ kind: "asset", slot: "logo", title: t("fbAssetTitle"), why: t("fbAssetWhy"), options: [], done: null }] : []);
 
 /** Never throws: on any failure the unaudited HTML is delivered rather than lost. */
-async function qualityGate({ it, skill, html, deep, allowFix = true, signal }) {
-  const stage = (k, v) => { if (S.pending?.stages) { S.pending.stages[k] = v; renderPending(); } };
-  let outHtml = html, checks = [], review = null, fixed = false;
-  try {
-    stage("design", "done"); stage("audit", "running");
-    checks = autoChecks(await measureHtml(html, it.id), staticChecks(html));
-    review = deep ? await expertReview(it, skill, html, checks, signal) : null;
-    stage("audit", "done");
-    const needFix = allowFix && (checks.some((c) => c.status === "fail") || review?.verdict === "revise");
-    if (needFix) {
-      stage("fix", "running");
-      const h2 = await polish(it, skill, html, checks, review, signal);
-      if (h2) {
-        // Accept a fix only if it measurably helps: a better automated score, or equal automated score and a higher expert score.
-        const c2 = autoChecks(await measureHtml(h2, it.id), staticChecks(h2));
-        const r2 = deep ? await expertReview(it, skill, h2, c2, signal) : null;
-        const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
-        if (better) { outHtml = h2; checks = c2; fixed = true; review = r2 || review; }
-      }
-      stage("fix", "done");
-    } else stage("fix", "skip");
-  } catch (e) { if (signal?.aborted || !checks.length) return { html: outHtml, q: null }; }
+/* ───────── check agent: runs in the background, after the output is already on screen ───────── */
+const CHK = {};                                   // `${ideaId}:${n}` -> live state; never persisted
+const chkKey = (id, n) => id + ":" + n;
+const findIdea = (id) => S.ideas.find((i) => i.id === id);
+function buildQ({ it, skill, checks, review, deep, fixedFrom = null, fixedBy = null }) {
   const q = {
-    deep: !!deep, fixed, at: Date.now(), auto: checks.map(({ id, status, detail }) => ({ id, status, detail })), autoScore: autoScore(checks),
+    deep: !!deep, at: Date.now(), fixed: !!fixedFrom, fixedFrom, fixedBy, auto: checks.map(({ id, status, detail }) => ({ id, status, detail })), autoScore: autoScore(checks),
     score: review ? review.score : null, verdict: review ? review.verdict : null, strengths: review?.strengths || [], issues: review?.issues || [], tips: review?.tips || [],
   };
   if (!q.tips.length) q.tips = fallbackTips(it, skill);
-  return { html: outHtml, q };
+  return q;
+}
+const verOptions = (it, viewN) => it.versions.map((x) => `<option value="${x.n}" ${x.n === viewN ? "selected" : ""}>v${x.n}${x.n === it.currentVersion ? " · " + t("current") : ""}</option>`).join("");
+function chatHtml(it) { const lastA = it.messages.map((m) => m.role).lastIndexOf("assistant"); return it.messages.map((m, i) => msgHtml(m, i, it, lastA)).join("") + pendingHtml(); }
+function inIdeaView(ideaId) { return S.view === "idea" && S.ideaId === ideaId; }
+function refreshQuality(ideaId, n) {
+  if (!inIdeaView(ideaId)) return;
+  const it = findIdea(ideaId); if (!it) return;
+  const el = document.getElementById("qc-" + n); if (el) el.outerHTML = qualityHtml(it, n);
+  const pb = document.getElementById("pbar-chk"); if (pb) pb.outerHTML = pbarChkHtml(it, S.viewN ?? it.currentVersion);
+}
+function refreshChat(ideaId) {
+  if (!inIdeaView(ideaId)) return;
+  const it = findIdea(ideaId), el = document.getElementById("msgs"); if (it && el) el.innerHTML = chatHtml(it);
+  const sel = document.getElementById("ver"); if (it && sel) sel.innerHTML = verOptions(it, S.viewN ?? it.currentVersion);
+}
+function pbarChkHtml(it, n) {
+  const c = CHK[chkKey(it.id, n)], done = c ? Object.values(c.steps).filter((x) => x === "done" || x === "skip").length : 0;
+  return `<span id="pbar-chk" class="chkpill" role="status" ${c ? "" : "hidden"}>${c ? `<i class="pd"></i>${t("chkAgent")} ${done}/4` : ""}</span>`;
 }
 
-async function reauditVersion(n, { fix }) {
-  const it = idea(), v = it?.versions.find((x) => x.n === n);
-  if (!v || S.auditing || S.pending) return;
-  S.auditing = true; toast(t("auditing")); render();
+/** Measure, review, and (if needed) prepare a fixed version. The fix is a NEW version; the one on screen never changes under the viewer. */
+async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
+  const it = findIdea(ideaId), v = it?.versions.find((x) => x.n === n); if (!v) return;
+  const key = chkKey(ideaId, n); if (CHK[key]) return;
+  const ctl = new AbortController(), signal = ctl.signal;
+  const c = (CHK[key] = { t0: Date.now(), ctl, steps: { measure: "running", review: deep ? "pending" : "skip", fix: "pending", recheck: "pending" }, info: {} });
+  c.timer = setInterval(() => refreshQuality(ideaId, n), 1000);
+  const step = (k, st, info) => { c.steps[k] = st; if (info) c.info[k] = info; refreshQuality(ideaId, n); };
+  refreshQuality(ideaId, n);
+  let checks = [], review = null;
   try {
-    const r = await qualityGate({ it, skill: v.skill, html: v.html, deep: true, allowFix: !!fix });
-    if (r.html !== v.html) {
-      const nn = (it.versions.at(-1)?.n || 0) + 1;
-      it.versions.push({ n: nn, html: r.html, q: r.q, skill: v.skill, note: "", createdAt: Date.now() });
-      it.currentVersion = nn; S.viewN = nn; S.previewOpen = true;
-      it.messages.push({ role: "user", content: t("autofixMsg"), skill: v.skill });
-      it.messages.push({ role: "assistant", content: t("autofixDone"), skill: v.skill, versionN: nn, feedback: 0 });
-    } else { if (r.q) v.q = r.q; if (fix) toast(t("auditPass")); }
-    it.updatedAt = Date.now(); persist();
-  } finally { S.auditing = false; render(); scrollEnd(); }
+    checks = autoChecks(await measureHtml(v.html, ideaId), staticChecks(v.html));
+    step("measure", "done", { checks });
+    if (deep) { step("review", "running"); review = await expertReview(it, v.skill, v.html, checks, signal); step("review", review ? "done" : "skip", { review }); }
+    v.q = buildQ({ it, skill: v.skill, checks, review, deep }); persist();
+    const needFix = allowFix && (checks.some((x) => x.status === "fail") || review?.verdict === "revise");
+    if (!needFix) { step("fix", "skip"); step("recheck", "skip"); }
+    else {
+      step("fix", "running", { count: checks.filter((x) => x.status !== "pass").length + (review?.issues || []).filter((i) => i.sev !== "low").length });
+      const h2 = await polish(it, v.skill, v.html, checks, review, signal);
+      if (!h2) { step("fix", "done", { rejected: true }); step("recheck", "skip"); }
+      else {
+        step("fix", "done"); step("recheck", "running");
+        const c2 = autoChecks(await measureHtml(h2, ideaId), staticChecks(h2));
+        const r2 = deep ? await expertReview(it, v.skill, h2, c2, signal) : null;
+        // Accept only a measurable improvement: better automated score, or equal automated score and a higher expert score.
+        const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
+        if (better) {
+          const nn = (it.versions.at(-1)?.n || 0) + 1;
+          it.versions.push({ n: nn, html: h2, q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
+          v.q.fixedBy = nn;
+          it.messages.push({ role: "assistant", content: t("chkFixMsg"), skill: v.skill, versionN: nn, feedback: 0 });
+          step("recheck", "done", { from: v.q.score ?? v.q.autoScore, to: it.versions.at(-1).q.score ?? it.versions.at(-1).q.autoScore, nn });
+          toast(t("chkFixReady").replace("{n}", nn));
+        } else step("recheck", "done", { rejected: true });
+      }
+    }
+  } catch (e) {
+    for (const k of Object.keys(c.steps)) if (c.steps[k] === "running" || c.steps[k] === "pending") c.steps[k] = "skip";
+    if (checks.length && !v.q) v.q = buildQ({ it, skill: v.skill, checks, review, deep });
+  } finally {
+    clearInterval(c.timer); delete CHK[key]; it.updatedAt = Date.now(); persist();
+    refreshChat(ideaId); refreshQuality(ideaId, n);
+  }
 }
+const reauditVersion = (n, { fix }) => runCheck(S.ideaId, n, { deep: true, allowFix: !!fix });
 
 /* ───────── quality card + tips ───────── */
-const stagesHtml = (st) => `<ol class="stages" aria-label="progress">${["design", "audit", "fix"].map((k) => `<li data-s="${st[k]}"><i>${st[k] === "done" ? "✓" : st[k] === "running" ? "…" : st[k] === "skip" ? "–" : "·"}</i>${t("stage_" + k)}</li>`).join("")}</ol>`;
+function checkRunHtml(it, n, c) {
+  const el = Math.round((Date.now() - c.t0) / 1000), st = c.steps, I = c.info;
+  const mk = (x, i) => (x === "done" ? `<span class="mark done">${svg("check")}</span>` : x === "running" ? `<span class="mark run"><i class="pd"></i></span>` : x === "skip" ? `<span class="mark">–</span>` : `<span class="mark">${i + 1}</span>`);
+  const bad = (I.measure?.checks || []).filter((x) => x.status !== "pass");
+  const rv = I.review?.review;
+  const rows = [
+    ["measure", t("chkStepMeasure"), I.measure ? (bad.length ? t("chkIssues").replace("{n}", bad.length) + "：" + bad.slice(0, 3).map((x) => (x.status === "fail" ? "✕ " : "! ") + t("chk_" + x.id)).join(" · ") + (bad.length > 3 ? " …" : "") : t("chkAllPass")) : ""],
+    ["review", t("chkStepReview"), rv ? `${t("chkScore")} ${rv.score}${rv.issues[0] ? "：" + esc(rv.issues[0].problem) : ""}` : ""],
+    ["fix", t("chkStepFix"), st.fix === "running" ? t("chkFixing").replace("{n}", I.fix?.count || "") : st.fix === "skip" ? t("chkNoFix") : I.fix?.rejected ? t("chkFixRejected") : ""],
+    ["recheck", t("chkStepRecheck"), I.recheck?.nn ? `${I.recheck.from} → ${I.recheck.to}` : I.recheck?.rejected ? t("chkFixRejected") : ""],
+  ];
+  return `<section class="chkrun" aria-label="${t("chkAgent")}"><div class="chkhead"><b>${t("chkAgent")}</b><span class="faint" role="status">${t("chkRunning")} · ${t("elapsed").replace("{s}", el)}</span></div>
+    <ol class="clog">${rows.map(([k, label, out], i) => `<li data-s="${st[k]}">${mk(st[k], i)}<span class="cl-body"><span class="cl-t">${label}</span>${out ? `<span class="cl-o">${out}</span>` : ""}</span></li>`).join("")}</ol>
+    <div class="qact" style="margin-top:10px"><button class="btn ghost" data-act="stop-check" data-n="${n}">${t("chkStop")}</button></div></section>`;
+}
 function qualityHtml(it, n) {
-  const v = it.versions.find((x) => x.n === n), q = v?.q; if (!q) return "";
-  const latest = n === it.currentVersion, sc = q.score ?? q.autoScore, tone = sc >= 85 ? "good" : sc >= 70 ? "ok" : "low";
+  const v = it.versions.find((x) => x.n === n); if (!v) return "";
+  const live = CHK[chkKey(it.id, n)], latest = n === it.currentVersion;
+  let inner;
+  if (live) inner = checkRunHtml(it, n, live);
+  else if (v.q) inner = qualityCard(it, v) + (latest ? tipsHtml(it, v) : "");
+  else if (latest) inner = `<div class="chkidle"><span class="muted">${t("chkUnchecked")}</span><button class="btn" data-act="reaudit" data-n="${n}">${t("chkRun")}</button></div>`;
+  else return "";
+  return `<div id="qc-${n}">${inner}</div>`;
+}
+function qualityCard(it, v) {
+  const n = v.n, q = v.q, latest = n === it.currentVersion, sc = q.score ?? q.autoScore, tone = sc >= 85 ? "good" : sc >= 70 ? "ok" : "low";
   const mark = (x) => (x === "pass" ? "✓" : x === "warn" ? "!" : "✕");
   const chk = q.auto.map((c) => `<li class="chk" data-s="${c.status}" title="${esc(c.detail || "")}"><i>${mark(c.status)}</i>${t("chk_" + c.id)}</li>`).join("");
   const iss = q.issues.slice(0, 4).map((i) => `<li class="iss" data-sev="${i.sev}"><b>${esc(i.problem)}</b><span class="muted">${esc(i.fix)}</span></li>`).join("");
-  return `<details class="quality" ${latest ? "open" : ""}><summary><span class="qscore" data-tone="${tone}">${sc}</span><span class="qt">${t("qTitle")}</span>${q.fixed ? `<span class="tag">${t("qFixed")}</span>` : ""}${q.deep ? "" : `<span class="faint">${t("qLight")}</span>`}</summary>
+  const fixedNote = q.fixedBy && q.fixedBy !== it.currentVersion ? `<div class="fixed-note"><span>${t("qFixedBy").replace("{n}", q.fixedBy)}</span><button class="btn primary" data-act="use-version" data-n="${q.fixedBy}">${t("chkUse").replace("{n}", q.fixedBy)}</button></div>` : "";
+  return `<details class="quality" ${latest ? "open" : ""}><summary><span class="qscore" data-tone="${tone}">${sc}</span><span class="qt">${t("qTitle")}</span>${q.fixedFrom ? `<span class="tag">${t("qFixedFrom").replace("{n}", q.fixedFrom)}</span>` : ""}${q.deep ? "" : `<span class="faint">${t("qLight")}</span>`}</summary>
     <ul class="chks">${chk}</ul>
     ${q.strengths.length ? `<p class="label">${t("qStrengths")}</p><ul class="plain">${q.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    ${iss ? `<p class="label">${q.fixed ? t("qFixedList") : t("qReview")}</p><ul class="issues">${iss}</ul>` : ""}
-    <div class="qact"><button class="btn" data-act="reaudit" data-n="${n}" ${S.auditing ? "disabled" : ""}>${t("reaudit")}</button>${q.issues.length && !q.fixed ? `<button class="btn" data-act="autofix" data-n="${n}" ${S.auditing ? "disabled" : ""}>${t("autofix")}</button>` : ""}</div></details>${latest ? tipsHtml(it, v) : ""}`;
+    ${iss ? `<p class="label">${q.fixedBy || q.fixedFrom ? t("qFixedList") : t("qReview")}</p><ul class="issues">${iss}</ul>` : ""}
+    ${fixedNote}
+    <div class="qact"><button class="btn" data-act="reaudit" data-n="${n}">${t("reaudit")}</button>${q.issues.length && !q.fixedBy && !q.fixedFrom ? `<button class="btn" data-act="autofix" data-n="${n}">${t("autofix")}</button>` : ""}</div></details>`;
 }
 function tipsHtml(it, v) {
   const tips = v.q.tips, as = S.assets[it.id] || [];
@@ -826,7 +912,8 @@ async function runAgent(agent, ideaId, note) {
       if (def.kind === "build") {
         const { note: lead, html } = extract(text);
         if (!html) throw new Error(lang() ? "No prototype came back." : "冇生成到原型。");
-        const g = await qualityGate({ it, skill: cur?.skill || it.spec.suggestedSkill, html, deep: false, allowFix: false });
+        const bsk = cur?.skill || it.spec.suggestedSkill;
+        const g = { html, q: buildQ({ it, skill: bsk, checks: autoChecks(await measureHtml(html, it.id), staticChecks(html)), review: null, deep: false }) };
         const n = (it.versions.at(-1)?.n || 0) + 1;
         it.versions.push({ n, html: g.html, q: g.q, skill: cur?.skill || it.spec.suggestedSkill, note: lead.slice(0, 300), createdAt: Date.now() });
         it.currentVersion = n; st.versionN = n; text = lead || "✓";
@@ -1108,8 +1195,9 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
   const iterating = skill !== "chat" && cur && cur.skill === skill && cur.html;
   const msgs = buildMessages(skill, it, input, iterating ? cur.html : null);
   it.messages.push({ role: "user", content: input, skill });
-  S.pending = { skill, text: "", chars: 0, confidence: r.confidence, stages: skill !== "chat" && S.gate ? { design: "running", audit: "pending", fix: "pending" } : null };
+  S.pending = { skill, text: "", chars: 0, confidence: r.confidence, t0: Date.now(), log: skill !== "chat" ? { phase: "wait", iterating: !!iterating, brief: briefLine(it, skill), skills: skillsLine(skill) } : null };
   render(); scrollEnd();
+  clearInterval(pendTimer); pendTimer = setInterval(() => renderPending(false), 1000);
 
   abort = new AbortController();
   let full = "";
@@ -1121,32 +1209,30 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
         const f = text.search(/```|<!doctype|<html/i);
         S.pending.text = f >= 0 ? text.slice(0, f) : text;
         S.pending.chars = f >= 0 ? text.length - f : 0;
-        renderPending();
+        if (S.pending.log) S.pending.log.phase = /<\/html>/i.test(text) ? "done" : /<script\b/i.test(text) ? "script" : /<body\b/i.test(text) ? "body" : /<style\b/i.test(text) ? "style" : "wait";
+        renderPending(true);
       },
     });
     full = res.text || full;
-    let content = full.trim(), versionN = null, outSkill = skill;
+    let content = full.trim(), versionN = null, outSkill = skill, kick = null;
     if (skill !== "chat") {
-      const { note, html: rawHtml } = extract(full);
-      if (rawHtml) {
-        let html = rawHtml, q = null;
-        if (S.gate) {
-          const g = await qualityGate({ it, skill, html: rawHtml, deep: !!regenerate || !(cur && cur.skill === skill && cur.q), signal: abort.signal });
-          html = g.html; q = g.q;
-        }
+      const { note, html } = extract(full);
+      if (html) {
         versionN = (it.versions.at(-1)?.n || 0) + 1;
-        it.versions.push({ n: versionN, html, q, skill, note: note.slice(0, 300), createdAt: Date.now() });
+        it.versions.push({ n: versionN, html, q: null, skill, note: note.slice(0, 300), createdAt: Date.now() });
+        if (S.gate) kick = { n: versionN, deep: !!regenerate || !(cur && cur.skill === skill && cur.q) };
         it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
         content = note || "✓";
         if (res.truncated) toast(lang() ? "Output was cut short; it may be incomplete. Try “regenerate”." : "輸出被截短，可能唔完整。可以試下重新生成。");
       } else outSkill = "chat";
     }
     it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
+    if (kick) runCheck(it.id, kick.n, { deep: kick.deep, allowFix: true });   // not awaited: the output is already on screen
   } catch (e) {
     if (!abort?.signal.aborted && e?.name !== "AbortError" && e?.code !== "aborted") toast(modelError(e));
     if (full.trim()) it.messages.push({ role: "assistant", content: full.trim(), skill: "chat", feedback: 0 });
   }
-  it.updatedAt = Date.now(); S.pending = null; abort = null; persist(); render(); scrollEnd();
+  it.updatedAt = Date.now(); clearInterval(pendTimer); S.pending = null; abort = null; persist(); render(); scrollEnd();
 }
 
 /* dictation */
@@ -1255,13 +1341,34 @@ function msgHtml(m, i, it, lastA) {
       ${i === lastA && !String(m.skill).startsWith("agent:") ? `<button class="ib sm" data-act="regen" aria-label="Regenerate" ${S.pending ? "disabled" : ""}>${svg("refresh")}</button>` : ""}</div></div>`;
 }
 
+function worklogHtml(p) {
+  const g = p.log, el = Math.round((Date.now() - p.t0) / 1000);
+  const ph = { wait: "phWait", style: "phStyle", body: "phBody", script: "phScript", done: "phDone" }[g.phase];
+  const mk = (x, i) => (x === "done" ? `<span class="mark done">${svg("check")}</span>` : x === "running" ? `<span class="mark run"><i class="pd"></i></span>` : `<span class="mark">${i + 1}</span>`);
+  const rows = [
+    ["done", g.iterating ? t("wlIter") : t("wlBrief"), esc(g.brief)],
+    ["done", t("wlSkills"), esc(g.skills)],
+    [g.phase === "done" ? "done" : "running", t("wlGen"), t(ph) + (p.chars ? " · " + (p.chars / 1000).toFixed(1) + "k" : "")],
+    ["pending", t("wlHandoff"), ""],
+  ];
+  return `<section class="worklog-wrap"><div class="chkhead"><b>${t("wlTitle")}</b><span class="faint" role="status">${t("elapsed").replace("{s}", el)}</span></div>
+    <ol class="worklog">${rows.map(([st, label, out], i) => `<li data-s="${st}">${mk(st, i)}<span class="cl-body"><span class="cl-t">${label}</span>${out ? `<span class="cl-o">${out}</span>` : ""}</span></li>`).join("")}</ol></section>`;
+}
+function briefLine(it, skill) {
+  const st = it.spec.style || {}, tn = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean).map((x) => (lang() ? x.en : x.zh));
+  const ph = PHIL.find((p) => p.id === st.phil) || PHIL[0];
+  const bits = [it.spec.title, tn.length ? tn.join(" + ") : null, skill !== "game-prototype" ? (lang() ? ph.en : ph.zh) : null].filter(Boolean);
+  return bits.join(" · ");
+}
+const skillsLine = (skill) => PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en")).map(packName).join(" · ") || t("noSkills");
 function pendingHtml() {
   const p = S.pending; if (!p) return "";
   return `<div class="msg" id="pending">${p.skill !== "chat" ? `<div class="route">${skillIcon(p.skill)} ${sl(p.skill)}</div>` : ""}
-    <div class="prose" aria-live="polite" aria-busy="true">${p.text ? prose(p.text) : p.chars ? "" : `<span class="dots"><i></i><i></i><i></i></span>`}</div>
-    ${p.stages ? stagesHtml(p.stages) : ""}${p.chars && (!p.stages || p.stages.design === "running") ? `<div class="prog" role="status"><span class="dots"><i></i><i></i><i></i></span>${t("building")} · ${(p.chars / 1000).toFixed(1)}k</div>` : ""}</div>`;
+    <div class="prose" aria-live="polite" aria-busy="true">${p.text ? prose(p.text) : p.log ? "" : `<span class="dots"><i></i><i></i><i></i></span>`}</div>
+    ${p.log ? worklogHtml(p) : ""}</div>`;
 }
-function renderPending() { const el = document.getElementById("pending"); if (el) { el.outerHTML = pendingHtml(); scrollEnd(); } }
+function renderPending(follow) { const el = document.getElementById("pending"); if (el) { el.outerHTML = pendingHtml(); if (follow) scrollEnd(); } }
+let pendTimer = null;
 
 function viewIdea() {
   const it = idea(); if (!it) { S.view = "journal"; return viewJournal(); }
@@ -1270,16 +1377,16 @@ function viewIdea() {
   const v = it.versions.find((x) => x.n === viewN);
   const preview = S.previewOpen && v ? `<aside class="preview" aria-label="Prototype preview">
       <div class="pbar"><button class="ib" data-act="close" aria-label="Close">${svg("x")}</button><span class="t">${esc(it.spec.title)}</span>
-        <label class="sr" for="ver">${t("version")}</label><select id="ver">${it.versions.map((x) => `<option value="${x.n}" ${x.n === viewN ? "selected" : ""}>v${x.n}${x.n === it.currentVersion ? " · " + t("current") : ""}</option>`).join("")}</select>
+        <label class="sr" for="ver">${t("version")}</label><select id="ver">${verOptions(it, viewN)}</select>
         ${viewN !== it.currentVersion ? `<button class="btn" data-act="revert" data-n="${viewN}">${t("revert")}</button>` : ""}
-        <button class="ib" data-act="reaudit" data-n="${viewN}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
+        ${pbarChkHtml(it, viewN)}<button class="ib" data-act="reaudit" data-n="${viewN}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
       <div class="stage">${v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${viewN}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`}</div></aside>` : "";
   const modelLabel = `${sl(S.pending?.skill || it.messages.at(-1)?.skill || it.spec.suggestedSkill)} · ${S.register === "en" ? "EN" : S.register === "yue" ? "廣東話" : "中英"}`;
   return `<div class="ws"><div class="chat">
     <div class="scroll" id="scroll"><div class="col">
       <section class="card summary"><span class="tag">${skillIcon(it.spec.suggestedSkill)} ${sl(it.spec.suggestedSkill)}</span><p>${esc(it.spec.oneLiner)}</p>
         <dl><dt>${t("core")}</dt><dd>${esc(it.spec.coreInteraction)}</dd><dt>${t("user")}</dt><dd>${esc(it.spec.targetUser)}</dd></dl></section>
-      ${it.messages.map((m, i) => msgHtml(m, i, it, lastA)).join("")}${pendingHtml()}
+      <div id="msgs">${it.messages.map((m, i) => msgHtml(m, i, it, lastA)).join("")}${pendingHtml()}</div>
     </div></div>
     <div class="composer-wrap"><form class="composer" id="cform"><label class="sr" for="draft">${t("message")}</label>
       <textarea id="draft" rows="1" placeholder="${esc(S.listening ? S.partial || t("listening") : t("message"))}">${esc(S.draft)}</textarea>
@@ -1361,6 +1468,8 @@ const onClick = async (e) => {
   if (b.id === "reset") { S.spec = null; S.draft = ""; return render(); }
   const it = idea(); const i = +b.dataset.i;
   switch (b.dataset.act) {
+    case "use-version": { const nn = +b.dataset.n; it.currentVersion = nn; S.viewN = nn; S.previewOpen = true; it.updatedAt = Date.now(); persist(); return render(); }
+    case "stop-check": CHK[chkKey(S.ideaId, +b.dataset.n)]?.ctl.abort(); return;
     case "reaudit": return reauditVersion(+b.dataset.n, { fix: false });
     case "autofix": return reauditVersion(+b.dataset.n, { fix: true });
     case "audit-current": {

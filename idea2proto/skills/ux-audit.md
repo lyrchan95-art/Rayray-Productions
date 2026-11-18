@@ -6,10 +6,10 @@ kind: workflow
 applies: prototype-html, game-prototype, design-variants
 default: on
 source: New workflow skill, merging design-critique, accessibility-review (WCAG 2.1 AA), Fable's verification gate, the head-designer self-check and world-weaving, plus automated measurements taken in a real 390px render.
-summary_zh: 生成之後、你睇到之前，先量度（掣大細、對比、溢出、錯誤）同專家審查，自動修正一次，再畀你提示：要唔要上傳素材、要你決定啲咩。
-summary_en: After generation and before you see it: measure (tap targets, contrast, overflow, errors), expert review, auto-fix once, then tips on assets to upload and decisions only you can make.
+summary_zh: 原型一出就畀你睇，質檢 Agent 喺背景量度（掣大細、對比、溢出、錯誤）、專家審查，有需要就準備修正版，再畀你提示：要唔要上傳素材、要你決定啲咩。
+summary_en: The prototype shows up immediately; a check agent works in the background (measure tap targets, contrast, overflow, errors; expert review; a fixed version if needed), then gives tips on assets to upload and decisions only you can make.
 ---
-UI/UX QUALITY GATE. Audit a generated single-file prototype BEFORE the user sees it.
+UI/UX QUALITY GATE. Audit a generated single-file prototype. The user already has it on screen; you run in the background and your report arrives within a minute.
 
 You receive the idea spec, the design brief, the skill type, AUTOMATED MEASUREMENTS from a 390x844 render, and the HTML. Trust the measurements over your guess. Judge only what the HTML supports and never invent problems.
 
