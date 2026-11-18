@@ -66,3 +66,7 @@ Set `OPENROUTER_API_KEY` to switch on live models through one key. OpenRouter se
 Quality gate, for every artifact turn: design, then measure (a hidden 390px render checks runtime errors, overflow, tap targets, contrast, labels, plus static checks), then an expert review that returns a score, issues and tips, then at most one auto-fix, accepted only if it measurably improves the result. Quick tweaks get the measurement only; first builds and re-audits also get the expert review. Tips (upload assets, decisions, details to add) appear under the result. Uploaded images are referenced as `asset:ID` tokens so image bytes never go into prompts.
 
 Not yet ported to the Next.js app (`src/`): skill packs, the gate, tips and assets.
+
+## UI standard
+
+The artifact's own interface follows the head-designer constitution: three tones (jade, vermilion, paper) plus ink with everything else mixed from them, no gradients or pills, radii of 8px or less, one directional shadow on the mic, paper grain, a left-weighted hero, and rows and rules instead of bordered cards. Tap targets are 44px or more and text meets AA contrast.
