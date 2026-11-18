@@ -58,3 +58,11 @@ Set `OPENROUTER_API_KEY` to switch on live models through one key. OpenRouter se
 ## Test artifact
 
 `artifact/idea2proto-live.html` is a standalone, client-only version of the loop for testing on claude.ai. Artifact pages can't make outside network requests, so it runs on the artifact's built-in model access, not GLM/DeepSeek, and keeps ideas in the viewer's browser.
+
+## Imported skills and the quality gate
+
+`skills/*.md` holds the design skills the app injects into generation prompts (head designer, frontend designer, Fable discipline, world weaving, Cantonese copywriter) and the `ux-audit` workflow. `node scripts/build-artifact.mjs` bakes them into `artifact/idea2proto-live.html` from `artifact/idea2proto-live.src.html`. Edit the `.src.html` template, never the built file.
+
+Quality gate, for every artifact turn: design, then measure (a hidden 390px render checks runtime errors, overflow, tap targets, contrast, labels, plus static checks), then an expert review that returns a score, issues and tips, then at most one auto-fix, accepted only if it measurably improves the result. Quick tweaks get the measurement only; first builds and re-audits also get the expert review. Tips (upload assets, decisions, details to add) appear under the result. Uploaded images are referenced as `asset:ID` tokens so image bytes never go into prompts.
+
+Not yet ported to the Next.js app (`src/`): skill packs, the gate, tips and assets.

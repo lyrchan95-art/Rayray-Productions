@@ -1,0 +1,1344 @@
+<title>Idea2Proto Live</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: one-thumb mobile app; capture → spec → workspace (chat + full-screen preview) → journal. Desktop splits chat | preview. */
+:root{
+  --bg:#f7f6f3;--surface:#fff;--surface-2:#efede8;--surface-3:#e6e3dc;--fg:#1d1c1a;--muted:#636058;--faint:#8a867d;
+  --border:#e1ddd5;--accent:#0e7c66;--accent-strong:#0a5f4e;--accent-soft:#dcefe9;--on-accent:#fff;--bubble:#eae7e0;--danger:#b42318;--scrim:rgba(20,19,17,.42);
+  --serif:"Source Serif 4","Noto Serif TC","Songti TC",Georgia,serif;--sans:Inter,"Noto Sans TC","PingFang HK",system-ui,sans-serif;--mono:ui-monospace,Menlo,monospace;
+  --r-md:10px;--r-lg:16px;--r-xl:24px;--shadow:0 4px 20px rgba(29,28,26,.07),0 0 0 1px var(--border);--ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1917;--surface:#24231f;--surface-2:#2c2a26;--surface-3:#36342f;--fg:#eeebe5;--muted:#aaa59c;--faint:#868178;--border:#3a3832;--accent:#4cc2a4;--accent-strong:#74d8be;--accent-soft:#1d3a33;--on-accent:#0a1f1a;--bubble:#34322d;--danger:#f0857a;--scrim:rgba(0,0,0,.55);--shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 1px var(--border);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1a1917;--surface:#24231f;--surface-2:#2c2a26;--surface-3:#36342f;--fg:#eeebe5;--muted:#aaa59c;--faint:#868178;--border:#3a3832;--accent:#4cc2a4;--accent-strong:#74d8be;--accent-soft:#1d3a33;--on-accent:#0a1f1a;--bubble:#34322d;--danger:#f0857a;--scrim:rgba(0,0,0,.55);--shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 1px var(--border);color-scheme:dark}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.app{height:100%;display:flex;flex-direction:column;max-width:1200px;margin:0 auto}
+.top{display:flex;align-items:center;gap:8px;min-height:52px;padding-block:4px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.brand{font-family:var(--serif);font-weight:600;font-size:19px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.brand b{color:var(--accent);font-weight:600}
+.main{flex:1;min-height:0;overflow-y:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.nav{display:flex;border-top:1px solid var(--border);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{flex:1;min-height:56px;border:0;background:none;color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);font-weight:500;font-size:14px;transition:background .12s var(--ease)}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{background:var(--accent-strong)}
+.btn.ghost{background:none;border-color:transparent}
+.btn.block{width:100%}.btn.lg{min-height:52px;font-size:15px;border-radius:var(--r-lg)}
+.ib{width:44px;height:44px;border:0;background:none;border-radius:var(--r-md);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ib:hover{background:var(--surface-2);color:var(--fg)}
+.ib.sm{width:34px;height:34px}
+svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:var(--r-md);padding:3px;gap:2px}
+.seg button{border:0;background:none;min-height:34px;padding:0 10px;border-radius:7px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.input,.ta{width:100%;min-height:44px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);font-size:16px}
+.input:focus,.ta:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.ta{resize:none;line-height:1.5}
+.label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.field{margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
+.muted{color:var(--muted)}.faint{color:var(--faint)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-strong);font-weight:500}
+
+/* capture */
+.capture{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-block:20px 28px}
+.hero{text-align:center;margin:auto 0 28px}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,8vw,38px);line-height:1.15;margin:0 0 6px;text-wrap:balance;letter-spacing:-.015em}
+.hero p{margin:0;color:var(--muted)}
+.voice{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px}
+.mic{position:relative;width:112px;height:112px;border-radius:50%;border:0;background:var(--accent);color:var(--on-accent);box-shadow:0 2px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:transform .12s var(--ease),background .12s var(--ease)}
+.mic svg{width:44px;height:44px;stroke-width:1.6}
+.mic:active{transform:scale(.96)}
+.mic[data-state="listening"]{background:var(--danger)}
+.mic[data-state="listening"]::before{content:"";position:absolute;inset:-10px;border-radius:50%;border:3px solid var(--danger);animation:pulse 1.2s var(--ease) infinite}
+.mic:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
+@keyframes pulse{from{transform:scale(.9);opacity:.6}to{transform:scale(1.15);opacity:0}}
+.hint{font-size:14px;color:var(--muted);min-height:1.5em;text-align:center;max-width:36ch}
+.alt{display:flex;gap:8px;align-items:flex-end}
+.alt .ta{min-height:52px;max-height:40vh;border-radius:var(--r-lg)}
+.send{width:52px;height:52px;flex-shrink:0;border:0;border-radius:var(--r-lg);background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center}
+.send:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
+.examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;justify-content:center}
+.examples button{font-size:13px}
+.spec h2{font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 4px}
+
+/* workspace */
+.ws{display:flex;height:100%;min-height:0}
+.chat{flex:1;min-width:0;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto}
+.col{max-width:720px;margin:0 auto;padding-block:12px 20px}
+.summary{margin-bottom:20px}
+.summary p{font-family:var(--serif);font-size:17px;margin:8px 0 0}
+.summary dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:10px 0 0;font-size:13px}
+.summary dt{color:var(--faint)}.summary dd{margin:0}
+.msg{margin-bottom:22px}
+.msg.user{display:flex;flex-direction:column;align-items:flex-end}
+.bubble{background:var(--bubble);padding:10px 14px;border-radius:16px 16px 6px 16px;max-width:85%;white-space:pre-wrap;word-wrap:break-word}
+.prose{font-family:var(--serif);font-size:17px;line-height:1.65;word-wrap:break-word}
+.prose p{margin:0 0 10px}.prose p:last-child{margin:0}
+.prose code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+.route{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.route svg{width:14px;height:14px}
+.acts{display:flex;gap:2px;margin-top:4px}
+.acts svg{width:16px;height:16px}
+.acard{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;padding:12px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--surface);text-align:left;font-size:14px}
+.acard:hover{border-color:var(--accent)}
+.acard .ico{width:44px;height:44px;border-radius:var(--r-md);background:var(--accent-soft);color:var(--accent-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dots{display:inline-flex;gap:4px;padding:8px 0}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--faint);animation:blink 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes blink{50%{opacity:.25}}
+.prog{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.composer-wrap{padding-block:0 12px}
+.composer{max-width:720px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:8px 8px 8px 12px}
+.composer:focus-within{box-shadow:var(--shadow),0 0 0 3px var(--accent-soft)}
+.composer textarea{display:block;width:100%;border:0;background:none;resize:none;outline:none;padding:8px 4px;max-height:30vh;font-size:16px}
+.crow{display:flex;align-items:center;gap:4px}
+.model{flex:1;min-width:0;font-size:12px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+.sbtn{width:38px;height:38px;border:0;border-radius:var(--r-md);background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center}
+.sbtn:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
+.preview{display:flex;flex-direction:column;background:var(--surface)}
+@media (max-width:899px){.preview{position:fixed;inset:0;z-index:50;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:rise .18s var(--ease)}}
+@media (min-width:900px){.preview{width:min(46vw,560px);flex-shrink:0;border-left:1px solid var(--border)}}
+@keyframes rise{from{transform:translateY(24px);opacity:0}}
+.pbar{display:flex;align-items:center;gap:4px;min-height:52px;padding:0 8px;border-bottom:1px solid var(--border);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.pbar .t{flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+.pbar select{min-height:34px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);padding:0 6px;font-size:13px}
+.stage{flex:1;min-height:0;display:flex;justify-content:center;background:var(--surface-2)}
+.stage iframe{flex:1;width:100%;border:0;background:#fff;display:block}
+@media (min-width:900px){.stage{padding:16px}.stage iframe{max-width:430px;border-radius:var(--r-lg);box-shadow:0 2px 10px rgba(0,0,0,.1)}}
+
+/* journal */
+.journal{max-width:720px;margin:0 auto;padding-block:8px 28px}
+.journal h1{font-family:var(--serif);font-weight:400;font-size:28px;margin:4px 0 14px}
+.filters{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+.entry{display:block;width:100%;text-align:left;padding:14px 16px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--surface);margin-bottom:8px}
+.entry:hover{border-color:var(--faint)}
+.entry b{display:block;font-weight:600}
+.entry span.sub{display:block;font-size:13px;color:var(--muted);margin:2px 0 8px}
+.meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--faint);flex-wrap:wrap}
+.empty{text-align:center;padding:48px 16px;color:var(--muted)}
+.group{font-size:12px;color:var(--faint);font-weight:500;margin:16px 0 6px}
+
+/* sheet + toast */
+.scrim{position:fixed;inset:0;z-index:60;background:var(--scrim)}
+.sheet{position:fixed;z-index:61;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding-block:8px calc(24px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));animation:rise .18s var(--ease)}
+.sheet h2{font-size:20px;margin:4px 0 14px}
+.handle{width:36px;height:4px;border-radius:99px;background:var(--surface-3);margin:4px auto 10px}
+@media (min-width:640px){.sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(480px,92vw);transform:translate(-50%,-50%);border-radius:var(--r-xl);animation:none}.handle{display:none}}
+.toast{position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;max-width:calc(100vw - 32px)}
+.note{font-size:12px;color:var(--faint);text-align:center;margin-top:10px}
+
+/* skills + agents + suggestions */
+.lib{max-width:720px;margin:0 auto;padding-block:8px 28px}
+.lib h1{font-family:var(--serif);font-weight:400;font-size:28px;margin:4px 0 6px}
+.list .acard{margin:0 0 8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px;margin:0}
+.kv dt{color:var(--faint)}.kv dd{margin:0}
+.slist{margin:0 0 16px;padding-left:22px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.sug-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:18px;font-size:13px}
+.examples .chip{border-radius:16px;text-align:left;padding:8px 12px;line-height:1.35;gap:8px;font-size:13px}
+.examples .chip svg{width:16px;height:16px;flex-shrink:0}
+.skillbanner{display:flex;align-items:center;justify-content:center;gap:4px;margin:-12px 0 16px}
+.steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.step{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);padding:12px 14px}
+.step[data-s="running"]{border-color:var(--accent)}
+.step h3{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.step .out{margin-top:8px}
+.step .out.prose{font-size:15px;line-height:1.6}
+.mark{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;background:var(--surface-3);color:var(--muted);flex-shrink:0}
+.mark svg{width:13px;height:13px;stroke-width:2.6}
+.mark.run{background:var(--accent-soft)}
+.mark.done{background:var(--accent);color:var(--on-accent)}
+.mark.err{background:var(--danger);color:var(--on-accent)}
+.pd{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1s infinite}
+.runact{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.error{color:var(--danger)}
+
+/* skill packs, quality gate, tips */
+.prow{display:flex;align-items:center;gap:8px;cursor:default}
+.rowmain{flex:1;min-width:0;display:flex;gap:12px;align-items:center;background:none;border:0;text-align:left;padding:0}
+.switch{position:relative;width:46px;height:28px;flex-shrink:0;border-radius:999px;border:0;background:var(--surface-3);transition:background .12s var(--ease)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .12s var(--ease)}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid var(--border);margin-top:14px}
+pre.src{white-space:pre-wrap;font:12px/1.5 var(--mono);background:var(--surface-2);border-radius:var(--r-md);padding:12px;max-height:40vh;overflow:auto;margin:8px 0 0}
+.swatches,.chips{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{width:44px;height:44px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--border)}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.stages{list-style:none;display:flex;gap:8px;padding:0;margin:8px 0 0;flex-wrap:wrap;font-family:var(--sans);font-size:13px}
+.stages li{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--faint)}
+.stages li i{font-style:normal;font-weight:700}
+.stages li[data-s="running"]{border-color:var(--accent);color:var(--accent-strong)}
+.stages li[data-s="done"]{color:var(--muted)}
+.quality{margin-top:10px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);font-family:var(--sans);font-size:14px}
+.quality summary{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;list-style:none;min-height:44px;flex-wrap:wrap}
+.quality summary::-webkit-details-marker{display:none}
+.quality>*:not(summary){margin:0 12px 12px}
+.qscore{min-width:40px;height:28px;padding:0 8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;background:var(--surface-3)}
+.qscore[data-tone="good"]{background:var(--accent-soft);color:var(--accent-strong)}
+.qscore[data-tone="low"]{background:var(--danger);color:var(--on-accent)}
+.qt{font-weight:600}
+.chks{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.chk i{font-style:normal;font-weight:700}
+.chk[data-s="pass"] i{color:var(--accent)}
+.chk[data-s="warn"] i{color:var(--fg)}
+.chk[data-s="fail"]{border-color:var(--danger)}
+.chk[data-s="fail"] i{color:var(--danger)}
+.issues{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+.iss{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:3px solid var(--border)}
+.iss[data-sev="high"]{border-left-color:var(--danger)}
+.iss[data-sev="medium"]{border-left-color:var(--faint)}
+.plain{margin:0;padding-left:18px}
+.qact{display:flex;gap:8px;flex-wrap:wrap}
+.tips{margin-top:10px;border-radius:var(--r-lg);background:var(--accent-soft);padding:14px;font-family:var(--sans);font-size:14px}
+.tips h3{margin:0 0 12px;font-size:14px}
+.tips ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:16px}
+.tip{display:flex;flex-direction:column;gap:3px}
+.tipk{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-strong)}
+.tipa{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.assets{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.thumb{position:relative;width:56px;height:56px;border-radius:var(--r-md);background:var(--surface)}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-md)}
+.thumb .ib{position:absolute;top:-8px;right:-8px;width:28px;height:28px;background:var(--surface);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.thumb .ib svg{width:14px;height:14px}
+</style>
+
+<div class="app" id="app"></div>
+<div id="overlay"></div>
+<div id="sheet"></div>
+<input type="file" id="assetfile" accept="image/*" hidden>
+
+<script>
+(() => {
+"use strict";
+/* ───────── icons ───────── */
+const ic = {
+  mic:'<path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  stop:'<rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/>',
+  send:'<path d="M12 19V5M5 12l7-7 7 7"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  book:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>', x:'<path d="M6 6l12 12M18 6 6 18"/>', play:'<path d="M7 4v16l13-8z"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>', pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  up:'<path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.3 20H7"/>',
+  down:'<path d="M17 13V4h3v9zM17 13l-4 8a2 2 0 0 1-2-2v-4H5.5a2 2 0 0 1-2-2.3l1.2-7A2 2 0 0 1 6.7 4H17"/>',
+  save:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  game:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 12h.01M18 13h.01"/>',
+  layers:'<path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/>', chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  lang:'<path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-4 7-6 8M13 21l4-10 4 10M14.5 17h5"/>',
+  grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  bot:'<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/>',
+  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  shuffle:'<path d="M16 4h4v4M4 20 20 4M20 16v4h-4M15 15l5 5M4 4l5 5"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>', upload:'<path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>',
+  check:'<path d="M5 12l5 5 9-10"/>', chevron:'<path d="M9 5l7 7-7 7"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+};
+const svg = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ic[n]}</svg>`;
+const skillIcon = (s) => svg(PACK_ICON[s] || (s === "game-prototype" ? "game" : s === "design-variants" ? "layers" : s === "chat" ? "chat" : s === "idea-capture" ? "spark" : String(s).startsWith("agent:") ? "bot" : "globe"));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ───────── i18n ───────── */
+const T = {
+  heroTitle:["講出你個 idea","Say your idea"], heroSub:["唔使寫 code，一分鐘有原型","Get a working prototype in under a minute"],
+  tap:["撳一下開始講","Tap to start talking"], listening:["聽緊你講… 講完再撳一下","Listening… tap again to finish"],
+  structuring:["整理緊個 idea…","Structuring your idea…"], typeInstead:["唔方便講嘢？打字都得…","Or type your idea…"],
+  review:["睇下啱唔啱","Check the spec"], reviewSub:["諗清楚先生成，呢步最影響成品質素","Edit before generating: this matters most"],
+  title:["名稱","Title"], one:["一句講晒","One-liner"], core:["核心互動","Core interaction"], user:["目標用戶","Target user"], buildAs:["整成","Build as"],
+  generate:["即刻整原型","Generate prototype"], over:["重新嚟過","Start over"], journal:["日誌","Journal"], newIdea:["新 idea","New idea"],
+  search:["搜尋 idea…","Search ideas…"], all:["全部","All"], none:["仲未有 idea。去「新 idea」講一個啦。","No ideas yet. Go to New idea and say one."],
+  nomatch:["搵唔到相關 idea。","No matches."], message:["想點改？例如「啲掣大啲」","What should change? e.g. “bigger buttons”"],
+  version:["版本","Version"], current:["目前","current"], revert:["用返呢個版本","Revert"], building:["砌緊原型","Building prototype"],
+  copied:["已複製","Copied"], language:["回覆語言","Reply language"], save:["儲存並重新生成","Save & rerun"], cancel:["取消","Cancel"],
+  saveFile:["下載 HTML","Download HTML"], noModel:["呢度用唔到 AI 模型。請喺 claude.ai 開啟，並且畀權限。","The AI model isn't available in this view. Open it on claude.ai and allow access."],
+  denied:["你未畀權限用 AI 模型，所以生成唔到。","AI access was declined, so nothing can be generated."], busyRate:["太多人撳緊，等陣再試啦。","Too many requests — wait a moment and try again."],
+  first:["按呢個 spec 整第一版原型。","Build the first prototype from this spec."], del:["刪除","Delete"], confirmDel:["再撳一次就會刪除","Tap again to delete"],
+  micNA:["呢度用唔到語音輸入（要用 Chrome 或桌面 app），直接打字啦。","Voice input isn't available here (needs Chrome or the desktop app). Type instead."],
+  today:["今日","Today"], yesterday:["尋日","Yesterday"], week:["過去 7 日","Previous 7 days"], older:["更早","Older"],
+  note:["測試版：idea 只會儲存喺你呢個瀏覽器。","Test build: ideas are saved only in this browser."],
+  close:["關閉","Close"],
+  sugTitle:["今日靈感","Ideas to try today"], sugRefresh:["換一批","Shuffle"],
+  navSkills:["技能庫","Skills"], navAgents:["Agent","Agents"],
+  skillsTitle:["技能庫","Skill library"], skillsSub:["你講嘢嘅時候，系統會自動揀最啱嘅技能。想自己揀都得。","Every message is routed to the best skill automatically. You can also pick one yourself."],
+  routerNote:["自動揀技能：118 句測試入面啱 96.6%。","Auto-routing scored 96.6% on a 118-message test set."],
+  used:["你用過 {n} 次","Used {n}×"], useSkill:["用呢個技能開始","Start with this skill"], skillLabel:["技能","Skill"],
+  gives:["你畀佢","You give it"], getsBack:["佢交返畀你","You get back"], tryExamples:["試下咁講：","Try saying:"], tested:["測試集","Eval set"],
+  saveOnly:["只儲存 idea 入日誌","Save idea only"],
+  agentsTitle:["Agent","Agents"], agentsSub:["Agent 會自己分幾步搞掂一件事，每一步你都睇得到。","An agent works through a goal in steps, and you can watch each one."],
+  agentRun:["開始運行","Run agent"], pickIdea:["揀邊個 idea","Choose an idea"], agentNote:["補充指示（選填）","Extra instructions (optional)"],
+  noIdeasAgent:["Agent 要有 idea 先做到嘢。先去講一個啦。","Agents work on an idea. Capture one first."],
+  agentBusy:["有個 agent 運行緊，等佢做完先。","An agent is already running. Let it finish first."],
+  running:["運行緊","Running"], stepsLabel:["步驟","Steps"], stopRun:["停止","Stop"],
+  runDone:["搞掂喇，結果已經存入呢個 idea 嘅對話。","Done. The result is saved in this idea's conversation."],
+  runStopped:["已停止，完成咗嘅步驟已經儲存。","Stopped. Finished steps were saved."], runFailed:["中途出咗錯，再試一次啦。","Something went wrong. Try again."],
+  openIdea:["打開呢個 idea","Open this idea"], copyAll:["複製全部","Copy all"], runAgain:["再運行一次","Run again"],
+  recentRuns:["最近運行","Recent runs"], viewProgress:["睇進度","View progress"], pageFromCopy:["用呢啲文案整個落地頁","Build a landing page from this copy"],
+  qTitle:["品質審查","Quality audit"], qFixed:["已自動修正一次","Auto-fixed once"], qLight:["快速檢查","quick check"],
+  qStrengths:["做得好","What works"], qReview:["要留意","To watch"], qFixedList:["已經修正咗","Fixed"],
+  reaudit:["重新審查","Re-audit"], autofix:["自動修正","Auto-fix"], auditing:["審查緊…","Auditing…"],
+  autofixMsg:["按審查結果自動修正","Auto-fix from the audit"], autofixDone:["已經按審查結果修正，出咗新版本。","Fixed from the audit findings and saved as a new version."],
+  auditPass:["審查完成，唔使修正。","Audit complete. Nothing needed fixing."],
+  tipsTitle:["提示：下一步可以咁做","Tips: what to do next"], tipAsset:["上傳{slot}","Upload {slot}"], tipContent:["補充資料","Add details"],
+  kAsset:["素材","Asset"], kDecision:["你決定","Your call"], kContent:["資料","Details"],
+  assetsTitle:["已上傳素材","Uploaded"], assetRemove:["刪除素材","Remove asset"], assetFull:["儲存空間唔夠，刪走幾張素材再試。","Storage is full. Remove an asset and try again."],
+  assetUsed:["已上傳，用新素材整新版本…","Uploaded. Building a new version with it…"], assetMax:["最多 8 張素材。","Up to 8 assets."], assetBad:["讀唔到呢張圖。","Couldn't read that image."],
+  fbAssetTitle:["上傳 logo 或者真相","Upload a logo or real photos"], fbAssetWhy:["而家用緊示意圖形，換上真素材會即刻似真好多。","The design uses stand-in shapes; real assets make it feel real."],
+  styleTitle:["設計方向","Design direction"], styleSub:["揀最多兩個主色同一種風格；唔揀就由設計師決定。","Pick up to two accent tones and a style, or leave it to the designer."],
+  tones:["主色","Accent tones"], phil:["風格參考","Style reference"],
+  stage_design:["設計","Design"], stage_audit:["審查","Audit"], stage_fix:["修正","Polish"],
+  coreTitle:["核心技能","Core skills"], craftTitle:["設計技能（已匯入）","Design skills (imported)"], workflowTitle:["工作流","Workflows"],
+  appliesTo:["套用於","Applies to"], source:["來源","Source"], promptSrc:["睇 prompt 原文","View prompt source"],
+  packOn:["生成時套用呢個技能","Apply this skill when generating"], gateOn:["生成後先審查，過關先畀你睇","Audit before showing the result"],
+  workflowTag:["工作流","Workflow"], craftTag:["設計技能","Design skill"], auditCurrent:["審查目前原型","Audit current prototype"], noProto:["未有原型可以審查。","No prototype to audit yet."],
+  chk_runs:["可以正常運行","Runs without errors"], chk_fit:["手機闊度冇溢出","Fits phone width"], chk_targets:["掣夠大（44px 或以上）","Tap targets 44px+"],
+  chk_contrast:["字同底色對比夠","Text contrast"], chk_text:["字體唔會太細","Text size"], chk_labels:["標籤同替代文字","Labels and alt text"],
+  chk_meta:["viewport 同標題","Viewport and title"], chk_offline:["冇外部連線","No external requests"], chk_dialogs:["冇 alert 彈窗","No alert dialogs"],
+  chk_polish:["冇 lorem／TODO，動畫可關","No filler; motion-safe"],
+};
+const SKILL_LABEL = {"prototype-html":["網頁原型","Web prototype"],"game-prototype":["小遊戲","Game prototype"],"design-variants":["設計方向","Design variants"],"chat":["傾偈","Chat"],"idea-capture":["記低點子","Idea capture"]};
+
+/* ───────── storage (per-viewer, guarded) ───────── */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+};
+
+/* ───────── state ───────── */
+const S = {
+  view: "capture", register: LS.get("i2p.register", "yue"), ideas: LS.get("i2p.ideas", []),
+  ideaId: null, draft: "", spec: null, busy: false, status: "", pending: null, previewOpen: false, viewN: null,
+  editing: null, q: "", filter: "", listening: false, partial: "", confirmDel: false,
+  skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [],
+  craft: LS.get("i2p.craft", {}), gate: LS.get("i2p.gate", true), assets: LS.get("i2p.assets", {}), assetSlot: "photo", auditing: false,
+};
+const lang = () => (S.register === "en" ? 1 : 0);
+const t = (k) => T[k][lang()];
+const sl = (s) => { const pk = PACKS.find((p) => p.id === s); if (pk) return lang() ? pk.name : pk.zh; return String(s).startsWith("agent:") ? AGENTS.find((a) => "agent:" + a.id === s)?.name[lang()] ?? s : SKILL_LABEL[s]?.[lang()] ?? s; };
+const idea = () => S.ideas.find((i) => i.id === S.ideaId);
+
+/* ───────── daily suggestions (reshuffled every session) ───────── */
+const POOL = [
+ {id:"g1",s:"game-prototype",zh:"整個小遊戲：用個盤接住跌落嚟嘅蛋撻",en:"A game: catch falling egg tarts on a tray"},
+ {id:"g2",s:"game-prototype",zh:"閃避遊戲：郁左右避開衝嚟嘅紅 van",en:"Dodge game: steer left and right to avoid red vans"},
+ {id:"g3",s:"game-prototype",zh:"反應遊戲：見到綠燈就撳，太早撳就輸",en:"Reaction game: tap on green, lose if you jump the light"},
+ {id:"g4",s:"game-prototype",zh:"麻雀牌配對小遊戲，限時 60 秒",en:"Mahjong tile-matching game with a 60-second timer"},
+ {id:"g5",s:"game-prototype",zh:"貪食蛇，不過食嘅係雞蛋仔，食愈多愈長",en:"Snake, but you eat egg waffles and grow longer"},
+ {id:"g6",s:"game-prototype",zh:"茶餐廳出餐遊戲：限時送啱客人叫嘅嘢食",en:"Cha chaan teng serving game: deliver the right order in time"},
+ {id:"h1",s:"prototype-html",zh:"幫我整個網頁介紹週末行山團，可以報名",en:"A landing page for a weekend hiking tour with a signup form"},
+ {id:"h2",s:"prototype-html",zh:"AA 分賬計算機：輸入人數同總數就計到",en:"A split-the-bill calculator: enter people and total"},
+ {id:"h3",s:"prototype-html",zh:"記帳工具：每日撳一下記低開支，月尾睇總數",en:"Expense tracker: log in one tap, see the monthly total"},
+ {id:"h4",s:"prototype-html",zh:"午餐決策器：撳一下隨機揀餐廳，可以剔走唔食嘅",en:"Lunch picker: tap for a random place, with a blocklist"},
+ {id:"h5",s:"prototype-html",zh:"咖啡店嘅預約同外賣落單頁",en:"A pickup ordering page for a coffee shop"},
+ {id:"h6",s:"prototype-html",zh:"簡單嘅寶寶餵奶同瞓覺記錄 app",en:"A simple baby feeding and sleep log"},
+ {id:"v1",s:"design-variants",zh:"幫一間珍珠奶茶舖出三個唔同設計方向",en:"Three design directions for a bubble tea shop"},
+ {id:"v2",s:"design-variants",zh:"寵物美容 app 主頁：可愛、高級、街頭三款",en:"Pet grooming app home in cute, premium and street styles"},
+ {id:"v3",s:"design-variants",zh:"本地書店網站：文青同復古兩種感覺",en:"Indie bookshop site: literary vs retro"},
+ {id:"v4",s:"design-variants",zh:"瑜珈 studio 預約畫面，幾款配色比較下",en:"Yoga studio booking screen in a few palettes"},
+ {id:"v5",s:"design-variants",zh:"港式老字號品牌頁：經典同新派各一款",en:"Heritage HK brand page: classic and modern"},
+ {id:"v6",s:"design-variants",zh:"運動 app 登入頁：能量、冷靜、競技三種 mood",en:"Fitness app onboarding in energetic, calm and competitive moods"},
+];
+function pickSuggestions(only) {
+  const last = LS.get("i2p.sug", []);
+  const kinds = ["game-prototype", "prototype-html", "design-variants"];
+  const focus = POOL.some((p) => p.s === only) ? [only, only, only] : kinds;
+  const out = [];
+  for (const k of focus) {
+    const all = POOL.filter((p) => p.s === k && !out.includes(p));
+    const fresh = all.filter((p) => !last.includes(p.id));
+    const c = fresh.length ? fresh : all;
+    out.push(c[Math.floor(Math.random() * c.length)]);
+  }
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  LS.set("i2p.sug", out.map((p) => p.id));
+  return out;
+}
+S.sug = pickSuggestions();
+
+/* ───────── imported skill packs (built from skills/*.md) ───────── */
+const PACKS = /*__PACKS__*/[];
+const PACK_ICON = { "head-designer": "pencil", "frontend-designer": "grid", "fable-discipline": "check", "world-weaving": "game", "cantonese-copywriter": "lang", "ux-audit": "shield" };
+const packOn = (id) => { const p = PACKS.find((x) => x.id === id); return !p ? false : p.kind === "workflow" ? S.gate : (S.craft[id] ?? p.on); };
+const packName = (p) => (lang() ? p.name : p.zh);
+
+const TONES = [
+  { id: "jade", zh: "翡翠綠", en: "Jade", hex: "#0e7c66" }, { id: "vermilion", zh: "朱紅", en: "Vermilion", hex: "#c8452d" },
+  { id: "ink", zh: "墨藍", en: "Ink blue", hex: "#243b6b" }, { id: "ochre", zh: "赭黃", en: "Ochre", hex: "#c58b2a" },
+  { id: "plum", zh: "梅紫", en: "Plum", hex: "#6d3a5e" }, { id: "sage", zh: "鼠尾草", en: "Sage", hex: "#8a9a7b" },
+];
+const PHIL = [
+  { id: "auto", zh: "由設計師決定", en: "Designer decides" }, { id: "swiss", zh: "瑞士國際主義", en: "Swiss International" },
+  { id: "wabi", zh: "侘寂", en: "Wabi-sabi" }, { id: "bauhaus", zh: "包浩斯", en: "Bauhaus" },
+  { id: "mid", zh: "中世紀編輯風", en: "Mid-century editorial" }, { id: "hk", zh: "港式老字號", en: "Hong Kong heritage" },
+];
+const SLOT = { logo: ["logo", "logo"], photo: ["相片", "photo"], product: ["產品相", "product photo"], hero: ["主視覺", "hero image"] };
+const slotName = (k) => (SLOT[k] || SLOT.photo)[lang()];
+
+function craftBlock(skill) {
+  return PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en")).map((p) => p.body).join("\n\n");
+}
+function briefBlock(it) {
+  const st = it.spec.style || {};
+  const tn = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean);
+  const ph = PHIL.find((p) => p.id === st.phil) || PHIL[0];
+  const tone = (i) => (tn[i] ? `${tn[i].en} ${tn[i].hex}` : "auto");
+  const as = S.assets[it.id] || [];
+  return `BRIEF:\n- project: ${it.spec.title}: ${it.spec.oneLiner}\n- tone 1: ${tone(0)}\n- tone 2: ${tone(1)}\n- reference philosophy: ${ph.id === "auto" ? "auto (choose confidently and state the choice in one short line of your reply)" : ph.en}`
+    + (as.length ? `\nASSETS uploaded by the user (reference as src="asset:ID" or url(asset:ID); never invent other image URLs):\n${as.map((a) => `- ${a.id} (${a.slot}): ${a.name}`).join("\n")}` : "");
+}
+function designPrompt(skill, it) {
+  return [SKILL_PROMPT[skill], craftBlock(skill), briefBlock(it), RULES, REGISTER[S.register], specBlock(it.spec)].filter(Boolean).join("\n\n");
+}
+
+/* ───────── assets: uploaded images are referenced as asset:ID tokens, never pasted into prompts ───────── */
+const MISSING_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='3'%3E%3Crect width='4' height='3' fill='%23c9c6bf'/%3E%3C/svg%3E";
+function resolveAssets(html, ideaId) {
+  const list = S.assets[ideaId] || [];
+  return html.replace(/asset:([a-z0-9_-]+)/g, (_, id) => list.find((a) => a.id === id)?.url || MISSING_IMG);
+}
+function shrinkImage(file, max, type) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); resolve(c.toDataURL(type, 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); reject(new Error("bad image")); };
+    img.src = u;
+  });
+}
+async function addAsset(ideaId, file, slot) {
+  const list = (S.assets[ideaId] ||= []);
+  if (list.length >= 8) { toast(t("assetMax")); return null; }
+  let url;
+  try { url = await shrinkImage(file, slot === "logo" ? 512 : 900, slot === "logo" ? "image/png" : "image/jpeg"); } catch { toast(t("assetBad")); return null; }
+  const n = list.filter((a) => a.slot === slot).length + 1;
+  const a = { id: slot + (n > 1 ? n : ""), slot, name: file.name.slice(0, 40), url };
+  list.push(a);
+  if (!LS.set("i2p.assets", S.assets)) { list.pop(); toast(t("assetFull")); return null; }
+  return a;
+}
+
+/* ───────── quality gate: measure in a real 390px render, expert review, fix once ───────── */
+function errProbe() {
+  window.__errs = [];
+  window.addEventListener("error", function (e) { window.__errs.push(String(e.message || e)); });
+  window.addEventListener("unhandledrejection", function (e) { window.__errs.push("promise: " + String(e.reason)); });
+}
+function auditProbe(ID) {
+  function lum(c) { var a = [c[0], c[1], c[2]].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; }
+  function parse(s) { var m = s && s.match(/rgba?\(([^)]+)\)/); if (!m) return null; var p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1]; }
+  function bgOf(el) { while (el && el.nodeType === 1) { var cs = getComputedStyle(el); if (cs.backgroundImage && cs.backgroundImage !== "none") return null; var c = parse(cs.backgroundColor); if (c && c[3] > 0.5) return c; el = el.parentElement; } return [255, 255, 255, 1]; }
+  function visible(el) { var r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; }
+  function nm(el) { return String(el.getAttribute("aria-label") || el.innerText || el.value || el.getAttribute("title") || el.tagName).replace(/\s+/g, " ").trim().slice(0, 24); }
+  function run() {
+    var out = { errors: (window.__errs || []).slice(0, 3), overflowBy: 0, textLen: 0, small: [], tiny: 0, contrast: [], imgNoAlt: 0, noLabel: 0, noName: 0, viewport: !!document.querySelector('meta[name="viewport"]'), lang: !!document.documentElement.getAttribute("lang"), title: !!(document.title || "").trim() };
+    var de = document.documentElement; out.overflowBy = Math.max(0, de.scrollWidth - de.clientWidth);
+    out.textLen = (document.body.innerText || "").trim().length;
+    var els = document.body.querySelectorAll("*"), n = 0;
+    for (var i = 0; i < els.length && n < 700; i++) {
+      var el = els[i]; if (!visible(el)) continue; n++;
+      var tag = el.tagName, cs = getComputedStyle(el);
+      var inter = /^(A|BUTTON|SELECT|TEXTAREA|SUMMARY)$/.test(tag) || (tag === "INPUT" && el.type !== "hidden") || el.getAttribute("role") === "button" || el.hasAttribute("onclick");
+      if (inter) {
+        var box = (tag === "INPUT" && el.closest("label")) ? el.closest("label") : el, r = box.getBoundingClientRect();
+        if (!(tag === "A" && cs.display === "inline") && (r.width < 44 || r.height < 44)) out.small.push(nm(el) + " " + Math.round(r.width) + "x" + Math.round(r.height));
+        if ((tag === "BUTTON" || tag === "A" || el.getAttribute("role") === "button") && !String(el.innerText || "").trim() && !el.getAttribute("aria-label") && !el.getAttribute("title") && !el.querySelector("img[alt]")) out.noName++;
+        if (/^(INPUT|SELECT|TEXTAREA)$/.test(tag) && !/^(hidden|submit|button|reset|image)$/.test(el.type || "") && !el.getAttribute("aria-label") && !el.getAttribute("aria-labelledby") && !el.closest("label") && !(el.id && document.querySelector('label[for="' + el.id + '"]'))) out.noLabel++;
+      }
+      if (tag === "IMG" && !el.hasAttribute("alt")) out.imgNoAlt++;
+      var own = ""; for (var k = 0; k < el.childNodes.length; k++) if (el.childNodes[k].nodeType === 3) own += el.childNodes[k].nodeValue;
+      own = own.trim();
+      if (own.length > 0 && !/^(SCRIPT|STYLE)$/.test(tag)) {
+        var fs = parseFloat(cs.fontSize); if (fs < 12) out.tiny++;
+        var fg = parse(cs.color), bg = bgOf(el);
+        if (fg && bg) {
+          var a = fg[3], f = [fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a)];
+          var l1 = lum(f), l2 = lum(bg), ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+          var large = fs >= 24 || (fs >= 18.66 && parseInt(cs.fontWeight, 10) >= 700);
+          if (ratio < (large ? 3 : 4.5)) out.contrast.push(own.slice(0, 18) + " " + ratio.toFixed(1) + ":1");
+        }
+      }
+    }
+    parent.postMessage({ ch: "i2p-audit", id: ID, m: out }, "*");
+  }
+  if (document.readyState === "complete") setTimeout(run, 700); else window.addEventListener("load", function () { setTimeout(run, 700); });
+}
+let auditSeq = 0;
+function measureHtml(html, ideaId) {
+  return new Promise((resolve) => {
+    const id = "a" + ++auditSeq, fr = document.createElement("iframe");
+    fr.setAttribute("sandbox", "allow-scripts"); fr.setAttribute("aria-hidden", "true"); fr.tabIndex = -1;
+    fr.style.cssText = "position:fixed;left:-9999px;top:0;width:390px;height:844px;border:0;visibility:hidden";
+    let done = false, to;
+    const fin = (m) => { if (done) return; done = true; window.removeEventListener("message", on); clearTimeout(to); fr.remove(); resolve(m); };
+    const on = (e) => { if (e.source === fr.contentWindow && e.data?.ch === "i2p-audit" && e.data.id === id) fin(e.data.m); };
+    to = setTimeout(() => fin(null), 7000);
+    window.addEventListener("message", on);
+    const probe = `<script>(${errProbe.toString()})();<\/script>`, runner = `<script>(${auditProbe.toString()})(${JSON.stringify(id)});<\/script>`;
+    let doc = wrap(resolveAssets(html, ideaId), {});
+    doc = /<head[^>]*>/i.test(doc) ? doc.replace(/<head[^>]*>/i, (m) => m + probe) : probe + doc;
+    doc = /<\/body>/i.test(doc) ? doc.replace(/<\/body>/i, () => runner + "</body>") : doc + runner;
+    document.body.appendChild(fr); fr.srcdoc = doc;
+  });
+}
+function staticChecks(html) {
+  const noCss = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+  return {
+    dialogs: /\b(alert|confirm|prompt)\s*\(/.test(noCss),
+    external: /<script[^>]+src=/i.test(html) || /\b(fetch|XMLHttpRequest|WebSocket|EventSource)\b/.test(noCss) || /(?:src|href)=["']https?:\/\/(?!fonts\.(?:googleapis|gstatic)\.com)/i.test(html),
+    filler: /lorem ipsum|\bTODO\b|coming soon/i.test(html),
+    focus: /:focus-visible|:focus\b/.test(html),
+    motion: !/(@keyframes|animation\s*:|transition\s*:)/.test(html) || /prefers-reduced-motion/.test(html),
+  };
+}
+function autoChecks(m, st) {
+  const c = [], add = (id, status, detail = "") => c.push({ id, status, detail });
+  add("runs", !m ? "warn" : m.errors.length || m.textLen < 30 ? "fail" : "pass", !m ? "no measurement" : m.errors[0] || (m.textLen < 30 ? "empty page" : ""));
+  if (m) {
+    add("fit", m.overflowBy > 2 ? "fail" : "pass", m.overflowBy > 2 ? `+${m.overflowBy}px` : "");
+    add("targets", !m.small.length ? "pass" : m.small.length < 3 ? "warn" : "fail", m.small.slice(0, 3).join("; "));
+    add("contrast", !m.contrast.length ? "pass" : m.contrast.length < 3 ? "warn" : "fail", m.contrast.slice(0, 3).join("; "));
+    add("text", m.tiny ? "warn" : "pass", m.tiny ? `${m.tiny} under 12px` : "");
+    const lab = m.imgNoAlt + m.noLabel + m.noName;
+    add("labels", !lab ? "pass" : lab < 3 ? "warn" : "fail", lab ? `${m.noLabel} inputs, ${m.noName} buttons, ${m.imgNoAlt} images` : "");
+    add("meta", !m.viewport ? "fail" : !m.title || !m.lang ? "warn" : "pass", !m.viewport ? "no viewport meta" : !m.title ? "no title" : !m.lang ? "no lang" : "");
+  }
+  add("offline", st.external ? "fail" : "pass", st.external ? "external script, request or link" : "");
+  add("dialogs", st.dialogs ? "fail" : "pass", st.dialogs ? "alert/confirm/prompt" : "");
+  add("polish", st.filler ? "fail" : !st.focus || !st.motion ? "warn" : "pass", st.filler ? "lorem/TODO text" : !st.focus ? "no visible focus style" : !st.motion ? "animation without reduced-motion" : "");
+  return c;
+}
+const autoScore = (c) => Math.max(0, 100 - 25 * c.filter((x) => x.status === "fail").length - 8 * c.filter((x) => x.status === "warn").length);
+
+function normalizeReview(j) {
+  if (!j || typeof j !== "object") return null;
+  const W = { high: 15, medium: 7, low: 3 };
+  const issues = (Array.isArray(j.issues) ? j.issues : []).filter((x) => x && x.problem).slice(0, 6)
+    .map((x) => ({ sev: W[x.sev] ? x.sev : "medium", area: String(x.area || ""), problem: String(x.problem).slice(0, 200), fix: String(x.fix || "").slice(0, 240) }));
+  const tips = (Array.isArray(j.tips) ? j.tips : []).filter((x) => x && x.title && ["asset", "decision", "content"].includes(x.kind)).slice(0, 4)
+    .map((x) => ({ kind: x.kind, title: String(x.title).slice(0, 90), why: String(x.why || "").slice(0, 180), slot: SLOT[x.slot] ? x.slot : "photo", options: (Array.isArray(x.options) ? x.options : []).map((o) => String(o).slice(0, 24)).slice(0, 3), done: null }))
+    .filter((x) => x.kind !== "decision" || x.options.length >= 2);
+  let score = Number(j.score); if (!isFinite(score)) score = 100 - issues.reduce((n, i) => n + W[i.sev], 0);
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  return { score, verdict: j.verdict === "pass" && score >= 80 && !issues.some((i) => i.sev === "high") ? "pass" : "revise", strengths: (Array.isArray(j.strengths) ? j.strengths : []).slice(0, 3).map((x) => String(x).slice(0, 100)), issues, tips };
+}
+async function expertReview(it, skill, html, checks, signal) {
+  const sample = await sampler(); if (!sample?.json) return null;
+  const meas = checks.map((c) => `${c.id}: ${c.status}${c.detail ? " (" + c.detail + ")" : ""}`).join("\n");
+  const ux = PACKS.find((p) => p.id === "ux-audit")?.body || "";
+  const hd = PACKS.some((p) => p.id === "head-designer" && p.applies.includes(skill)) && packOn("head-designer");
+  const prompt = `[Instructions]\n${ux}\nHEAD DESIGNER is ${hd ? "ON" : "OFF"}.\n${REGISTER[S.register]}\n[/Instructions]\n\nSKILL TYPE: ${skill}\n${briefBlock(it)}\n${specBlock(it.spec)}\n\nAUTOMATED MEASUREMENTS (390x844 render):\n${meas}\n\nHTML:\n\`\`\`html\n${html.slice(0, 16000)}\n\`\`\``;
+  try { return normalizeReview(await sample.json(prompt, { signal, cache: false, modelTier: "default" })); }
+  catch (e) { if (signal?.aborted) throw e; return null; }
+}
+async function polish(it, skill, html, checks, review, signal) {
+  const sample = await sampler();
+  const auto = checks.filter((c) => c.status !== "pass").map((c) => `- ${c.id}: ${c.status}${c.detail ? " (" + c.detail + ")" : ""}`);
+  const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- [${i.sev}/${i.area}] ${i.problem} => ${i.fix}`);
+  const prompt = `[Instructions]\n${designPrompt(skill, it)}\n[/Instructions]\n\nAUDIT FINDINGS. Fix every item below, keep everything that already works, and return the full updated document in the same output format.\nAUTOMATED:\n${auto.join("\n") || "- none"}\nEXPERT:\n${exp.join("\n") || "- none"}\n\nCURRENT PROTOTYPE:\n\`\`\`html\n${html}\n\`\`\``;
+  const res = await sample(prompt, { signal, cache: false, modelTier: "complex" });
+  return extract(res.text || "").html;
+}
+const fallbackTips = (it, skill) => (skill !== "game-prototype" && !(S.assets[it.id] || []).length ? [{ kind: "asset", slot: "logo", title: t("fbAssetTitle"), why: t("fbAssetWhy"), options: [], done: null }] : []);
+
+/** Never throws: on any failure the unaudited HTML is delivered rather than lost. */
+async function qualityGate({ it, skill, html, deep, allowFix = true, signal }) {
+  const stage = (k, v) => { if (S.pending?.stages) { S.pending.stages[k] = v; renderPending(); } };
+  let outHtml = html, checks = [], review = null, fixed = false;
+  try {
+    stage("design", "done"); stage("audit", "running");
+    checks = autoChecks(await measureHtml(html, it.id), staticChecks(html));
+    review = deep ? await expertReview(it, skill, html, checks, signal) : null;
+    stage("audit", "done");
+    const needFix = allowFix && (checks.some((c) => c.status === "fail") || review?.verdict === "revise");
+    if (needFix) {
+      stage("fix", "running");
+      const h2 = await polish(it, skill, html, checks, review, signal);
+      if (h2) {
+        // Accept a fix only if it measurably helps: a better automated score, or equal automated score and a higher expert score.
+        const c2 = autoChecks(await measureHtml(h2, it.id), staticChecks(h2));
+        const r2 = deep ? await expertReview(it, skill, h2, c2, signal) : null;
+        const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
+        if (better) { outHtml = h2; checks = c2; fixed = true; review = r2 || review; }
+      }
+      stage("fix", "done");
+    } else stage("fix", "skip");
+  } catch (e) { if (signal?.aborted || !checks.length) return { html: outHtml, q: null }; }
+  const q = {
+    deep: !!deep, fixed, at: Date.now(), auto: checks.map(({ id, status, detail }) => ({ id, status, detail })), autoScore: autoScore(checks),
+    score: review ? review.score : null, verdict: review ? review.verdict : null, strengths: review?.strengths || [], issues: review?.issues || [], tips: review?.tips || [],
+  };
+  if (!q.tips.length) q.tips = fallbackTips(it, skill);
+  return { html: outHtml, q };
+}
+
+async function reauditVersion(n, { fix }) {
+  const it = idea(), v = it?.versions.find((x) => x.n === n);
+  if (!v || S.auditing || S.pending) return;
+  S.auditing = true; toast(t("auditing")); render();
+  try {
+    const r = await qualityGate({ it, skill: v.skill, html: v.html, deep: true, allowFix: !!fix });
+    if (r.html !== v.html) {
+      const nn = (it.versions.at(-1)?.n || 0) + 1;
+      it.versions.push({ n: nn, html: r.html, q: r.q, skill: v.skill, note: "", createdAt: Date.now() });
+      it.currentVersion = nn; S.viewN = nn; S.previewOpen = true;
+      it.messages.push({ role: "user", content: t("autofixMsg"), skill: v.skill });
+      it.messages.push({ role: "assistant", content: t("autofixDone"), skill: v.skill, versionN: nn, feedback: 0 });
+    } else { if (r.q) v.q = r.q; if (fix) toast(t("auditPass")); }
+    it.updatedAt = Date.now(); persist();
+  } finally { S.auditing = false; render(); scrollEnd(); }
+}
+
+/* ───────── quality card + tips ───────── */
+const stagesHtml = (st) => `<ol class="stages" aria-label="progress">${["design", "audit", "fix"].map((k) => `<li data-s="${st[k]}"><i>${st[k] === "done" ? "✓" : st[k] === "running" ? "…" : st[k] === "skip" ? "–" : "·"}</i>${t("stage_" + k)}</li>`).join("")}</ol>`;
+function qualityHtml(it, n) {
+  const v = it.versions.find((x) => x.n === n), q = v?.q; if (!q) return "";
+  const latest = n === it.currentVersion, sc = q.score ?? q.autoScore, tone = sc >= 85 ? "good" : sc >= 70 ? "ok" : "low";
+  const mark = (x) => (x === "pass" ? "✓" : x === "warn" ? "!" : "✕");
+  const chk = q.auto.map((c) => `<li class="chk" data-s="${c.status}" title="${esc(c.detail || "")}"><i>${mark(c.status)}</i>${t("chk_" + c.id)}</li>`).join("");
+  const iss = q.issues.slice(0, 4).map((i) => `<li class="iss" data-sev="${i.sev}"><b>${esc(i.problem)}</b><span class="muted">${esc(i.fix)}</span></li>`).join("");
+  return `<details class="quality" ${latest ? "open" : ""}><summary><span class="qscore" data-tone="${tone}">${sc}</span><span class="qt">${t("qTitle")}</span>${q.fixed ? `<span class="tag">${t("qFixed")}</span>` : ""}${q.deep ? "" : `<span class="faint">${t("qLight")}</span>`}</summary>
+    <ul class="chks">${chk}</ul>
+    ${q.strengths.length ? `<p class="label">${t("qStrengths")}</p><ul class="plain">${q.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${iss ? `<p class="label">${q.fixed ? t("qFixedList") : t("qReview")}</p><ul class="issues">${iss}</ul>` : ""}
+    <div class="qact"><button class="btn" data-act="reaudit" data-n="${n}" ${S.auditing ? "disabled" : ""}>${t("reaudit")}</button>${q.issues.length && !q.fixed ? `<button class="btn" data-act="autofix" data-n="${n}" ${S.auditing ? "disabled" : ""}>${t("autofix")}</button>` : ""}</div></details>${latest ? tipsHtml(it, v) : ""}`;
+}
+function tipsHtml(it, v) {
+  const tips = v.q.tips, as = S.assets[it.id] || [];
+  if (!tips.length && !as.length) return "";
+  const KIND = { asset: t("kAsset"), decision: t("kDecision"), content: t("kContent") };
+  const cards = tips.map((tp, i) => {
+    let act = "";
+    if (tp.done) act = `<span class="tag">✓ ${esc(tp.done)}</span>`;
+    else if (tp.kind === "asset") act = `<button class="btn" data-act="tip-asset" data-slot="${tp.slot}">${svg("upload")} ${t("tipAsset").replace("{slot}", slotName(tp.slot))}</button>`;
+    else if (tp.kind === "decision") act = tp.options.map((o, j) => `<button class="chip" data-act="tip-decide" data-n="${v.n}" data-i="${i}" data-j="${j}">${esc(o)}</button>`).join("");
+    else act = `<button class="btn" data-act="tip-content" data-n="${v.n}" data-i="${i}">${t("tipContent")}</button>`;
+    return `<li class="tip"><span class="tipk">${KIND[tp.kind]}</span><b>${esc(tp.title)}</b><span class="muted">${esc(tp.why)}</span><div class="tipa">${act}</div></li>`;
+  }).join("");
+  const thumbs = as.length ? `<div class="assets"><span class="faint">${t("assetsTitle")}</span>${as.map((a) => `<span class="thumb"><img src="${a.url}" alt="${esc(a.name)}"><button class="ib sm" data-act="asset-remove" data-id="${a.id}" aria-label="${t("assetRemove")}">${svg("x")}</button></span>`).join("")}</div>` : "";
+  return `<section class="tips" aria-label="${t("tipsTitle")}"><h3>${t("tipsTitle")}</h3>${cards ? `<ul>${cards}</ul>` : ""}${thumbs}</section>`;
+}
+function styleFieldHtml() {
+  if (S.skillPick === "idea-capture") return "";
+  const L = lang(), st = (S.spec.style ||= { tones: [], phil: "auto" });
+  const sw = TONES.map((x) => `<button class="swatch" style="background:${x.hex}" data-tone="${x.id}" aria-pressed="${st.tones.includes(x.id)}" aria-label="${L ? x.en : x.zh}" title="${L ? x.en : x.zh}"></button>`).join("");
+  const showPhil = S.spec.suggestedSkill !== "game-prototype";
+  return `<div class="field"><span class="label">${t("styleTitle")}</span><p class="faint" style="margin:0 0 8px;font-size:12px">${t("styleSub")}</p>
+    <div class="swatches" role="group" aria-label="${t("tones")}">${sw}</div>
+    ${showPhil ? `<div class="chips" style="margin-top:10px" role="group" aria-label="${t("phil")}">${PHIL.map((p) => `<button class="chip" data-phil="${p.id}" aria-pressed="${st.phil === p.id}">${L ? p.en : p.zh}</button>`).join("")}</div>` : ""}</div>`;
+}
+
+/* ───────── skill library ───────── */
+const LIB = [
+ {id:"idea-capture",ver:"1.2.0",evals:3,
+  desc:["將你口講或者打出嚟嘅散亂諗法，整理成清楚嘅 spec。","Turns a rambling spoken or typed thought into a clear spec."],
+  gives:["一段口語，中英夾雜都得","Any raw idea, spoken or typed, mixed languages welcome"],
+  gets:["名稱、一句講晒、核心互動、目標用戶，同建議用邊個技能","Title, one-liner, core interaction, target user and a suggested skill"],
+  ex:[["我有個 idea：幫街坊交換二手嘢，用 WhatsApp 咁簡單","I have an idea: neighbours swapping second-hand things over WhatsApp"],["諗到個方法幫打工仔慳返食飯時間","An idea to save office workers time at lunch"]]},
+ {id:"prototype-html",ver:"1.3.0",evals:2,
+  desc:["整一個手機優先、撳得入去嘅單頁原型。","Builds a mobile-first, clickable single-page prototype."],
+  gives:["一份 spec，之後可以用口講點改，例如「啲掣大啲」","A spec, then spoken tweaks like “bigger buttons”"],
+  gets:["一個 HTML 檔，核心互動真係用得，每次改動都有新版本","One HTML file with a working core interaction, and a new version per change"]},
+ {id:"game-prototype",ver:"1.2.0",evals:1,
+  desc:["整一個直向、單手玩得嘅 canvas 小遊戲。","Builds a portrait canvas game you can play with one thumb."],
+  gives:["遊戲點玩嘅一句描述","One line on how the game plays"],
+  gets:["有開始畫面、計分、重玩同最高紀錄嘅小遊戲","A game with start screen, score, restart and best score"]},
+ {id:"design-variants",ver:"1.1.0",evals:1,
+  desc:["同一個畫面出三至四個風格完全唔同嘅設計方向，左右掃睇。","Three or four distinct visual directions of one screen, swipeable."],
+  gives:["你想睇邊個畫面，同大概個 mood","Which screen, and roughly the mood"],
+  gets:["可以掃嘅全螢幕版本，每個有名，配色、字體、圓角都唔同","Swipeable full-screen panels, each named, with its own palette, type and radius"]},
+];
+const exFor = (k) => k.ex || POOL.filter((p) => p.s === k.id).slice(0, 2).map((p) => [p.zh, p.en]);
+const skillCount = (id) => (id === "idea-capture" ? S.ideas.length : S.ideas.reduce((n, i) => n + i.versions.filter((v) => v.skill === id).length, 0));
+
+/* ───────── agents: multi-step runs over an idea ───────── */
+const AGENTS = [
+ {id:"validator",name:["市場驗證員","Idea validator"],tag:["四步幫你睇清楚個 idea 值唔值得做。","Four steps to see whether the idea is worth building."],
+  steps:[
+   {key:"users",title:["邊個真係需要？","Who really needs it?"],tier:"default",ins:"List the 3 most specific target user segments in Hong Kong for this idea. For each: the pain point in their own words, how they solve it today, and how often it happens. Max 180 words."},
+   {key:"market",title:["市場上有咩替代品？","What are people using instead?"],tier:"default",ins:"Name 3 to 5 alternatives (apps, services, workarounds) this idea competes with. For each: what it does better, and where this idea can win. Say 'likely' when unsure and never invent a company name. Max 200 words."},
+   {key:"tests",title:["一個禮拜內點驗證？","How to test it within a week"],tier:"default",ins:"Propose 3 cheap validation experiments one founder can run within 7 days in Hong Kong (for example a WhatsApp group test, a landing page signup, 5 street interviews). For each: what to do, a numeric success threshold, and the cost. Max 200 words."},
+   {key:"verdict",title:["結論同下一步","Verdict and next move"],tier:"default",ins:"Give a verdict: Go, Pivot or Stop (in the reply language), with a 2-sentence reason, the single biggest risk, and the one action to take tomorrow. Start with the verdict in bold. Max 100 words."},
+  ]},
+ {id:"sprint",name:["原型衝刺","Prototype sprint"],tag:["審視、改版、自我檢查，一次過出新版本。","Audit, rebuild and self-check, ending in a new version."],
+  steps:[
+   {key:"audit",title:["搵出最大問題","Find the biggest problems"],tier:"default",needsHtml:true,ins:"Review the idea and the CURRENT PROTOTYPE if there is one. List the 3 biggest usability or quality problems (touch targets, clarity, empty states, copy, performance), one line each with the fix. If there is no prototype yet, list the 3 riskiest assumptions to build around. Max 120 words."},
+   {key:"build",title:["改版","Rebuild"],tier:"default",kind:"build",needsHtml:true,ins:"Apply the fixes from the previous step to the prototype (or build a first version from the spec if none exists). Keep everything that works."},
+   {key:"check",title:["自我檢查","Self-check"],tier:"quick",needsHtml:true,after:true,ins:"Check the NEW PROTOTYPE against this checklist and report pass or fail with one short line each: viewport meta, touch targets at least 44px, empty state, visible focus, contrast, copy tone, no network calls. Max 120 words."},
+  ]},
+ {id:"launch",name:["上線文案包","Launch kit"],tag:["定位、落地頁文案、社交帖文，用地道廣東話寫。","Positioning, landing copy and social posts in native HK Cantonese."],
+  steps:[
+   {key:"angle",title:["定位同切入點","Positioning and angle"],tier:"default",ins:"Act as a senior Hong Kong copywriter. Define the angle in at most 4 short lines: the audience, ONE hook (a relatable local pain point or a bold benefit), the tone, and the register (colloquial Cantonese or formal written Chinese)."},
+   {key:"copy",title:["落地頁文案","Landing page copy"],tier:"default",ins:"Write ready-to-publish landing page copy: headline, 2 to 3 line body, 3 short benefit lines, CTA button text. Then 2 alternative headlines for A/B testing, one witty with wordplay and one direct benefit. Short lines for mobile readers."},
+   {key:"social",title:["社交帖文","Social posts"],tier:"default",ins:"Write 3 social posts, each at most 60 words with a low-friction call to action: one Instagram, one Threads, one WhatsApp broadcast. Label each with its channel."},
+  ]},
+];
+
+function agentPrompt(def, it, note, prior, cur) {
+  const skill = cur?.skill || it.spec.suggestedSkill;
+  const plain = def.kind === "build" ? "" : '\nPlain text only: no markdown headings; short lines; use "- " for lists; **bold** is allowed.';
+  const ins = def.kind === "build" ? `${def.ins}\n${designPrompt(skill, it)}` : def.ins;
+  const ctx = [
+    `IDEA: ${JSON.stringify(it.spec)}`,
+    it.raw ? `ORIGINAL WORDS: ${it.raw}` : "",
+    note ? `FOUNDER'S EXTRA INSTRUCTIONS: ${note}` : "",
+    ...prior.map((p) => `PREVIOUS STEP, ${p.title}:\n${p.text.slice(0, 2500)}`),
+  ];
+  if (def.needsHtml) {
+    const html = def.after ? it.versions.at(-1)?.html : cur?.html;
+    if (html) ctx.push(`${def.after ? "NEW" : "CURRENT"} PROTOTYPE:\n\`\`\`html\n${html.slice(0, 14000)}\n\`\`\``);
+  }
+  return `[Instructions]\n${ins}\n${REGISTER[S.register]}${plain}\n[/Instructions]\n\n${ctx.filter(Boolean).join("\n\n")}`;
+}
+
+let runAbort = null;
+async function runAgent(agent, ideaId, note) {
+  const it = S.ideas.find((i) => i.id === ideaId); if (!it) return;
+  if (S.run?.status === "running") return toast(t("agentBusy"));
+  const sample = await sampler();
+  if (!sample) return toast(t("noModel"));
+  S.run = { agentId: agent.id, ideaId, note, status: "running", steps: agent.steps.map((d) => ({ key: d.key, title: d.title, status: "pending", text: "", versionN: null })) };
+  S.sheet = null; renderSheet(); S.view = "run"; render();
+  runAbort = new AbortController();
+  const done = [];
+  for (let i = 0; i < agent.steps.length; i++) {
+    const def = agent.steps[i], st = S.run.steps[i];
+    st.status = "running"; renderRunBody();
+    try {
+      const cur = it.versions.find((v) => v.n === it.currentVersion);
+      const res = await sample(agentPrompt(def, it, note, done, cur), {
+        signal: runAbort.signal, cache: false, modelTier: def.tier || "default",
+        onText: ({ text }) => { st.text = def.kind === "build" ? text.split(/```|<!doctype|<html/i)[0] : text; renderRunBody(); },
+      });
+      let text = res.text || st.text;
+      if (def.kind === "build") {
+        const { note: lead, html } = extract(text);
+        if (!html) throw new Error(lang() ? "No prototype came back." : "冇生成到原型。");
+        const g = await qualityGate({ it, skill: cur?.skill || it.spec.suggestedSkill, html, deep: false, allowFix: false });
+        const n = (it.versions.at(-1)?.n || 0) + 1;
+        it.versions.push({ n, html: g.html, q: g.q, skill: cur?.skill || it.spec.suggestedSkill, note: lead.slice(0, 300), createdAt: Date.now() });
+        it.currentVersion = n; st.versionN = n; text = lead || "✓";
+      }
+      st.text = text.trim(); st.status = "done";
+      done.push({ title: def.title[lang()], text: st.text });
+      if (runAbort?.signal.aborted) { S.run.status = "stopped"; break; }
+    } catch (e) {
+      if (runAbort?.signal.aborted) { st.status = "pending"; S.run.status = "stopped"; }
+      else { st.status = "error"; st.text = modelError(e); S.run.status = "error"; }
+      break;
+    }
+    renderRunBody();
+  }
+  if (S.run.status === "running") S.run.status = "done";
+  const ok = S.run.steps.filter((x) => x.status === "done");
+  if (ok.length) {
+    const L = lang();
+    it.messages.push({ role: "user", content: agent.name[L] + (note ? "：" + note : ""), skill: "agent:" + agent.id });
+    it.messages.push({ role: "assistant", content: ok.map((x) => `**${x.title[L]}**\n${x.text}`).join("\n\n"), skill: "agent:" + agent.id, versionN: [...ok].reverse().find((x) => x.versionN)?.versionN || null, feedback: 0 });
+    it.updatedAt = Date.now();
+  }
+  S.runLog.unshift({ agentId: agent.id, ideaId, title: it.spec.title, at: Date.now(), status: S.run.status });
+  S.runLog = S.runLog.slice(0, 8); LS.set("i2p.runs", S.runLog);
+  persist(); runAbort = null; render();
+}
+
+/* ───────── views: skills, agents, run ───────── */
+function packRow(p) {
+  const L = lang(), on = packOn(p.id);
+  return `<div class="acard prow"><button class="rowmain" data-skill-open="${p.id}"><span class="ico">${skillIcon(p.id)}</span>
+    <span style="flex:1;min-width:0"><b>${packName(p)}</b><br><span class="muted">${p.summary[L]}</span><br><span class="faint" style="font-size:12px">${t("appliesTo")}：${p.applies.map((x) => sl(x)).join(" · ")}</span></span></button>
+    <button class="switch" role="switch" aria-checked="${on}" aria-label="${esc(packName(p))}" data-pack-toggle="${p.id}"></button></div>`;
+}
+function viewSkills() {
+  const L = lang();
+  const core = LIB.map((k) => `<button class="acard" data-skill-open="${k.id}"><span class="ico">${skillIcon(k.id)}</span>
+      <span style="flex:1;min-width:0"><b>${sl(k.id)}</b> <span class="faint" style="font-size:12px">v${k.ver}</span><br><span class="muted">${k.desc[L]}</span><br><span class="faint" style="font-size:12px">${t("used").replace("{n}", skillCount(k.id))}</span></span>${svg("chevron")}</button>`).join("");
+  return `<div class="lib"><h1>${t("skillsTitle")}</h1><p class="muted" style="margin:0 0 8px">${t("skillsSub")}</p>
+    <h2 class="group">${t("coreTitle")}</h2><div class="list">${core}</div>
+    <h2 class="group">${t("craftTitle")}</h2><div class="list">${PACKS.filter((p) => p.kind === "craft").map(packRow).join("")}</div>
+    <h2 class="group">${t("workflowTitle")}</h2><div class="list">${PACKS.filter((p) => p.kind === "workflow").map(packRow).join("")}</div>
+    <p class="note">${t("routerNote")}</p></div>`;
+}
+
+function viewAgents() {
+  const L = lang(), r = S.run;
+  const progress = r ? `${r.steps.filter((x) => x.status === "done").length}/${r.steps.length}` : "";
+  const banner = r ? `<button class="acard" data-act="run-view" style="margin:0 0 16px"><span class="ico">${svg("bot")}</span><span style="flex:1;min-width:0"><b>${AGENTS.find((a) => a.id === r.agentId).name[L]}</b><br><span class="muted">${r.status === "running" ? t("running") + " · " + progress : t("viewProgress")}</span></span>${svg("chevron")}</button>` : "";
+  const recent = S.runLog.filter((x) => S.ideas.some((i) => i.id === x.ideaId));
+  const fmt = new Intl.DateTimeFormat(L ? "en-HK" : "zh-HK", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return `<div class="lib"><h1>${t("agentsTitle")}</h1><p class="muted" style="margin:0 0 16px">${t("agentsSub")}</p>${banner}
+    <div class="list">${AGENTS.map((a) => `<button class="acard" data-agent-open="${a.id}"><span class="ico">${svg("bot")}</span><span style="flex:1;min-width:0"><b>${a.name[L]}</b><br><span class="muted">${a.tag[L]}</span><br><span class="faint" style="font-size:12px">${a.steps.length} ${L ? "steps" : "步"}</span></span>${svg("chevron")}</button>`).join("")}</div>
+    ${recent.length ? `<h2 class="group">${t("recentRuns")}</h2>${recent.slice(0, 5).map((x) => `<button class="entry" data-open-idea="${x.ideaId}"><b>${AGENTS.find((a) => a.id === x.agentId).name[L]}</b><span class="sub">${esc(x.title)}</span><span class="meta"><span>${fmt.format(x.at)}</span></span></button>`).join("")}` : ""}</div>`;
+}
+
+function runBodyHtml() {
+  const r = S.run, L = lang(), it = S.ideas.find((i) => i.id === r.ideaId);
+  const steps = r.steps.map((x, i) => {
+    const mark = x.status === "done" ? `<span class="mark done">${svg("check")}</span>` : x.status === "running" ? `<span class="mark run"><i class="pd"></i></span>` : x.status === "error" ? `<span class="mark err">${svg("x")}</span>` : `<span class="mark">${i + 1}</span>`;
+    const out = x.text ? `<div class="out prose">${prose(x.text)}</div>` : x.status === "running" ? `<div class="out"><span class="dots"><i></i><i></i><i></i></span></div>` : "";
+    return `<li class="step" data-s="${x.status}"><h3>${mark}${x.title[L]}${x.versionN ? ` <span class="tag">v${x.versionN}</span>` : ""}</h3>${out}</li>`;
+  }).join("");
+  const msg = r.status === "done" ? t("runDone") : r.status === "stopped" ? t("runStopped") : r.status === "error" ? t("runFailed") : "";
+  const hasCopy = r.agentId === "launch" && r.steps.find((x) => x.key === "copy")?.status === "done";
+  const acts = r.status === "running" ? "" : `<div class="runact">
+    <button class="btn primary lg block" data-open-idea="${r.ideaId}">${t("openIdea")}</button>
+    ${hasCopy ? `<button class="btn block" data-act="launch-page">${t("pageFromCopy")}</button>` : ""}
+    <button class="btn block" data-act="copy-run">${t("copyAll")}</button>
+    <button class="btn ghost block" data-act="rerun">${t("runAgain")}</button></div>`;
+  return `<p class="muted" style="margin:0 0 12px">${esc(it?.spec.title || "")}${r.note ? " · " + esc(r.note) : ""}</p><ol class="steps">${steps}</ol>${msg ? `<p class="${r.status === "error" ? "error" : "muted"}" role="status" style="margin:14px 0">${msg}</p>` : ""}${acts}`;
+}
+function viewRun() { return S.run ? `<div class="lib"><div id="runbody">${runBodyHtml()}</div></div>` : viewAgents(); }
+function renderRunBody() {
+  const el = document.getElementById("runbody"); if (!el || !S.run) return;
+  el.innerHTML = runBodyHtml();
+  document.querySelector('.step[data-s="running"]')?.scrollIntoView({ block: "nearest" });
+}
+
+/* ───────── sheets ───────── */
+function sheetPack(p) {
+  const L = lang(), on = packOn(p.id), wf = p.kind === "workflow";
+  return `<div class="handle"></div><h2>${packName(p)} <span class="tag">${wf ? t("workflowTag") : t("craftTag")}</span></h2><p class="muted" style="margin:0 0 14px">${p.summary[L]}</p>
+    <dl class="kv"><dt>${t("appliesTo")}</dt><dd>${p.applies.map((x) => sl(x)).join(" · ")}</dd><dt>${t("source")}</dt><dd>${esc(p.source)}</dd></dl>
+    <div class="setrow"><span id="pk-l">${wf ? t("gateOn") : t("packOn")}</span><button class="switch" role="switch" aria-checked="${on}" aria-labelledby="pk-l" data-pack-toggle="${p.id}"></button></div>
+    ${p.id === "ux-audit" ? `<button class="btn block" data-act="audit-current" style="margin-top:4px">${svg("shield")} ${t("auditCurrent")}</button>` : ""}
+    <details style="margin-top:14px"><summary class="label" style="cursor:pointer">${t("promptSrc")}</summary><pre class="src">${esc(p.body)}</pre></details>
+    <button class="btn ghost block" data-act="sheet-close" style="margin-top:10px">${t("close")}</button>`;
+}
+function sheetSkill(id) {
+  const pk = PACKS.find((x) => x.id === id); if (pk) return sheetPack(pk);
+  const k = LIB.find((x) => x.id === id), L = lang();
+  return `<div class="handle"></div><h2>${sl(id)} <span class="tag">v${k.ver}</span></h2><p class="muted" style="margin:0 0 14px">${k.desc[L]}</p>
+    <dl class="kv"><dt>${t("gives")}</dt><dd>${k.gives[L]}</dd><dt>${t("getsBack")}</dt><dd>${k.gets[L]}</dd><dt>${t("tested")}</dt><dd>${k.evals} ${L ? "cases" : "個案例"}</dd></dl>
+    <p class="label" style="margin-top:16px">${t("tryExamples")}</p>
+    <div class="examples" style="justify-content:flex-start;margin-top:0">${exFor(k).map((x) => `<button class="chip" data-sheet-ex="${esc(x[L])}" data-for="${id}">${esc(x[L])}</button>`).join("")}</div>
+    <button class="btn primary lg block" data-skill-use="${id}" style="margin-top:16px">${t("useSkill")}</button>
+    <button class="btn ghost block" data-act="sheet-close" style="margin-top:6px">${t("close")}</button>`;
+}
+function sheetAgent() {
+  const sh = S.sheet, a = AGENTS.find((x) => x.id === sh.id), L = lang();
+  const form = S.ideas.length ? `<div class="field"><label class="label" for="agent-idea">${t("pickIdea")}</label><select class="input" id="agent-idea">${S.ideas.map((i) => `<option value="${i.id}" ${i.id === sh.ideaId ? "selected" : ""}>${esc(i.spec.title)}</option>`).join("")}</select></div>
+    <div class="field"><label class="label" for="agent-note">${t("agentNote")}</label><textarea class="ta" id="agent-note" rows="2">${esc(sh.note || "")}</textarea></div>
+    <button class="btn primary lg block" data-agent-run="${a.id}">${t("agentRun")}</button>`
+    : `<p class="muted">${t("noIdeasAgent")}</p><button class="btn primary lg block" data-nav="capture">${t("newIdea")}</button>`;
+  return `<div class="handle"></div><h2>${a.name[L]}</h2><p class="muted" style="margin:0 0 14px">${a.tag[L]}</p>
+    <p class="label">${t("stepsLabel")}</p><ol class="slist">${a.steps.map((x) => `<li>${x.title[L]}</li>`).join("")}</ol>${form}
+    <button class="btn ghost block" data-act="sheet-close" style="margin-top:6px">${t("close")}</button>`;
+}
+function renderSheet() {
+  const el = document.getElementById("sheet");
+  if (!S.sheet) { el.innerHTML = ""; return; }
+  const label = S.sheet.kind === "skill" ? sl(S.sheet.id) : AGENTS.find((a) => a.id === S.sheet.id).name[lang()];
+  el.innerHTML = `<div class="scrim"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(label)}" tabindex="-1">${S.sheet.kind === "skill" ? sheetSkill(S.sheet.id) : sheetAgent()}</div>`;
+  el.querySelector(".sheet").focus();
+}
+const persist = () => { if (!LS.set("i2p.ideas", S.ideas)) { // quota: drop oldest versions' html but keep the latest
+  for (const i of S.ideas) i.versions.slice(0, -2).forEach((v) => (v.html = v.html ? "" : v.html)); LS.set("i2p.ideas", S.ideas); } };
+
+/* ───────── model access ───────── */
+let samplerP = null;
+const sampler = () => (samplerP ??= (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)));
+function modelError(e) {
+  const c = e?.code;
+  if (c === "not_granted") return t("denied");
+  if (c === "rate_limited") return t("busyRate");
+  return e?.message || String(e);
+}
+
+const REGISTER = {
+  yue: "Write like a senior Hong Kong copywriter. Reply in colloquial Hong Kong Cantonese (Traditional Chinese): authentic HK vocabulary and sentence-final particles (啦 喎 咩 啫 㗎 喇), natural rhythm, never 書面語腔 or translationese from English, common English product words mixed in sparingly (app, feature, promo). Exact characters: 喺 嘅 咗 唔 畀 嗰. No Mandarin vocabulary (use 影片 not 視頻, 質素 not 質量, 軟件 not 軟體, 網絡 not 網路). Formal contexts (bank, legal, corporate) use 書面語 Traditional Chinese. Headlines hook with a local pain point or clear benefit; short scannable lines; one clear low-friction CTA. Text inside the prototype follows the same rules.",
+  mixed: "Reply in natural Hong Kong 中英夾雜: Cantonese sentence structure, Traditional Chinese with HK vocabulary (影片, 質素, 軟件, 網絡), English for product/tech terms, no Mandarin wording or translationese. Hook-first headlines, short scannable lines, one low-friction CTA. Prototype text may mix both.",
+  en: "Reply in clear, friendly English. Prototype text in English.",
+};
+
+/* ───────── skill router (zero-cost keyword classifier, ported from the app) ───────── */
+const R = {
+  game:[[/\b(game|games|arcade|platformer|puzzle|runner|shooter|snake|flappy|clicker|quiz game)\b/i,3],[/\b(score|high ?score|level|lives|enemy|enemies|boss|jump|dodge|tap to|swipe to|collect|obstacle)s?\b/i,1.5],[/(遊戲|游戏|打機|玩法|關卡|分數|得分|過關|小遊戲|手遊|跳躍|閃避|射擊|拼圖|打怪|接住|彈|躲)/,3],[/(玩|跳|射|撞|食|追)/,.8]],
+  variants:[[/\b(variants?|variations?|styles?|design directions?|directions|moodboard|mood|look and feel|aesthetics?|palettes?|colou?r schemes?|themes|alternatives)\b/i,2.5],[/\b(three|3|five|5|several|different|multiple|a few)\s+(versions|looks|styles|designs|options|takes)\b/i,3],[/(風格|设计方向|設計方向|幾個版本|唔同款|唔同style|多款|配色|色調|視覺方向|視覺|感覺|款式|三個版本|3個版本|幾款)/,3]],
+  html:[[/\b(landing page|web ?page|website|site|web app|app|form|tool|dashboard|calculator|tracker|booking|checkout|signup|menu|portfolio|todo|timer|converter|planner|prototype|mockup|ui|screen|page)\b/i,1.6],[/\b(build|make|create|generate|design|prototype|mock up|show me)\b/i,1],[/(網頁|網站|頁面|落地頁|工具|表格|計算機|記帳|預約|訂餐|清單|原型|介面|界面|畫面|整個|整一個|做個|做一個|幫我整|生成)/,1.6]],
+  tweak:[[/\b(bigger|smaller|larger|more|less|darker|lighter|brighter|playful|serious|minimal|bolder|faster|slower|change|make it|make the|add|remove|replace|swap|move|increase|decrease|fix|tweak|instead|colou?r|font|button|spacing|padding|background|title|text|in cantonese|in english|dark mode)\b/i,1.4],[/(大啲|細啲|多啲|少啲|快啲|慢啲|再.{0,6}啲|改|加|刪|轉|換|移|顏色|字體|掣|按鈕|背景|標題|用廣東話|英文|深色|淺色|好玩啲|簡潔啲|活潑啲|復古|風)/,1.4]],
+  chat:[[/\?\s*$|？\s*$/,1.6],[/^(what|how|why|should|can you explain|is it|is there|do you|does|which|who|when|where)\b/i,1.8],[/\b(explain|advice|recommend|compare|pros and cons|market|pricing|competitors?|thoughts on|opinion)\b/i,1.4],[/(點解|點樣|係咪|有冇|咩|嗎|建議|意見|比較|市場|定價|對手|你覺得)/,1.6]],
+};
+const sc = (rs, x) => rs.reduce((s, [re, w]) => (re.test(x) ? s + w : s), 0);
+function route(text, artifactSkill) {
+  const s = {"game-prototype":sc(R.game,text),"design-variants":sc(R.variants,text),"prototype-html":sc(R.html,text),chat:sc(R.chat,text)};
+  const tw = sc(R.tweak, text);
+  if (artifactSkill && tw > 0) s[artifactSkill] += tw + 1;
+  if (s["game-prototype"] >= 3) s["prototype-html"] *= .5;
+  if (s["design-variants"] >= 2.5) s["prototype-html"] *= .6;
+  const e = Object.entries(s).sort((a, b) => b[1] - a[1]);
+  const tot = e.reduce((a, [, v]) => a + v, 0);
+  if (!e[0][1]) return { skill: "chat", confidence: .3 };
+  const conf = Math.round((.6 * e[0][1] / tot + .4 * Math.min(1, e[0][1] / 3)) * 100) / 100;
+  return conf < .55 ? { skill: "chat", confidence: conf } : { skill: e[0][0], confidence: conf };
+}
+
+/* ───────── skill prompts (same shape as the app's registry) ───────── */
+const RULES = `Output rules (strict):
+- First, 1–2 short sentences to the user about what you built or changed. No headings, no lists.
+- Then ONE fenced \`\`\`html block with a COMPLETE single-file HTML document.
+- All CSS in <style>, all JS in <script>. No external scripts, no network requests, no CDNs, no external images (use CSS, inline SVG, or the user's ASSETS via src="asset:ID" when provided). A Google Fonts <link> is allowed.
+- Mobile-first portrait (360–430px), viewport meta, 100dvh, touch targets ≥ 44px, no hover-only interactions. No alert/confirm/prompt.
+- localStorage is allowed. Aim for 250-450 lines; never truncate. Fewer, better-finished components beat many half-finished ones.`;
+const SKILL_PROMPT = {
+  "prototype-html": "You are a senior product designer-engineer. Build a working, clickable, mobile-first prototype of the idea as one HTML file. Make the core interaction actually work with realistic sample data. Polished, modern, generous spacing, one accent colour.",
+  "game-prototype": "You are a mobile game prototyper. Build a playable PORTRAIT game on a full-screen <canvas>. Pointer events for touch (tap/drag) that work with one thumb, also mouse. touch-action:none, devicePixelRatio, resize, requestAnimationFrame. Start screen → play → game over with score and tap-to-restart; best score in localStorage. Gentle difficulty ramp, light juicy feedback.",
+  "design-variants": "You are a brand and UI art director. Produce THREE or FOUR distinctly different visual directions for the SAME key screen, as horizontally swipeable full-screen panels (CSS scroll-snap, each 100vw). Each panel labelled 'n/N · direction name'. Directions must differ in palette, type, radius, density and imagery style — not just colour swaps.",
+};
+const specBlock = (sp) => `<spec>${JSON.stringify(sp)}</spec>`;
+
+function buildMessages(skill, it, input, currentHtml) {
+  const hist = [];
+  let budget = 12000;
+  for (let i = it.messages.length - 1; i >= 0 && hist.length < 12; i--) {
+    const m = it.messages[i];
+    const c = m.versionN ? `${m.content}\n[produced prototype v${m.versionN}]` : m.content;
+    if ((budget -= c.length) < 0) break;
+    hist.unshift({ role: m.role, content: c });
+  }
+  while (hist.length && hist[0].role !== "user") hist.shift();
+  const sys = skill === "chat"
+    ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\nThe idea: ${specBlock(it.spec)}`
+    : designPrompt(skill, it);
+  const iter = currentHtml ? `\n\nCURRENT PROTOTYPE (modify it — keep everything not asked to change, return the full updated document):\n\`\`\`html\n${currentHtml}\n\`\`\`` : "";
+  const msgs = [...hist, { role: "user", content: input + iter }];
+  // System instructions ride in the first user turn (memoryless sampler).
+  msgs[0] = { role: "user", content: `[Instructions]\n${sys}\n[/Instructions]\n\n${msgs[0].content}` };
+  return msgs;
+}
+
+function extract(reply) {
+  const f = reply.match(/```(?:html)?\s*\n([\s\S]*?)(?:\n```|$)/i);
+  let html = null, note = reply;
+  if (f && /<(html|body|!doctype|canvas|div|section)/i.test(f[1])) { html = f[1].trim(); note = reply.slice(0, f.index).trim(); }
+  else { const r = reply.match(/<!doctype html[\s\S]*?(<\/html>|$)/i); if (r) { html = r[0]; note = reply.slice(0, r.index).trim(); } }
+  if (html) {
+    if (!/<!doctype/i.test(html)) html = "<!doctype html>\n" + html;
+    const o = (html.match(/<script\b/gi) || []).length, c = (html.match(/<\/script>/gi) || []).length;
+    if (o > c) html += "\n<\/script>";
+    if (!/<\/body>/i.test(html)) html += "\n</body>";
+    if (!/<\/html>/i.test(html)) html += "\n</html>";
+  }
+  return { note, html };
+}
+
+/* storage shim injected into every prototype: sandboxed frames have no usable localStorage */
+const SHIM = `<script>(function(){var seed=__SEED__;function mk(init,sync){var d=Object.assign({},init),a={getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null},setItem:function(k,v){d[String(k)]=String(v);sync&&sync(d)},removeItem:function(k){delete d[String(k)];sync&&sync(d)},clear:function(){d={};sync&&sync(d)},key:function(i){return Object.keys(d)[i]||null}};Object.defineProperty(a,'length',{get:function(){return Object.keys(d).length}});return a}
+function ok(s){try{window[s].setItem('__t','1');window[s].removeItem('__t');return true}catch(e){return false}}
+if(!ok('localStorage'))try{Object.defineProperty(window,'localStorage',{configurable:true,value:mk(seed,function(d){parent.postMessage({ch:'i2p-store',d:d},'*')})})}catch(e){}
+if(!ok('sessionStorage'))try{Object.defineProperty(window,'sessionStorage',{configurable:true,value:mk({})})}catch(e){}})();<\/script>`;
+function wrap(html, seed) {
+  const head = SHIM.replace("__SEED__", JSON.stringify(seed || {}).replace(/</g, "\\u003c"));
+  return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => m + head) : head + html;
+}
+window.addEventListener("message", (e) => {
+  const fr = document.getElementById("pframe");
+  if (!fr || e.source !== fr.contentWindow || e.data?.ch !== "i2p-store") return;
+  const it = idea(); if (!it) return;
+  it.store = e.data.d; persist();
+});
+
+/* ───────── actions ───────── */
+let toastTimer;
+function toast(msg) {
+  const o = document.getElementById("overlay");
+  o.querySelector(".toast")?.remove();
+  const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg; o.appendChild(el);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 2800);
+}
+
+async function structure(raw) {
+  const sample = await sampler();
+  if (!sample) return toast(t("noModel"));
+  S.busy = true; S.status = t("structuring"); render();
+  try {
+    const sp = await sample.json(`You turn a founder's raw, possibly spoken, possibly Cantonese/中英夾雜 idea into a compact product spec.
+Return ONLY JSON with keys: "title" (≤6 words, user's language), "oneLiner" (≤20 words), "coreInteraction" (the ONE thing a user does, ≤20 words), "targetUser" (≤12 words), "suggestedSkill": "prototype-html" | "game-prototype" | "design-variants".
+Pick game-prototype for anything playable, design-variants when they want to explore looks/styles, else prototype-html. Fix speech-to-text errors silently. Don't invent features.
+${REGISTER[S.register]}
+
+<raw>${raw}</raw>`, { modelTier: "quick" });
+    const ok = ["prototype-html", "game-prototype", "design-variants"];
+    S.spec = {
+      title: String(sp.title || raw.slice(0, 30)), oneLiner: String(sp.oneLiner || ""), coreInteraction: String(sp.coreInteraction || ""),
+      targetUser: String(sp.targetUser || ""), suggestedSkill: ok.includes(sp.suggestedSkill) ? sp.suggestedSkill : "prototype-html",
+    };
+    S.spec.style = { tones: [], phil: "auto" };
+    if (S.skillPick && S.skillPick !== "idea-capture") S.spec.suggestedSkill = S.skillPick;
+  } catch (e) { toast(modelError(e)); }
+  S.busy = false; S.status = ""; render();
+}
+
+function createIdea(generate = true) {
+  const now = Date.now();
+  const it = { id: "i" + now.toString(36), spec: S.spec, raw: S.draft, messages: [], versions: [], currentVersion: null, store: {}, createdAt: now, updatedAt: now };
+  S.ideas.unshift(it); persist();
+  S.ideaId = it.id; S.spec = null; S.draft = ""; S.view = "idea"; S.viewN = null; S.previewOpen = false;
+  render();
+  S.skillPick = null;
+  if (generate) turn({ input: t("first"), forceSkill: it.spec.suggestedSkill });
+}
+
+let abort = null;
+async function turn({ input, forceSkill, regenerate, editIndex }) {
+  const it = idea(); if (!it || S.pending) return;
+  const sample = await sampler();
+  if (!sample) return toast(t("noModel"));
+  if (regenerate) {
+    const i = it.messages.map((m) => m.role).lastIndexOf("user");
+    if (i < 0) return;
+    input = it.messages[i].content; forceSkill = it.messages[i].skill; it.messages = it.messages.slice(0, i);
+    if (String(forceSkill).startsWith("agent:")) forceSkill = undefined;
+  } else if (editIndex != null) it.messages = it.messages.slice(0, editIndex);
+
+  const cur = it.versions.find((v) => v.n === it.currentVersion);
+  const r = forceSkill ? { skill: forceSkill, confidence: 1 } : route(input, cur?.skill);
+  const skill = r.skill;
+  const iterating = skill !== "chat" && cur && cur.skill === skill && cur.html;
+  const msgs = buildMessages(skill, it, input, iterating ? cur.html : null);
+  it.messages.push({ role: "user", content: input, skill });
+  S.pending = { skill, text: "", chars: 0, confidence: r.confidence, stages: skill !== "chat" && S.gate ? { design: "running", audit: "pending", fix: "pending" } : null };
+  render(); scrollEnd();
+
+  abort = new AbortController();
+  let full = "";
+  try {
+    const res = await sample(msgs, {
+      signal: abort.signal, cache: false, modelTier: skill === "chat" ? "quick" : "default",
+      onText: ({ text }) => {
+        full = text;
+        const f = text.search(/```|<!doctype|<html/i);
+        S.pending.text = f >= 0 ? text.slice(0, f) : text;
+        S.pending.chars = f >= 0 ? text.length - f : 0;
+        renderPending();
+      },
+    });
+    full = res.text || full;
+    let content = full.trim(), versionN = null, outSkill = skill;
+    if (skill !== "chat") {
+      const { note, html: rawHtml } = extract(full);
+      if (rawHtml) {
+        let html = rawHtml, q = null;
+        if (S.gate) {
+          const g = await qualityGate({ it, skill, html: rawHtml, deep: !!regenerate || !(cur && cur.skill === skill && cur.q), signal: abort.signal });
+          html = g.html; q = g.q;
+        }
+        versionN = (it.versions.at(-1)?.n || 0) + 1;
+        it.versions.push({ n: versionN, html, q, skill, note: note.slice(0, 300), createdAt: Date.now() });
+        it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
+        content = note || "✓";
+        if (res.truncated) toast(lang() ? "Output was cut short; it may be incomplete. Try “regenerate”." : "輸出被截短，可能唔完整。可以試下重新生成。");
+      } else outSkill = "chat";
+    }
+    it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
+  } catch (e) {
+    if (!abort?.signal.aborted && e?.name !== "AbortError" && e?.code !== "aborted") toast(modelError(e));
+    if (full.trim()) it.messages.push({ role: "assistant", content: full.trim(), skill: "chat", feedback: 0 });
+  }
+  it.updatedAt = Date.now(); S.pending = null; abort = null; persist(); render(); scrollEnd();
+}
+
+/* dictation */
+let dictP = null, dict = null;
+const dictation = () => (dictP ??= (window.claude?.use ? window.claude.use("dictation") : Promise.resolve(null)).then((d) => {
+  dict = d;
+  if (d) {
+    d.onPartial(({ text }) => { S.partial = text; renderHint(); });
+    d.onFinal(({ text }) => { S.draft = (S.draft ? S.draft + " " : "") + text; S.partial = ""; syncDraft(); });
+    d.onState(({ state }) => {
+      const was = S.listening; S.listening = state === "listening" || state === "starting";
+      if (was && state === "idle") {
+        // speech finished: go straight to structuring (the 60-second fast path)
+        if (S.view === "capture" && S.draft.trim().length > 1 && !S.spec) structure(S.draft.trim());
+        else if (S.view === "idea" && S.draft.trim()) { const v = S.draft.trim(); S.draft = ""; turn({ input: v }); }
+        else render();
+      } else render();
+    });
+  }
+  return d;
+}));
+dictation();
+function toggleMic() {
+  if (!dict) return toast(t("micNA"));
+  if (S.listening) { dict.stop().catch(() => {}); return; }
+  S.draft = S.view === "capture" ? "" : S.draft;
+  const langTag = S.register === "en" ? "en-US" : "zh-HK";
+  dict.start({ language: langTag }).catch((e) => {
+    if (e?.code === "invalid_argument") return dict.start().catch((e2) => toast(e2?.message || t("micNA")));
+    if (e?.code !== "dismissed") toast(e?.code === "not_granted" ? t("micNA") : e?.message || t("micNA"));
+  });
+}
+
+async function downloadHtml(v, it) {
+  const dl = await (window.claude?.use ? window.claude.use("downloads") : null);
+  const name = (it.spec.title || "prototype").replace(/[^\w一-鿿-]+/g, "-").slice(0, 40) + `-v${v.n}.html`;
+  if (!dl) {
+    try { await navigator.clipboard.writeText(resolveAssets(v.html, it.id)); toast(t("copied") + " (HTML)"); } catch { toast("—"); }
+    return;
+  }
+  try { await dl.save({ filename: name, data: resolveAssets(v.html, it.id) }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
+}
+
+/* ───────── rendering ───────── */
+const $app = document.getElementById("app");
+let lastView = null;
+const prose = (s) => esc(s).split(/\n{2,}/).map((p) => `<p>${p.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>")}</p>`).join("");
+function scrollEnd() { requestAnimationFrame(() => { const s = document.getElementById("scroll"); if (s) s.scrollTop = s.scrollHeight; }); }
+function syncDraft() { const ta = document.getElementById("draft"); if (ta) { ta.value = S.draft; autosize(ta); } }
+function autosize(ta) { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; }
+function renderHint() {
+  const h = document.getElementById("hint"); if (!h) return;
+  h.textContent = S.listening ? (S.partial || t("listening")) : S.status || t("tap");
+}
+
+function regSeg() {
+  return `<div class="seg" role="group" aria-label="${t("language")}">${[["yue","廣東話"],["mixed","中英"],["en","EN"]].map(([k, l]) => `<button data-reg="${k}" aria-pressed="${S.register === k}">${l}</button>`).join("")}</div>`;
+}
+
+function viewCapture() {
+  if (S.spec) {
+    const f = (k, multi) => multi ? `<textarea class="ta" id="sp-${k}" rows="2" data-spec="${k}">${esc(S.spec[k])}</textarea>` : `<input class="input" id="sp-${k}" data-spec="${k}" value="${esc(S.spec[k])}">`;
+    return `<div class="capture"><section class="card spec" aria-labelledby="spec-h">
+      <p class="muted" style="margin:0 0 4px;font-size:13px">${t("reviewSub")}</p><h2 id="spec-h">${t("review")}</h2>
+      <div class="field" style="margin-top:14px"><label class="label" for="sp-title">${t("title")}</label>${f("title")}</div>
+      <div class="field"><label class="label" for="sp-oneLiner">${t("one")}</label>${f("oneLiner", 1)}</div>
+      <div class="field"><label class="label" for="sp-coreInteraction">${t("core")}</label>${f("coreInteraction", 1)}</div>
+      <div class="field"><label class="label" for="sp-targetUser">${t("user")}</label>${f("targetUser")}</div>
+      <div class="field"><span class="label">${t("buildAs")}</span><div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${["prototype-html","game-prototype","design-variants"].map((s) => `<button class="chip" data-skill="${s}" aria-pressed="${S.spec.suggestedSkill === s}">${skillIcon(s)} ${sl(s)}</button>`).join("")}</div></div>
+      ${styleFieldHtml()}
+      <button class="btn primary lg block" id="gen">${S.skillPick === "idea-capture" ? t("saveOnly") : t("generate")}</button>
+      <button class="btn ghost block" id="reset" style="margin-top:8px">${t("over")}</button></section></div>`;
+  }
+  const L = lang();
+  const banner = S.skillPick ? `<div class="skillbanner"><span class="tag">${skillIcon(S.skillPick)} ${t("skillLabel")}：${sl(S.skillPick)}</span><button class="ib sm" data-act="skill-clear" aria-label="${t("close")}">${svg("x")}</button></div>` : "";
+  return `<div class="capture">
+    <div class="hero"><h1>${t("heroTitle")}</h1><p>${t("heroSub")}</p></div>${banner}
+    <div class="voice">
+      <button class="mic" id="mic" data-state="${S.listening ? "listening" : "idle"}" ${S.busy ? "disabled" : ""} aria-label="${S.listening ? "Stop" : "Voice"}" aria-pressed="${S.listening}">${svg(S.listening ? "stop" : "mic")}</button>
+      <div class="hint" id="hint" aria-live="polite">${esc(S.listening ? S.partial || t("listening") : S.status || t("tap"))}</div>
+    </div>
+    <form class="alt" id="capform"><label class="sr" for="draft">${t("typeInstead")}</label>
+      <textarea class="ta" id="draft" rows="1" placeholder="${t("typeInstead")}" ${S.busy ? "disabled" : ""}>${esc(S.draft)}</textarea>
+      <button class="send" type="submit" aria-label="Send" ${S.busy ? "disabled" : ""}>${svg("send")}</button></form>
+    <div class="sug-head"><span class="faint">${t("sugTitle")}</span><button class="btn ghost" style="min-height:36px" data-act="sug-refresh">${svg("shuffle")} ${t("sugRefresh")}</button></div>
+    <div class="examples" style="margin-top:6px">${S.sug.map((x) => `<button class="chip" data-ex="${esc(x[L ? "en" : "zh"])}">${skillIcon(x.s)} ${esc(x[L ? "en" : "zh"])}</button>`).join("")}</div>
+    <p class="note">${t("note")}</p></div>`;
+}
+
+function msgHtml(m, i, it, lastA) {
+  if (m.role === "user") {
+    if (S.editing === i) return `<div class="msg user" style="align-items:stretch"><label class="sr" for="edit">Edit</label><textarea class="ta" id="edit" rows="3">${esc(m.content)}</textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn ghost" data-act="edit-cancel">${t("cancel")}</button><button class="btn primary" data-act="edit-save" data-i="${i}">${t("save")}</button></div></div>`;
+    return `<div class="msg user"><div class="bubble">${esc(m.content)}</div><div class="acts">
+      <button class="ib sm" data-act="copy" data-i="${i}" aria-label="Copy">${svg("copy")}</button>
+      ${String(m.skill).startsWith("agent:") ? "" : `<button class="ib sm" data-act="edit" data-i="${i}" aria-label="Edit" ${S.pending ? "disabled" : ""}>${svg("pencil")}</button>`}</div></div>`;
+  }
+  return `<div class="msg">${m.skill && m.skill !== "chat" ? `<div class="route">${skillIcon(m.skill)} ${sl(m.skill)}</div>` : ""}
+    <div class="prose">${prose(m.content)}</div>
+    ${m.versionN ? `<button class="acard" data-act="open" data-n="${m.versionN}"><span class="ico">${skillIcon(m.skill)}</span><span style="flex:1;min-width:0"><b>${esc(it.spec.title)}</b><br><span class="muted">${t("version")} ${m.versionN}${m.versionN === it.currentVersion ? " · " + t("current") : ""}</span></span>${svg("play")}</button>` : ""}
+    ${m.versionN ? qualityHtml(it, m.versionN) : ""}
+    <div class="acts"><button class="ib sm" data-act="copy" data-i="${i}" aria-label="Copy">${svg("copy")}</button>
+      <button class="ib sm" data-act="fb" data-v="1" data-i="${i}" aria-label="Good" aria-pressed="${m.feedback === 1}" style="${m.feedback === 1 ? "color:var(--accent)" : ""}">${svg("up")}</button>
+      <button class="ib sm" data-act="fb" data-v="-1" data-i="${i}" aria-label="Bad" aria-pressed="${m.feedback === -1}" style="${m.feedback === -1 ? "color:var(--danger)" : ""}">${svg("down")}</button>
+      ${i === lastA && !String(m.skill).startsWith("agent:") ? `<button class="ib sm" data-act="regen" aria-label="Regenerate" ${S.pending ? "disabled" : ""}>${svg("refresh")}</button>` : ""}</div></div>`;
+}
+
+function pendingHtml() {
+  const p = S.pending; if (!p) return "";
+  return `<div class="msg" id="pending">${p.skill !== "chat" ? `<div class="route">${skillIcon(p.skill)} ${sl(p.skill)}</div>` : ""}
+    <div class="prose" aria-live="polite" aria-busy="true">${p.text ? prose(p.text) : p.chars ? "" : `<span class="dots"><i></i><i></i><i></i></span>`}</div>
+    ${p.stages ? stagesHtml(p.stages) : ""}${p.chars && (!p.stages || p.stages.design === "running") ? `<div class="prog" role="status"><span class="dots"><i></i><i></i><i></i></span>${t("building")} · ${(p.chars / 1000).toFixed(1)}k</div>` : ""}</div>`;
+}
+function renderPending() { const el = document.getElementById("pending"); if (el) { el.outerHTML = pendingHtml(); scrollEnd(); } }
+
+function viewIdea() {
+  const it = idea(); if (!it) { S.view = "journal"; return viewJournal(); }
+  const lastA = it.messages.map((m) => m.role).lastIndexOf("assistant");
+  const viewN = S.viewN ?? it.currentVersion;
+  const v = it.versions.find((x) => x.n === viewN);
+  const preview = S.previewOpen && v ? `<aside class="preview" aria-label="Prototype preview">
+      <div class="pbar"><button class="ib" data-act="close" aria-label="Close">${svg("x")}</button><span class="t">${esc(it.spec.title)}</span>
+        <label class="sr" for="ver">${t("version")}</label><select id="ver">${it.versions.map((x) => `<option value="${x.n}" ${x.n === viewN ? "selected" : ""}>v${x.n}${x.n === it.currentVersion ? " · " + t("current") : ""}</option>`).join("")}</select>
+        ${viewN !== it.currentVersion ? `<button class="btn" style="min-height:34px" data-act="revert" data-n="${viewN}">${t("revert")}</button>` : ""}
+        <button class="ib" data-act="reaudit" data-n="${viewN}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
+      <div class="stage">${v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${viewN}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`}</div></aside>` : "";
+  const modelLabel = `${sl(S.pending?.skill || it.messages.at(-1)?.skill || it.spec.suggestedSkill)} · ${S.register === "en" ? "EN" : S.register === "yue" ? "廣東話" : "中英"}`;
+  return `<div class="ws"><div class="chat">
+    <div class="scroll" id="scroll"><div class="col">
+      <section class="card summary"><span class="tag">${skillIcon(it.spec.suggestedSkill)} ${sl(it.spec.suggestedSkill)}</span><p>${esc(it.spec.oneLiner)}</p>
+        <dl><dt>${t("core")}</dt><dd>${esc(it.spec.coreInteraction)}</dd><dt>${t("user")}</dt><dd>${esc(it.spec.targetUser)}</dd></dl></section>
+      ${it.messages.map((m, i) => msgHtml(m, i, it, lastA)).join("")}${pendingHtml()}
+    </div></div>
+    <div class="composer-wrap"><form class="composer" id="cform"><label class="sr" for="draft">${t("message")}</label>
+      <textarea id="draft" rows="1" placeholder="${esc(S.listening ? S.partial || t("listening") : t("message"))}">${esc(S.draft)}</textarea>
+      <div class="crow"><span class="model">${esc(modelLabel)}</span>
+        <button type="button" class="ib sm" id="mic" aria-label="Voice" aria-pressed="${S.listening}" ${S.pending ? "disabled" : ""} style="${S.listening ? "color:var(--danger)" : ""}">${svg(S.listening ? "stop" : "mic")}</button>
+        ${S.pending ? `<button type="button" class="sbtn" data-act="stop" aria-label="Stop">${svg("stop")}</button>` : `<button type="submit" class="sbtn" aria-label="Send" ${S.draft.trim() ? "" : "disabled"}>${svg("send")}</button>`}
+      </div></form></div></div>${preview}</div>`;
+}
+
+function viewJournal() {
+  const q = S.q.trim().toLowerCase();
+  const list = S.ideas.filter((i) => (!S.filter || i.spec.suggestedSkill === S.filter) &&
+    (!q || [i.spec.title, i.spec.oneLiner, i.raw, ...i.messages.map((m) => m.content)].join(" ").toLowerCase().includes(q)));
+  const d0 = new Date(); d0.setHours(0, 0, 0, 0); const day = 864e5;
+  const groups = [[t("today"), []], [t("yesterday"), []], [t("week"), []], [t("older"), []]];
+  list.forEach((i) => groups[i.updatedAt >= +d0 ? 0 : i.updatedAt >= d0 - day ? 1 : i.updatedAt >= d0 - 7 * day ? 2 : 3][1].push(i));
+  const fmt = new Intl.DateTimeFormat(lang() ? "en-HK" : "zh-HK", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return `<div class="journal"><h1>${t("journal")}</h1>
+    <label class="sr" for="jq">${t("search")}</label><input class="input" id="jq" type="search" placeholder="${t("search")}" value="${esc(S.q)}">
+    <div class="filters" role="group" aria-label="Filter">${["", "prototype-html", "game-prototype", "design-variants"].map((f) => `<button class="chip" data-filter="${f}" aria-pressed="${S.filter === f}">${f ? skillIcon(f) + " " + sl(f) : t("all")}</button>`).join("")}</div>
+    ${list.length ? groups.filter((g) => g[1].length).map(([label, items]) => `<h2 class="group">${label}</h2>` + items.map((i) => `<button class="entry" data-open-idea="${i.id}"><b>${esc(i.spec.title)}</b><span class="sub">${esc(i.spec.oneLiner)}</span>
+      <span class="meta"><span class="tag">${sl(i.spec.suggestedSkill)}</span>${i.currentVersion ? `<span>v${i.currentVersion}</span>` : ""}<span>${i.messages.length} ${lang() ? "messages" : "則訊息"}</span><span>${fmt.format(i.updatedAt)}</span></span></button>`).join("")).join("")
+      : `<p class="empty">${S.ideas.length ? t("nomatch") : t("none")}</p>`}</div>`;
+}
+
+function render() {
+  const inIdea = S.view === "idea";
+  const it = idea();
+  document.documentElement.lang = S.register === "en" ? "en" : "zh-HK";
+  const top = inIdea
+    ? `<div class="top"><button class="ib" data-nav="journal" aria-label="${t("journal")}">${svg("back")}</button><span class="brand" style="font-size:16px">${esc(it?.spec.title || "")}</span>
+       ${it?.currentVersion ? `<button class="ib" data-act="toggle-preview" aria-label="Preview" aria-pressed="${S.previewOpen}">${svg("play")}</button>` : ""}
+       <button class="ib" data-act="del" aria-label="${t("del")}" style="${S.confirmDel ? "color:var(--danger)" : ""}" title="${S.confirmDel ? t("confirmDel") : t("del")}">${svg("trash")}</button></div>`
+    : S.view === "run" && S.run
+    ? `<div class="top"><button class="ib" data-nav="agents" aria-label="${t("navAgents")}">${svg("back")}</button><span class="brand" style="font-size:16px">${AGENTS.find((a) => a.id === S.run.agentId).name[lang()]}</span>${S.run.status === "running" ? `<button class="btn" data-act="stop-run">${t("stopRun")}</button>` : ""}</div>`
+    : `<div class="top"><span class="brand">Idea2Proto<b>.</b></span>${regSeg()}</div>`;
+  const body = ({ capture: viewCapture, skills: viewSkills, agents: viewAgents, run: viewRun, journal: viewJournal, idea: viewIdea })[S.view]();
+  const cur = S.view === "run" ? "agents" : S.view;
+  const navBtn = (v, icon, label) => `<button data-nav="${v}" aria-current="${cur === v ? "page" : "false"}">${svg(icon)}${label}</button>`;
+  const nav = inIdea ? "" : `<nav class="nav" aria-label="Main">${navBtn("capture", "plus", t("newIdea"))}${navBtn("skills", "grid", t("navSkills"))}${navBtn("agents", "bot", t("navAgents"))}${navBtn("journal", "book", t("journal"))}</nav>`;
+  const focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
+  const keepScroll = lastView === S.view ? ($app.querySelector(".main")?.scrollTop || 0) : 0; lastView = S.view;
+  $app.innerHTML = top + `<main class="main" style="${inIdea ? "padding:0;overflow:hidden;display:flex;flex-direction:column" : ""}">${body}</main>` + nav;
+  if (keepScroll) $app.querySelector(".main").scrollTop = keepScroll;
+  if (inIdea) { const ws = $app.querySelector(".ws"); if (ws) ws.style.flex = "1"; const sc = $app.querySelector(".chat"); sc.querySelectorAll(".col,.composer-wrap").forEach((e) => { e.style.paddingLeft = "max(16px, env(safe-area-inset-left,0px))"; e.style.paddingRight = "max(16px, env(safe-area-inset-right,0px))"; }); }
+  const fr = document.getElementById("pframe");
+  if (fr && it) { const v = it.versions.find((x) => x.n === (S.viewN ?? it.currentVersion)); fr.srcdoc = wrap(resolveAssets(v.html, it.id), it.store); }
+  const ta = document.getElementById("draft"); if (ta) autosize(ta);
+  if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch {} } }
+}
+
+/* ───────── events (delegated) ───────── */
+const onClick = async (e) => {
+  if (e.target.classList?.contains("scrim")) { S.sheet = null; return renderSheet(); }
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id !== "mic" && b.dataset.act !== "del") S.confirmDel = false;
+  if (b.dataset.reg) { S.register = b.dataset.reg; LS.set("i2p.register", S.register); return render(); }
+  if (b.dataset.nav) { if (S.listening) dict?.stop().catch(() => {}); S.view = b.dataset.nav; S.previewOpen = false; S.editing = null; S.draft = ""; S.sheet = null; renderSheet(); if (S.view === "capture") S.skillPick = null; return render(); }
+  if (b.dataset.ex) { S.draft = b.dataset.ex; return structure(S.draft); }
+  if (b.dataset.packToggle) {
+    const id = b.dataset.packToggle, p = PACKS.find((x) => x.id === id);
+    if (p.kind === "workflow") { S.gate = !S.gate; LS.set("i2p.gate", S.gate); } else { S.craft[id] = !packOn(id); LS.set("i2p.craft", S.craft); }
+    if (S.sheet) renderSheet();
+    return render();
+  }
+  if (b.dataset.tone) { const st = S.spec.style, i = st.tones.indexOf(b.dataset.tone); if (i >= 0) st.tones.splice(i, 1); else { st.tones.push(b.dataset.tone); if (st.tones.length > 2) st.tones.shift(); } return render(); }
+  if (b.dataset.phil) { S.spec.style.phil = b.dataset.phil; return render(); }
+  if (b.dataset.skillOpen) { S.sheet = { kind: "skill", id: b.dataset.skillOpen }; return renderSheet(); }
+  if (b.dataset.agentOpen) { S.sheet = { kind: "agent", id: b.dataset.agentOpen, ideaId: S.ideas.some((i) => i.id === S.ideaId) ? S.ideaId : S.ideas[0]?.id, note: "" }; return renderSheet(); }
+  if (b.dataset.skillUse) { S.skillPick = b.dataset.skillUse; S.sheet = null; renderSheet(); S.view = "capture"; S.sug = pickSuggestions(S.skillPick); render(); return document.getElementById("draft")?.focus(); }
+  if (b.dataset.sheetEx) { S.skillPick = b.dataset.for; S.sheet = null; renderSheet(); S.view = "capture"; S.draft = b.dataset.sheetEx; S.sug = pickSuggestions(S.skillPick); render(); return structure(S.draft); }
+  if (b.dataset.agentRun) return runAgent(AGENTS.find((a) => a.id === b.dataset.agentRun), document.getElementById("agent-idea")?.value, (document.getElementById("agent-note")?.value || "").trim());
+  if (b.dataset.skill) { S.spec.suggestedSkill = b.dataset.skill; return render(); }
+  if (b.dataset.filter != null) { S.filter = b.dataset.filter; return render(); }
+  if (b.dataset.openIdea) { S.ideaId = b.dataset.openIdea; S.view = "idea"; S.viewN = null; S.previewOpen = matchMedia("(min-width:900px)").matches && !!idea()?.currentVersion; render(); return scrollEnd(); }
+  if (b.id === "mic") return toggleMic();
+  if (b.id === "gen") return S.spec.title.trim() && createIdea(S.skillPick !== "idea-capture");
+  if (b.id === "reset") { S.spec = null; S.draft = ""; return render(); }
+  const it = idea(); const i = +b.dataset.i;
+  switch (b.dataset.act) {
+    case "reaudit": return reauditVersion(+b.dataset.n, { fix: false });
+    case "autofix": return reauditVersion(+b.dataset.n, { fix: true });
+    case "audit-current": {
+      const cur = idea(); if (!cur?.currentVersion) return toast(t("noProto"));
+      S.sheet = null; renderSheet(); S.view = "idea"; render(); return reauditVersion(cur.currentVersion, { fix: false });
+    }
+    case "tip-asset": S.assetSlot = b.dataset.slot; document.getElementById("assetfile").click(); return;
+    case "tip-decide": {
+      const v = it.versions.find((x) => x.n === +b.dataset.n), tp = v.q.tips[+b.dataset.i], opt = tp.options[+b.dataset.j];
+      tp.done = opt; persist(); render();
+      return turn({ input: lang() ? `Decision on "${tp.title}": ${opt}. Apply it.` : `「${tp.title}」我揀：${opt}。按呢個改。`, forceSkill: v.skill });
+    }
+    case "tip-content": {
+      const v = it.versions.find((x) => x.n === +b.dataset.n), tp = v.q.tips[+b.dataset.i];
+      S.draft = `${tp.title}：`; render(); const d = document.getElementById("draft"); d?.focus(); d?.setSelectionRange(d.value.length, d.value.length); return;
+    }
+    case "asset-remove": { const l = S.assets[S.ideaId] || []; const k = l.findIndex((a) => a.id === b.dataset.id); if (k >= 0) l.splice(k, 1); LS.set("i2p.assets", S.assets); return render(); }
+    case "sheet-close": S.sheet = null; return renderSheet();
+    case "sug-refresh": S.sug = pickSuggestions(S.skillPick); return render();
+    case "skill-clear": S.skillPick = null; S.sug = pickSuggestions(); return render();
+    case "run-view": S.view = "run"; return render();
+    case "stop-run": runAbort?.abort(); return;
+    case "copy-run": { const L = lang(); try { await navigator.clipboard.writeText(S.run.steps.filter((x) => x.status === "done").map((x) => x.title[L] + "\n" + x.text).join("\n\n")); toast(t("copied")); } catch {} return; }
+    case "rerun": return runAgent(AGENTS.find((a) => a.id === S.run.agentId), S.run.ideaId, S.run.note);
+    case "launch-page": {
+      const copy = S.run.steps.find((x) => x.key === "copy")?.text; S.ideaId = S.run.ideaId; S.view = "idea"; S.viewN = null; S.previewOpen = false; render();
+      return turn({ input: (lang() ? "Build a landing page using this exact copy:\n" : "用呢段文案整個落地頁，字眼照用：\n") + copy, forceSkill: "prototype-html" });
+    }
+    case "open": S.viewN = +b.dataset.n; S.previewOpen = true; return render();
+    case "close": S.previewOpen = false; return render();
+    case "toggle-preview": S.previewOpen = !S.previewOpen; S.viewN = null; return render();
+    case "revert": it.currentVersion = +b.dataset.n; it.updatedAt = Date.now(); persist(); toast(`${t("version")} ${b.dataset.n} ✓`); return render();
+    case "dl": return downloadHtml(it.versions.find((v) => v.n === +b.dataset.n), it);
+    case "copy": try { await navigator.clipboard.writeText(it.messages[i].content); toast(t("copied")); } catch {} return;
+    case "fb": { const m = it.messages[i], v = +b.dataset.v; m.feedback = m.feedback === v ? 0 : v; persist(); return render(); }
+    case "regen": return turn({ regenerate: true });
+    case "edit": S.editing = i; render(); return document.getElementById("edit")?.focus();
+    case "edit-cancel": S.editing = null; return render();
+    case "edit-save": { const v = document.getElementById("edit").value.trim(); if (!v) return; S.editing = null; return turn({ input: v, editIndex: +b.dataset.i }); }
+    case "stop": abort?.abort(); return;
+    case "del":
+      if (!S.confirmDel) { S.confirmDel = true; toast(t("confirmDel")); return render(); }
+      S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); delete S.assets[S.ideaId]; LS.set("i2p.assets", S.assets); persist(); S.confirmDel = false; S.view = "journal"; return render();
+  }
+};
+$app.addEventListener("click", onClick);
+document.getElementById("sheet").addEventListener("click", onClick);
+document.getElementById("assetfile").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0]; e.target.value = "";
+  const it = idea(); if (!f || !it) return;
+  const a = await addAsset(it.id, f, S.assetSlot || "photo"); if (!a) return;
+  toast(t("assetUsed")); render();
+  const cur = it.versions.find((v) => v.n === it.currentVersion);
+  turn({ input: lang() ? `Use the uploaded ${slotName(a.slot)} (asset:${a.id}) where it fits best.` : `將我上傳嘅${slotName(a.slot)}（asset:${a.id}）用落最啱嘅位置。`, forceSkill: cur?.skill || it.spec.suggestedSkill });
+});
+$app.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el.id === "draft") { S.draft = el.value; autosize(el); const s = $app.querySelector('.sbtn[type="submit"]'); if (s) s.disabled = !S.draft.trim(); }
+  if (el.dataset.spec) S.spec[el.dataset.spec] = el.value;
+  if (el.id === "jq") { S.q = el.value; render(); }
+});
+$app.addEventListener("change", (e) => { if (e.target.id === "ver") { S.viewN = +e.target.value; render(); } });
+$app.addEventListener("keydown", (e) => {
+  if (e.target.id === "draft" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form?.requestSubmit(); }
+});
+$app.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = S.draft.trim(); if (v.length < 2) return;
+  if (e.target.id === "capform") structure(v);
+  if (e.target.id === "cform") { S.draft = ""; turn({ input: v }); }
+});
+document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (S.sheet) { S.sheet = null; renderSheet(); } else if (S.previewOpen) { S.previewOpen = false; render(); } });
+
+render();
+})();
+</script>

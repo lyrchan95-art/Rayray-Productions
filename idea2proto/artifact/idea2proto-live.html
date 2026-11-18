@@ -167,11 +167,62 @@ svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke
 .pd{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1s infinite}
 .runact{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .error{color:var(--danger)}
+
+/* skill packs, quality gate, tips */
+.prow{display:flex;align-items:center;gap:8px;cursor:default}
+.rowmain{flex:1;min-width:0;display:flex;gap:12px;align-items:center;background:none;border:0;text-align:left;padding:0}
+.switch{position:relative;width:46px;height:28px;flex-shrink:0;border-radius:999px;border:0;background:var(--surface-3);transition:background .12s var(--ease)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .12s var(--ease)}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid var(--border);margin-top:14px}
+pre.src{white-space:pre-wrap;font:12px/1.5 var(--mono);background:var(--surface-2);border-radius:var(--r-md);padding:12px;max-height:40vh;overflow:auto;margin:8px 0 0}
+.swatches,.chips{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{width:44px;height:44px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--border)}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.stages{list-style:none;display:flex;gap:8px;padding:0;margin:8px 0 0;flex-wrap:wrap;font-family:var(--sans);font-size:13px}
+.stages li{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--faint)}
+.stages li i{font-style:normal;font-weight:700}
+.stages li[data-s="running"]{border-color:var(--accent);color:var(--accent-strong)}
+.stages li[data-s="done"]{color:var(--muted)}
+.quality{margin-top:10px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);font-family:var(--sans);font-size:14px}
+.quality summary{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;list-style:none;min-height:44px;flex-wrap:wrap}
+.quality summary::-webkit-details-marker{display:none}
+.quality>*:not(summary){margin:0 12px 12px}
+.qscore{min-width:40px;height:28px;padding:0 8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;background:var(--surface-3)}
+.qscore[data-tone="good"]{background:var(--accent-soft);color:var(--accent-strong)}
+.qscore[data-tone="low"]{background:var(--danger);color:var(--on-accent)}
+.qt{font-weight:600}
+.chks{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.chk i{font-style:normal;font-weight:700}
+.chk[data-s="pass"] i{color:var(--accent)}
+.chk[data-s="warn"] i{color:var(--fg)}
+.chk[data-s="fail"]{border-color:var(--danger)}
+.chk[data-s="fail"] i{color:var(--danger)}
+.issues{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+.iss{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:3px solid var(--border)}
+.iss[data-sev="high"]{border-left-color:var(--danger)}
+.iss[data-sev="medium"]{border-left-color:var(--faint)}
+.plain{margin:0;padding-left:18px}
+.qact{display:flex;gap:8px;flex-wrap:wrap}
+.tips{margin-top:10px;border-radius:var(--r-lg);background:var(--accent-soft);padding:14px;font-family:var(--sans);font-size:14px}
+.tips h3{margin:0 0 12px;font-size:14px}
+.tips ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:16px}
+.tip{display:flex;flex-direction:column;gap:3px}
+.tipk{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-strong)}
+.tipa{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.assets{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.thumb{position:relative;width:56px;height:56px;border-radius:var(--r-md);background:var(--surface)}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-md)}
+.thumb .ib{position:absolute;top:-8px;right:-8px;width:28px;height:28px;background:var(--surface);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.thumb .ib svg{width:14px;height:14px}
 </style>
 
 <div class="app" id="app"></div>
 <div id="overlay"></div>
 <div id="sheet"></div>
+<input type="file" id="assetfile" accept="image/*" hidden>
 
 <script>
 (() => {
@@ -196,11 +247,12 @@ const ic = {
   bot:'<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/>',
   spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
   shuffle:'<path d="M16 4h4v4M4 20 20 4M20 16v4h-4M15 15l5 5M4 4l5 5"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>', upload:'<path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>',
   check:'<path d="M5 12l5 5 9-10"/>', chevron:'<path d="M9 5l7 7-7 7"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
 };
 const svg = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ic[n]}</svg>`;
-const skillIcon = (s) => svg(s === "game-prototype" ? "game" : s === "design-variants" ? "layers" : s === "chat" ? "chat" : s === "idea-capture" ? "spark" : String(s).startsWith("agent:") ? "bot" : "globe");
+const skillIcon = (s) => svg(PACK_ICON[s] || (s === "game-prototype" ? "game" : s === "design-variants" ? "layers" : s === "chat" ? "chat" : s === "idea-capture" ? "spark" : String(s).startsWith("agent:") ? "bot" : "globe"));
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* ───────── i18n ───────── */
@@ -238,6 +290,27 @@ const T = {
   runStopped:["已停止，完成咗嘅步驟已經儲存。","Stopped. Finished steps were saved."], runFailed:["中途出咗錯，再試一次啦。","Something went wrong. Try again."],
   openIdea:["打開呢個 idea","Open this idea"], copyAll:["複製全部","Copy all"], runAgain:["再運行一次","Run again"],
   recentRuns:["最近運行","Recent runs"], viewProgress:["睇進度","View progress"], pageFromCopy:["用呢啲文案整個落地頁","Build a landing page from this copy"],
+  qTitle:["品質審查","Quality audit"], qFixed:["已自動修正一次","Auto-fixed once"], qLight:["快速檢查","quick check"],
+  qStrengths:["做得好","What works"], qReview:["要留意","To watch"], qFixedList:["已經修正咗","Fixed"],
+  reaudit:["重新審查","Re-audit"], autofix:["自動修正","Auto-fix"], auditing:["審查緊…","Auditing…"],
+  autofixMsg:["按審查結果自動修正","Auto-fix from the audit"], autofixDone:["已經按審查結果修正，出咗新版本。","Fixed from the audit findings and saved as a new version."],
+  auditPass:["審查完成，唔使修正。","Audit complete. Nothing needed fixing."],
+  tipsTitle:["提示：下一步可以咁做","Tips: what to do next"], tipAsset:["上傳{slot}","Upload {slot}"], tipContent:["補充資料","Add details"],
+  kAsset:["素材","Asset"], kDecision:["你決定","Your call"], kContent:["資料","Details"],
+  assetsTitle:["已上傳素材","Uploaded"], assetRemove:["刪除素材","Remove asset"], assetFull:["儲存空間唔夠，刪走幾張素材再試。","Storage is full. Remove an asset and try again."],
+  assetUsed:["已上傳，用新素材整新版本…","Uploaded. Building a new version with it…"], assetMax:["最多 8 張素材。","Up to 8 assets."], assetBad:["讀唔到呢張圖。","Couldn't read that image."],
+  fbAssetTitle:["上傳 logo 或者真相","Upload a logo or real photos"], fbAssetWhy:["而家用緊示意圖形，換上真素材會即刻似真好多。","The design uses stand-in shapes; real assets make it feel real."],
+  styleTitle:["設計方向","Design direction"], styleSub:["揀最多兩個主色同一種風格；唔揀就由設計師決定。","Pick up to two accent tones and a style, or leave it to the designer."],
+  tones:["主色","Accent tones"], phil:["風格參考","Style reference"],
+  stage_design:["設計","Design"], stage_audit:["審查","Audit"], stage_fix:["修正","Polish"],
+  coreTitle:["核心技能","Core skills"], craftTitle:["設計技能（已匯入）","Design skills (imported)"], workflowTitle:["工作流","Workflows"],
+  appliesTo:["套用於","Applies to"], source:["來源","Source"], promptSrc:["睇 prompt 原文","View prompt source"],
+  packOn:["生成時套用呢個技能","Apply this skill when generating"], gateOn:["生成後先審查，過關先畀你睇","Audit before showing the result"],
+  workflowTag:["工作流","Workflow"], craftTag:["設計技能","Design skill"], auditCurrent:["審查目前原型","Audit current prototype"], noProto:["未有原型可以審查。","No prototype to audit yet."],
+  chk_runs:["可以正常運行","Runs without errors"], chk_fit:["手機闊度冇溢出","Fits phone width"], chk_targets:["掣夠大（44px 或以上）","Tap targets 44px+"],
+  chk_contrast:["字同底色對比夠","Text contrast"], chk_text:["字體唔會太細","Text size"], chk_labels:["標籤同替代文字","Labels and alt text"],
+  chk_meta:["viewport 同標題","Viewport and title"], chk_offline:["冇外部連線","No external requests"], chk_dialogs:["冇 alert 彈窗","No alert dialogs"],
+  chk_polish:["冇 lorem／TODO，動畫可關","No filler; motion-safe"],
 };
 const SKILL_LABEL = {"prototype-html":["網頁原型","Web prototype"],"game-prototype":["小遊戲","Game prototype"],"design-variants":["設計方向","Design variants"],"chat":["傾偈","Chat"],"idea-capture":["記低點子","Idea capture"]};
 
@@ -253,10 +326,11 @@ const S = {
   ideaId: null, draft: "", spec: null, busy: false, status: "", pending: null, previewOpen: false, viewN: null,
   editing: null, q: "", filter: "", listening: false, partial: "", confirmDel: false,
   skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [],
+  craft: LS.get("i2p.craft", {}), gate: LS.get("i2p.gate", true), assets: LS.get("i2p.assets", {}), assetSlot: "photo", auditing: false,
 };
 const lang = () => (S.register === "en" ? 1 : 0);
 const t = (k) => T[k][lang()];
-const sl = (s) => (String(s).startsWith("agent:") ? AGENTS.find((a) => "agent:" + a.id === s)?.name[lang()] ?? s : SKILL_LABEL[s]?.[lang()] ?? s);
+const sl = (s) => { const pk = PACKS.find((p) => p.id === s); if (pk) return lang() ? pk.name : pk.zh; return String(s).startsWith("agent:") ? AGENTS.find((a) => "agent:" + a.id === s)?.name[lang()] ?? s : SKILL_LABEL[s]?.[lang()] ?? s; };
 const idea = () => S.ideas.find((i) => i.id === S.ideaId);
 
 /* ───────── daily suggestions (reshuffled every session) ───────── */
@@ -296,6 +370,281 @@ function pickSuggestions(only) {
   return out;
 }
 S.sug = pickSuggestions();
+
+/* ───────── imported skill packs (built from skills/*.md) ───────── */
+const PACKS = [{"id":"cantonese-copywriter","name":"Cantonese copywriter","zh":"廣東話文案","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Imported from your cantonese-copywriter skill. Skipped when the reply language is English.","summary":["每一句畫面文字都似香港人寫：先講痛點或好處，短句，CTA 清楚，冇翻譯腔。","Every visible line reads native Hong Kong: hook first, short lines, a clear CTA, no translationese."],"body":"COPYWRITING (apply to every visible line, as a senior Hong Kong copywriter):\n- Pick the register. Casual B2C, lifestyle, F&B, games: colloquial Cantonese with sentence-final particles (啦 喎 咩 啫 㗎 喇) and light 中英夾雜. Banking, legal, corporate, luxury: written Chinese in Traditional characters with HK terms (軟件, 網絡, 質素).\n- Hook first: open with a relatable Hong Kong pain point, a witty question or a bold benefit. Use wordplay and four-character phrases only when they sharpen the message.\n- Short lines, scannable on a phone. One clear, low-friction CTA per screen (e.g. 「撳入嚟試下」「留言話我知你揀邊款」).\n- No translationese: rewrite from scratch, never word-for-word from English. No Mandarin vocabulary or grammar. Exact characters: 喺 嘅 咗 唔 畀 嗰.\n- Local context only when it serves the message (返工放工, 搭車, 週末好去處, 慳錢攻略). Trendy terms must fit the audience's age or they read as old-fashioned.\n- Before returning, check: does it feel conceived in Hong Kong, does it drive the action, is every character and term correct and consistent in register?"},{"id":"fable-discipline","name":"Fable discipline","zh":"Fable 品質紀律","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Imported from your Fable skill (scope, evidence, adversarial reasoning, verification, calibrated reporting), scaled down for single-file prototypes.","summary":["唔好隨便砌 generic 嘢：先講明「做到啲咩先算完成」，處理邊緣情況，交貨前自己對住 spec 檢查。","No generic scaffolding: define done first, handle real edge cases, and verify against the spec before handing over."],"body":"PROTOTYPE DISCIPLINE (from Fable):\n1. Scope: decide silently what \"done\" means for this screen: the one core interaction works end to end with realistic data. Add nothing the spec did not imply.\n2. Edge cases: name 2-3 concrete ones for THIS idea (bill split: zero people, uneven cents; booking: past dates; game: pause, resize) and handle them visibly (validation message, disabled state).\n3. Reject generic-AI tells: no lorem ipsum, no TODO or stub buttons, no grey placeholder boxes without purpose, no default unstyled controls, no boilerplate hero that ignores what the product does.\n4. Load-bearing basics: input validation with human error text, an empty state, a working state for anything that takes time, a success state. Never show raw errors.\n5. Verify before returning: walk your output against the spec and these rules. If something cannot work in one file (accounts, payments, real data), say so in one sentence instead of faking it.\n6. Report like Fable: lead with what you built, name the biggest open risk, and when a decision only the user can make blocks quality, end with that single question."},{"id":"frontend-designer","name":"Frontend designer","zh":"前端設計師","kind":"craft","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"Built from the design-system guidance (token system, type, layout, states). No `frontend-design` skill was found in the synced set.","summary":["用設計 token、字體配對、清晰層次同完整狀態（空白、載入、錯誤）整出有質素嘅介面。","Token system, type pairing, clear hierarchy and complete states (empty, loading, error) for interfaces with real polish."],"body":"FRONTEND CRAFT (apply to every screen):\n- Open the CSS with a :root token block: 4-6 named colours (bg, surface, text, muted, accent, one semantic), 2 font tokens, a 4px spacing scale, radii, one shadow. Every colour in the file comes from a token. Define light AND dark (prefers-color-scheme) unless the concept is deliberately single-theme; body always has an explicit background.\n- Type: pair one characterful display face with one clean body face via a Google Fonts <link>, with real fallbacks. One type scale (12/14/16/20/28/40). Body at least 16px on phones, line-height 1.5, headings text-wrap:balance, lines under 65 characters.\n- Neutrals lean toward the accent hue. No flat #888 greys.\n- Layout: flex/grid with gap, 16px minimum side gutter, env(safe-area-inset-*) padding, one column on phones. Put the primary action in thumb reach (lower half); use a sticky bottom action bar when a screen has one main CTA.\n- Hierarchy: one focal point per screen, summary before detail, emphasis by size/weight/space before colour.\n- Interaction: every tap target at least 44px, visible :focus-visible, nothing hover-only, pressed state, transitions 120-180ms ease-out, respect prefers-reduced-motion.\n- States: design empty, loading, error and success for every data view. Use realistic sample data marked as sample. Never lorem ipsum, never TODO or buttons that do nothing.\n- Forms: visible labels (not placeholder-only), correct type/inputmode/autocomplete, inline error text in plain words.\n- Avoid the generic-AI look: cream + serif + terracotta, near-black + one acid accent, purple-to-blue gradient hero, emoji as section markers, everything centred, rounded-lg everywhere, accent rail on rounded cards. Use cards only where an element needs to stand apart.\n- Include one detail only this subject would have: its real units, vocabulary or document conventions."},{"id":"head-designer","name":"Head designer","zh":"設計總監","kind":"craft","applies":["prototype-html","design-variants"],"on":true,"source":"Imported from your head-designer skill (constitution + four creative inputs).","summary":["編輯式、有人手感嘅美術指導：留白多、唔對稱、只用三個色調、有紙張質感，避開 AI 預設嘅閃光漸變同膠囊掣。","Editorial, human-crafted art direction: generous negative space, controlled asymmetry, exactly three tones, tactile grain. No neon gradients or pill buttons."],"body":"ART DIRECTION: HEAD DESIGNER (human-crafted, editorial). This constitution wins over generic styling where they conflict.\nThe BRIEF gives industry, tone 1, tone 2 and a reference philosophy. If a value is \"auto\", choose confidently and state the choice in one short line of your reply.\nNEVER: neon glow gradients; glossy or clay-like 3D surfaces; perfect symmetry; over-rounded containers, pill buttons or floating drop-shadow card spam; decorative glow lines; crowded layouts padded with meaningless shapes.\nALWAYS:\n- Composition: at least 40% negative space, an off-centre editorial grid (print magazine, not dashboard template).\n- Light: one directional source (soft, from upper-left), soft diffused shadows, blacks lifted slightly off pure black.\n- Texture: tactile grain (an inline SVG-noise data-URI or layered radial-gradient noise; paper, linen, matte), never a sterile flat surface.\n- Palette: exactly three tones: Tone 1, Tone 2 and one neutral background (text derives from the neutral).\n- Controls stay usable: tap targets 44px+, corners square or at most 8px radius, contrast at AA.\nTranslate the philosophy into concrete choices: Swiss International = grid-locked type, neo-grotesque sans, red/black/white. Wabi-sabi = asymmetric composition, muted earth tones, visible imperfection. Bauhaus = primary shapes and bold geometry. Mid-century editorial = serif display with sans body on warm paper. Hong Kong heritage = enamel-sign lettering, tiled-wall green and red, newsprint grain.\nSelf-check before returning: scan the result against NEVER and fix anything that crept in."},{"id":"ux-audit","name":"UI/UX quality gate","zh":"UI/UX 品質審查","kind":"workflow","applies":["prototype-html","game-prototype","design-variants"],"on":true,"source":"New workflow skill, merging design-critique, accessibility-review (WCAG 2.1 AA), Fable's verification gate, the head-designer self-check and world-weaving, plus automated measurements taken in a real 390px render.","summary":["生成之後、你睇到之前，先量度（掣大細、對比、溢出、錯誤）同專家審查，自動修正一次，再畀你提示：要唔要上傳素材、要你決定啲咩。","After generation and before you see it: measure (tap targets, contrast, overflow, errors), expert review, auto-fix once, then tips on assets to upload and decisions only you can make."],"body":"UI/UX QUALITY GATE. Audit a generated single-file prototype BEFORE the user sees it.\n\nYou receive the idea spec, the design brief, the skill type, AUTOMATED MEASUREMENTS from a 390x844 render, and the HTML. Trust the measurements over your guess. Judge only what the HTML supports and never invent problems.\n\nReview lenses:\n1. First impression (2 seconds): what draws the eye, is the purpose clear, is that the right focal point?\n2. Usability and flow: can the core interaction finish in 3 taps or fewer? Is the primary action obvious and in thumb reach? Are empty, loading, error and success states present? Are edge cases handled (zero, invalid input, repeated taps)?\n3. Hierarchy and composition: reading order, emphasis, whitespace, type scale, consistent spacing, radius and colour tokens.\n4. Accessibility (WCAG 2.1 AA): contrast, 44px targets, labels, focus visibility, semantics, reduced motion.\n5. Copy: native Hong Kong voice for the register, hook first, no translationese, no lorem or TODO, a specific CTA.\n6. Spec conformance: does it do what the spec's core interaction says? Is anything faked that cannot work in one file?\n7. Art direction: if HEAD DESIGNER is on, check its NEVER list (neon glow, glossy 3D, pills, card spam, symmetry, more than 3 tones, no negative space, sterile flat). For games: first 60 seconds, the odd detail, feedback, persistence and open loop.\n8. Generic-AI tells: cream + serif + terracotta, purple-to-blue gradient hero, emoji section markers, everything centred, rounded-lg everywhere.\n\nSeverity: high = blocks the core task, badly fails AA, or looks broken. medium = noticeably lowers quality. low = polish.\nScore: start at 100; high -15, medium -7, low -3 each. verdict is \"pass\" when score is 80 or more and there is no high issue, otherwise \"revise\".\n\nTIPS are what the user can act on. At most 4, highest impact first, only things the USER can do and the model cannot:\n- asset: a real image would lift the result (slot: logo, photo, product or hero). Only when the design uses placeholders or generic shapes where a real brand or photo belongs.\n- decision: a product or design choice only the user can make, with 2-3 short options (each 14 characters or fewer), e.g. which action leads, which tone, which feature comes first.\n- content: real facts you had to invent (prices, opening hours, names, claims).\nNo generic tips such as \"add more features\". Write titles and reasons in the reply language, plainly, in one sentence each.\n\nReturn ONLY JSON:\n{\"score\":0-100,\"verdict\":\"pass|revise\",\"strengths\":[\"up to 3 short\"],\"issues\":[{\"sev\":\"high|medium|low\",\"area\":\"flow|hierarchy|a11y|copy|spec|art|states\",\"problem\":\"...\",\"fix\":\"a concrete change to the HTML\"}],\"tips\":[{\"kind\":\"asset\",\"slot\":\"logo|photo|product|hero\",\"title\":\"...\",\"why\":\"...\"},{\"kind\":\"decision\",\"title\":\"...\",\"why\":\"...\",\"options\":[\"...\",\"...\"]},{\"kind\":\"content\",\"title\":\"...\",\"why\":\"...\"}]}\nAt most 6 issues, most important first."},{"id":"world-weaving","name":"World weaving","zh":"遊戲世界設計","kind":"craft","applies":["game-prototype"],"on":true,"source":"Imported from your world-weaving skill (world before mechanics, first 60 seconds, open loop).","summary":["先砌個世界先砌玩法：頭 60 秒有一個明顯動作、一個滿足嘅回應、一個古怪細節，同一個令人明日再嚟嘅 open loop。","World before mechanics: a clear first 60 seconds, one odd handcrafted detail, and an open loop that brings players back."],"body":"WORLD-FIRST GAME DESIGN (from World Weaving):\n- Build the place before the mechanic: a 2-4 word world title, one line of backstory on the start screen, and a role for the player.\n- First 60 seconds: one obvious action, one satisfying response, zero tutorial text. Teach by invitation: the first obstacle or layout makes the right move obvious.\n- One odd, non-functional, handcrafted detail that suggests the world existed before the player (a sleeping cat on a rooftop, a sign with a pun).\n- Every action answers back: screen shake, particle burst, number pop, navigator.vibrate (guarded).\n- Difficulty is a curve, not a wall: each stage teaches then tests, and the next goal is visible.\n- Open loop and persistence: keep something the player owns (best score, streak, unlocked item) in localStorage, greet a returning player, and end each run hinting at what unlocks next.\n- One consistent visual language (flat shapes, pixel, or paper cut) and a quiet HUD that never fights the player.\n- Use Hong Kong world flavour when the spec allows (landmarks, vocabulary)."}];
+const PACK_ICON = { "head-designer": "pencil", "frontend-designer": "grid", "fable-discipline": "check", "world-weaving": "game", "cantonese-copywriter": "lang", "ux-audit": "shield" };
+const packOn = (id) => { const p = PACKS.find((x) => x.id === id); return !p ? false : p.kind === "workflow" ? S.gate : (S.craft[id] ?? p.on); };
+const packName = (p) => (lang() ? p.name : p.zh);
+
+const TONES = [
+  { id: "jade", zh: "翡翠綠", en: "Jade", hex: "#0e7c66" }, { id: "vermilion", zh: "朱紅", en: "Vermilion", hex: "#c8452d" },
+  { id: "ink", zh: "墨藍", en: "Ink blue", hex: "#243b6b" }, { id: "ochre", zh: "赭黃", en: "Ochre", hex: "#c58b2a" },
+  { id: "plum", zh: "梅紫", en: "Plum", hex: "#6d3a5e" }, { id: "sage", zh: "鼠尾草", en: "Sage", hex: "#8a9a7b" },
+];
+const PHIL = [
+  { id: "auto", zh: "由設計師決定", en: "Designer decides" }, { id: "swiss", zh: "瑞士國際主義", en: "Swiss International" },
+  { id: "wabi", zh: "侘寂", en: "Wabi-sabi" }, { id: "bauhaus", zh: "包浩斯", en: "Bauhaus" },
+  { id: "mid", zh: "中世紀編輯風", en: "Mid-century editorial" }, { id: "hk", zh: "港式老字號", en: "Hong Kong heritage" },
+];
+const SLOT = { logo: ["logo", "logo"], photo: ["相片", "photo"], product: ["產品相", "product photo"], hero: ["主視覺", "hero image"] };
+const slotName = (k) => (SLOT[k] || SLOT.photo)[lang()];
+
+function craftBlock(skill) {
+  return PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en")).map((p) => p.body).join("\n\n");
+}
+function briefBlock(it) {
+  const st = it.spec.style || {};
+  const tn = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean);
+  const ph = PHIL.find((p) => p.id === st.phil) || PHIL[0];
+  const tone = (i) => (tn[i] ? `${tn[i].en} ${tn[i].hex}` : "auto");
+  const as = S.assets[it.id] || [];
+  return `BRIEF:\n- project: ${it.spec.title}: ${it.spec.oneLiner}\n- tone 1: ${tone(0)}\n- tone 2: ${tone(1)}\n- reference philosophy: ${ph.id === "auto" ? "auto (choose confidently and state the choice in one short line of your reply)" : ph.en}`
+    + (as.length ? `\nASSETS uploaded by the user (reference as src="asset:ID" or url(asset:ID); never invent other image URLs):\n${as.map((a) => `- ${a.id} (${a.slot}): ${a.name}`).join("\n")}` : "");
+}
+function designPrompt(skill, it) {
+  return [SKILL_PROMPT[skill], craftBlock(skill), briefBlock(it), RULES, REGISTER[S.register], specBlock(it.spec)].filter(Boolean).join("\n\n");
+}
+
+/* ───────── assets: uploaded images are referenced as asset:ID tokens, never pasted into prompts ───────── */
+const MISSING_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='3'%3E%3Crect width='4' height='3' fill='%23c9c6bf'/%3E%3C/svg%3E";
+function resolveAssets(html, ideaId) {
+  const list = S.assets[ideaId] || [];
+  return html.replace(/asset:([a-z0-9_-]+)/g, (_, id) => list.find((a) => a.id === id)?.url || MISSING_IMG);
+}
+function shrinkImage(file, max, type) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); resolve(c.toDataURL(type, 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); reject(new Error("bad image")); };
+    img.src = u;
+  });
+}
+async function addAsset(ideaId, file, slot) {
+  const list = (S.assets[ideaId] ||= []);
+  if (list.length >= 8) { toast(t("assetMax")); return null; }
+  let url;
+  try { url = await shrinkImage(file, slot === "logo" ? 512 : 900, slot === "logo" ? "image/png" : "image/jpeg"); } catch { toast(t("assetBad")); return null; }
+  const n = list.filter((a) => a.slot === slot).length + 1;
+  const a = { id: slot + (n > 1 ? n : ""), slot, name: file.name.slice(0, 40), url };
+  list.push(a);
+  if (!LS.set("i2p.assets", S.assets)) { list.pop(); toast(t("assetFull")); return null; }
+  return a;
+}
+
+/* ───────── quality gate: measure in a real 390px render, expert review, fix once ───────── */
+function errProbe() {
+  window.__errs = [];
+  window.addEventListener("error", function (e) { window.__errs.push(String(e.message || e)); });
+  window.addEventListener("unhandledrejection", function (e) { window.__errs.push("promise: " + String(e.reason)); });
+}
+function auditProbe(ID) {
+  function lum(c) { var a = [c[0], c[1], c[2]].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; }
+  function parse(s) { var m = s && s.match(/rgba?\(([^)]+)\)/); if (!m) return null; var p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1]; }
+  function bgOf(el) { while (el && el.nodeType === 1) { var cs = getComputedStyle(el); if (cs.backgroundImage && cs.backgroundImage !== "none") return null; var c = parse(cs.backgroundColor); if (c && c[3] > 0.5) return c; el = el.parentElement; } return [255, 255, 255, 1]; }
+  function visible(el) { var r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; }
+  function nm(el) { return String(el.getAttribute("aria-label") || el.innerText || el.value || el.getAttribute("title") || el.tagName).replace(/\s+/g, " ").trim().slice(0, 24); }
+  function run() {
+    var out = { errors: (window.__errs || []).slice(0, 3), overflowBy: 0, textLen: 0, small: [], tiny: 0, contrast: [], imgNoAlt: 0, noLabel: 0, noName: 0, viewport: !!document.querySelector('meta[name="viewport"]'), lang: !!document.documentElement.getAttribute("lang"), title: !!(document.title || "").trim() };
+    var de = document.documentElement; out.overflowBy = Math.max(0, de.scrollWidth - de.clientWidth);
+    out.textLen = (document.body.innerText || "").trim().length;
+    var els = document.body.querySelectorAll("*"), n = 0;
+    for (var i = 0; i < els.length && n < 700; i++) {
+      var el = els[i]; if (!visible(el)) continue; n++;
+      var tag = el.tagName, cs = getComputedStyle(el);
+      var inter = /^(A|BUTTON|SELECT|TEXTAREA|SUMMARY)$/.test(tag) || (tag === "INPUT" && el.type !== "hidden") || el.getAttribute("role") === "button" || el.hasAttribute("onclick");
+      if (inter) {
+        var box = (tag === "INPUT" && el.closest("label")) ? el.closest("label") : el, r = box.getBoundingClientRect();
+        if (!(tag === "A" && cs.display === "inline") && (r.width < 44 || r.height < 44)) out.small.push(nm(el) + " " + Math.round(r.width) + "x" + Math.round(r.height));
+        if ((tag === "BUTTON" || tag === "A" || el.getAttribute("role") === "button") && !String(el.innerText || "").trim() && !el.getAttribute("aria-label") && !el.getAttribute("title") && !el.querySelector("img[alt]")) out.noName++;
+        if (/^(INPUT|SELECT|TEXTAREA)$/.test(tag) && !/^(hidden|submit|button|reset|image)$/.test(el.type || "") && !el.getAttribute("aria-label") && !el.getAttribute("aria-labelledby") && !el.closest("label") && !(el.id && document.querySelector('label[for="' + el.id + '"]'))) out.noLabel++;
+      }
+      if (tag === "IMG" && !el.hasAttribute("alt")) out.imgNoAlt++;
+      var own = ""; for (var k = 0; k < el.childNodes.length; k++) if (el.childNodes[k].nodeType === 3) own += el.childNodes[k].nodeValue;
+      own = own.trim();
+      if (own.length > 0 && !/^(SCRIPT|STYLE)$/.test(tag)) {
+        var fs = parseFloat(cs.fontSize); if (fs < 12) out.tiny++;
+        var fg = parse(cs.color), bg = bgOf(el);
+        if (fg && bg) {
+          var a = fg[3], f = [fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a)];
+          var l1 = lum(f), l2 = lum(bg), ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+          var large = fs >= 24 || (fs >= 18.66 && parseInt(cs.fontWeight, 10) >= 700);
+          if (ratio < (large ? 3 : 4.5)) out.contrast.push(own.slice(0, 18) + " " + ratio.toFixed(1) + ":1");
+        }
+      }
+    }
+    parent.postMessage({ ch: "i2p-audit", id: ID, m: out }, "*");
+  }
+  if (document.readyState === "complete") setTimeout(run, 700); else window.addEventListener("load", function () { setTimeout(run, 700); });
+}
+let auditSeq = 0;
+function measureHtml(html, ideaId) {
+  return new Promise((resolve) => {
+    const id = "a" + ++auditSeq, fr = document.createElement("iframe");
+    fr.setAttribute("sandbox", "allow-scripts"); fr.setAttribute("aria-hidden", "true"); fr.tabIndex = -1;
+    fr.style.cssText = "position:fixed;left:-9999px;top:0;width:390px;height:844px;border:0;visibility:hidden";
+    let done = false, to;
+    const fin = (m) => { if (done) return; done = true; window.removeEventListener("message", on); clearTimeout(to); fr.remove(); resolve(m); };
+    const on = (e) => { if (e.source === fr.contentWindow && e.data?.ch === "i2p-audit" && e.data.id === id) fin(e.data.m); };
+    to = setTimeout(() => fin(null), 7000);
+    window.addEventListener("message", on);
+    const probe = `<script>(${errProbe.toString()})();<\/script>`, runner = `<script>(${auditProbe.toString()})(${JSON.stringify(id)});<\/script>`;
+    let doc = wrap(resolveAssets(html, ideaId), {});
+    doc = /<head[^>]*>/i.test(doc) ? doc.replace(/<head[^>]*>/i, (m) => m + probe) : probe + doc;
+    doc = /<\/body>/i.test(doc) ? doc.replace(/<\/body>/i, () => runner + "</body>") : doc + runner;
+    document.body.appendChild(fr); fr.srcdoc = doc;
+  });
+}
+function staticChecks(html) {
+  const noCss = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+  return {
+    dialogs: /\b(alert|confirm|prompt)\s*\(/.test(noCss),
+    external: /<script[^>]+src=/i.test(html) || /\b(fetch|XMLHttpRequest|WebSocket|EventSource)\b/.test(noCss) || /(?:src|href)=["']https?:\/\/(?!fonts\.(?:googleapis|gstatic)\.com)/i.test(html),
+    filler: /lorem ipsum|\bTODO\b|coming soon/i.test(html),
+    focus: /:focus-visible|:focus\b/.test(html),
+    motion: !/(@keyframes|animation\s*:|transition\s*:)/.test(html) || /prefers-reduced-motion/.test(html),
+  };
+}
+function autoChecks(m, st) {
+  const c = [], add = (id, status, detail = "") => c.push({ id, status, detail });
+  add("runs", !m ? "warn" : m.errors.length || m.textLen < 30 ? "fail" : "pass", !m ? "no measurement" : m.errors[0] || (m.textLen < 30 ? "empty page" : ""));
+  if (m) {
+    add("fit", m.overflowBy > 2 ? "fail" : "pass", m.overflowBy > 2 ? `+${m.overflowBy}px` : "");
+    add("targets", !m.small.length ? "pass" : m.small.length < 3 ? "warn" : "fail", m.small.slice(0, 3).join("; "));
+    add("contrast", !m.contrast.length ? "pass" : m.contrast.length < 3 ? "warn" : "fail", m.contrast.slice(0, 3).join("; "));
+    add("text", m.tiny ? "warn" : "pass", m.tiny ? `${m.tiny} under 12px` : "");
+    const lab = m.imgNoAlt + m.noLabel + m.noName;
+    add("labels", !lab ? "pass" : lab < 3 ? "warn" : "fail", lab ? `${m.noLabel} inputs, ${m.noName} buttons, ${m.imgNoAlt} images` : "");
+    add("meta", !m.viewport ? "fail" : !m.title || !m.lang ? "warn" : "pass", !m.viewport ? "no viewport meta" : !m.title ? "no title" : !m.lang ? "no lang" : "");
+  }
+  add("offline", st.external ? "fail" : "pass", st.external ? "external script, request or link" : "");
+  add("dialogs", st.dialogs ? "fail" : "pass", st.dialogs ? "alert/confirm/prompt" : "");
+  add("polish", st.filler ? "fail" : !st.focus || !st.motion ? "warn" : "pass", st.filler ? "lorem/TODO text" : !st.focus ? "no visible focus style" : !st.motion ? "animation without reduced-motion" : "");
+  return c;
+}
+const autoScore = (c) => Math.max(0, 100 - 25 * c.filter((x) => x.status === "fail").length - 8 * c.filter((x) => x.status === "warn").length);
+
+function normalizeReview(j) {
+  if (!j || typeof j !== "object") return null;
+  const W = { high: 15, medium: 7, low: 3 };
+  const issues = (Array.isArray(j.issues) ? j.issues : []).filter((x) => x && x.problem).slice(0, 6)
+    .map((x) => ({ sev: W[x.sev] ? x.sev : "medium", area: String(x.area || ""), problem: String(x.problem).slice(0, 200), fix: String(x.fix || "").slice(0, 240) }));
+  const tips = (Array.isArray(j.tips) ? j.tips : []).filter((x) => x && x.title && ["asset", "decision", "content"].includes(x.kind)).slice(0, 4)
+    .map((x) => ({ kind: x.kind, title: String(x.title).slice(0, 90), why: String(x.why || "").slice(0, 180), slot: SLOT[x.slot] ? x.slot : "photo", options: (Array.isArray(x.options) ? x.options : []).map((o) => String(o).slice(0, 24)).slice(0, 3), done: null }))
+    .filter((x) => x.kind !== "decision" || x.options.length >= 2);
+  let score = Number(j.score); if (!isFinite(score)) score = 100 - issues.reduce((n, i) => n + W[i.sev], 0);
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  return { score, verdict: j.verdict === "pass" && score >= 80 && !issues.some((i) => i.sev === "high") ? "pass" : "revise", strengths: (Array.isArray(j.strengths) ? j.strengths : []).slice(0, 3).map((x) => String(x).slice(0, 100)), issues, tips };
+}
+async function expertReview(it, skill, html, checks, signal) {
+  const sample = await sampler(); if (!sample?.json) return null;
+  const meas = checks.map((c) => `${c.id}: ${c.status}${c.detail ? " (" + c.detail + ")" : ""}`).join("\n");
+  const ux = PACKS.find((p) => p.id === "ux-audit")?.body || "";
+  const hd = PACKS.some((p) => p.id === "head-designer" && p.applies.includes(skill)) && packOn("head-designer");
+  const prompt = `[Instructions]\n${ux}\nHEAD DESIGNER is ${hd ? "ON" : "OFF"}.\n${REGISTER[S.register]}\n[/Instructions]\n\nSKILL TYPE: ${skill}\n${briefBlock(it)}\n${specBlock(it.spec)}\n\nAUTOMATED MEASUREMENTS (390x844 render):\n${meas}\n\nHTML:\n\`\`\`html\n${html.slice(0, 16000)}\n\`\`\``;
+  try { return normalizeReview(await sample.json(prompt, { signal, cache: false, modelTier: "default" })); }
+  catch (e) { if (signal?.aborted) throw e; return null; }
+}
+async function polish(it, skill, html, checks, review, signal) {
+  const sample = await sampler();
+  const auto = checks.filter((c) => c.status !== "pass").map((c) => `- ${c.id}: ${c.status}${c.detail ? " (" + c.detail + ")" : ""}`);
+  const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- [${i.sev}/${i.area}] ${i.problem} => ${i.fix}`);
+  const prompt = `[Instructions]\n${designPrompt(skill, it)}\n[/Instructions]\n\nAUDIT FINDINGS. Fix every item below, keep everything that already works, and return the full updated document in the same output format.\nAUTOMATED:\n${auto.join("\n") || "- none"}\nEXPERT:\n${exp.join("\n") || "- none"}\n\nCURRENT PROTOTYPE:\n\`\`\`html\n${html}\n\`\`\``;
+  const res = await sample(prompt, { signal, cache: false, modelTier: "complex" });
+  return extract(res.text || "").html;
+}
+const fallbackTips = (it, skill) => (skill !== "game-prototype" && !(S.assets[it.id] || []).length ? [{ kind: "asset", slot: "logo", title: t("fbAssetTitle"), why: t("fbAssetWhy"), options: [], done: null }] : []);
+
+/** Never throws: on any failure the unaudited HTML is delivered rather than lost. */
+async function qualityGate({ it, skill, html, deep, allowFix = true, signal }) {
+  const stage = (k, v) => { if (S.pending?.stages) { S.pending.stages[k] = v; renderPending(); } };
+  let outHtml = html, checks = [], review = null, fixed = false;
+  try {
+    stage("design", "done"); stage("audit", "running");
+    checks = autoChecks(await measureHtml(html, it.id), staticChecks(html));
+    review = deep ? await expertReview(it, skill, html, checks, signal) : null;
+    stage("audit", "done");
+    const needFix = allowFix && (checks.some((c) => c.status === "fail") || review?.verdict === "revise");
+    if (needFix) {
+      stage("fix", "running");
+      const h2 = await polish(it, skill, html, checks, review, signal);
+      if (h2) {
+        // Accept a fix only if it measurably helps: a better automated score, or equal automated score and a higher expert score.
+        const c2 = autoChecks(await measureHtml(h2, it.id), staticChecks(h2));
+        const r2 = deep ? await expertReview(it, skill, h2, c2, signal) : null;
+        const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
+        if (better) { outHtml = h2; checks = c2; fixed = true; review = r2 || review; }
+      }
+      stage("fix", "done");
+    } else stage("fix", "skip");
+  } catch (e) { if (signal?.aborted || !checks.length) return { html: outHtml, q: null }; }
+  const q = {
+    deep: !!deep, fixed, at: Date.now(), auto: checks.map(({ id, status, detail }) => ({ id, status, detail })), autoScore: autoScore(checks),
+    score: review ? review.score : null, verdict: review ? review.verdict : null, strengths: review?.strengths || [], issues: review?.issues || [], tips: review?.tips || [],
+  };
+  if (!q.tips.length) q.tips = fallbackTips(it, skill);
+  return { html: outHtml, q };
+}
+
+async function reauditVersion(n, { fix }) {
+  const it = idea(), v = it?.versions.find((x) => x.n === n);
+  if (!v || S.auditing || S.pending) return;
+  S.auditing = true; toast(t("auditing")); render();
+  try {
+    const r = await qualityGate({ it, skill: v.skill, html: v.html, deep: true, allowFix: !!fix });
+    if (r.html !== v.html) {
+      const nn = (it.versions.at(-1)?.n || 0) + 1;
+      it.versions.push({ n: nn, html: r.html, q: r.q, skill: v.skill, note: "", createdAt: Date.now() });
+      it.currentVersion = nn; S.viewN = nn; S.previewOpen = true;
+      it.messages.push({ role: "user", content: t("autofixMsg"), skill: v.skill });
+      it.messages.push({ role: "assistant", content: t("autofixDone"), skill: v.skill, versionN: nn, feedback: 0 });
+    } else { if (r.q) v.q = r.q; if (fix) toast(t("auditPass")); }
+    it.updatedAt = Date.now(); persist();
+  } finally { S.auditing = false; render(); scrollEnd(); }
+}
+
+/* ───────── quality card + tips ───────── */
+const stagesHtml = (st) => `<ol class="stages" aria-label="progress">${["design", "audit", "fix"].map((k) => `<li data-s="${st[k]}"><i>${st[k] === "done" ? "✓" : st[k] === "running" ? "…" : st[k] === "skip" ? "–" : "·"}</i>${t("stage_" + k)}</li>`).join("")}</ol>`;
+function qualityHtml(it, n) {
+  const v = it.versions.find((x) => x.n === n), q = v?.q; if (!q) return "";
+  const latest = n === it.currentVersion, sc = q.score ?? q.autoScore, tone = sc >= 85 ? "good" : sc >= 70 ? "ok" : "low";
+  const mark = (x) => (x === "pass" ? "✓" : x === "warn" ? "!" : "✕");
+  const chk = q.auto.map((c) => `<li class="chk" data-s="${c.status}" title="${esc(c.detail || "")}"><i>${mark(c.status)}</i>${t("chk_" + c.id)}</li>`).join("");
+  const iss = q.issues.slice(0, 4).map((i) => `<li class="iss" data-sev="${i.sev}"><b>${esc(i.problem)}</b><span class="muted">${esc(i.fix)}</span></li>`).join("");
+  return `<details class="quality" ${latest ? "open" : ""}><summary><span class="qscore" data-tone="${tone}">${sc}</span><span class="qt">${t("qTitle")}</span>${q.fixed ? `<span class="tag">${t("qFixed")}</span>` : ""}${q.deep ? "" : `<span class="faint">${t("qLight")}</span>`}</summary>
+    <ul class="chks">${chk}</ul>
+    ${q.strengths.length ? `<p class="label">${t("qStrengths")}</p><ul class="plain">${q.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${iss ? `<p class="label">${q.fixed ? t("qFixedList") : t("qReview")}</p><ul class="issues">${iss}</ul>` : ""}
+    <div class="qact"><button class="btn" data-act="reaudit" data-n="${n}" ${S.auditing ? "disabled" : ""}>${t("reaudit")}</button>${q.issues.length && !q.fixed ? `<button class="btn" data-act="autofix" data-n="${n}" ${S.auditing ? "disabled" : ""}>${t("autofix")}</button>` : ""}</div></details>${latest ? tipsHtml(it, v) : ""}`;
+}
+function tipsHtml(it, v) {
+  const tips = v.q.tips, as = S.assets[it.id] || [];
+  if (!tips.length && !as.length) return "";
+  const KIND = { asset: t("kAsset"), decision: t("kDecision"), content: t("kContent") };
+  const cards = tips.map((tp, i) => {
+    let act = "";
+    if (tp.done) act = `<span class="tag">✓ ${esc(tp.done)}</span>`;
+    else if (tp.kind === "asset") act = `<button class="btn" data-act="tip-asset" data-slot="${tp.slot}">${svg("upload")} ${t("tipAsset").replace("{slot}", slotName(tp.slot))}</button>`;
+    else if (tp.kind === "decision") act = tp.options.map((o, j) => `<button class="chip" data-act="tip-decide" data-n="${v.n}" data-i="${i}" data-j="${j}">${esc(o)}</button>`).join("");
+    else act = `<button class="btn" data-act="tip-content" data-n="${v.n}" data-i="${i}">${t("tipContent")}</button>`;
+    return `<li class="tip"><span class="tipk">${KIND[tp.kind]}</span><b>${esc(tp.title)}</b><span class="muted">${esc(tp.why)}</span><div class="tipa">${act}</div></li>`;
+  }).join("");
+  const thumbs = as.length ? `<div class="assets"><span class="faint">${t("assetsTitle")}</span>${as.map((a) => `<span class="thumb"><img src="${a.url}" alt="${esc(a.name)}"><button class="ib sm" data-act="asset-remove" data-id="${a.id}" aria-label="${t("assetRemove")}">${svg("x")}</button></span>`).join("")}</div>` : "";
+  return `<section class="tips" aria-label="${t("tipsTitle")}"><h3>${t("tipsTitle")}</h3>${cards ? `<ul>${cards}</ul>` : ""}${thumbs}</section>`;
+}
+function styleFieldHtml() {
+  if (S.skillPick === "idea-capture") return "";
+  const L = lang(), st = (S.spec.style ||= { tones: [], phil: "auto" });
+  const sw = TONES.map((x) => `<button class="swatch" style="background:${x.hex}" data-tone="${x.id}" aria-pressed="${st.tones.includes(x.id)}" aria-label="${L ? x.en : x.zh}" title="${L ? x.en : x.zh}"></button>`).join("");
+  const showPhil = S.spec.suggestedSkill !== "game-prototype";
+  return `<div class="field"><span class="label">${t("styleTitle")}</span><p class="faint" style="margin:0 0 8px;font-size:12px">${t("styleSub")}</p>
+    <div class="swatches" role="group" aria-label="${t("tones")}">${sw}</div>
+    ${showPhil ? `<div class="chips" style="margin-top:10px" role="group" aria-label="${t("phil")}">${PHIL.map((p) => `<button class="chip" data-phil="${p.id}" aria-pressed="${st.phil === p.id}">${L ? p.en : p.zh}</button>`).join("")}</div>` : ""}</div>`;
+}
 
 /* ───────── skill library ───────── */
 const LIB = [
@@ -346,7 +695,7 @@ const AGENTS = [
 function agentPrompt(def, it, note, prior, cur) {
   const skill = cur?.skill || it.spec.suggestedSkill;
   const plain = def.kind === "build" ? "" : '\nPlain text only: no markdown headings; short lines; use "- " for lists; **bold** is allowed.';
-  const ins = def.kind === "build" ? `${def.ins}\n${SKILL_PROMPT[skill]}\n${RULES}` : def.ins;
+  const ins = def.kind === "build" ? `${def.ins}\n${designPrompt(skill, it)}` : def.ins;
   const ctx = [
     `IDEA: ${JSON.stringify(it.spec)}`,
     it.raw ? `ORIGINAL WORDS: ${it.raw}` : "",
@@ -383,8 +732,9 @@ async function runAgent(agent, ideaId, note) {
       if (def.kind === "build") {
         const { note: lead, html } = extract(text);
         if (!html) throw new Error(lang() ? "No prototype came back." : "冇生成到原型。");
+        const g = await qualityGate({ it, skill: cur?.skill || it.spec.suggestedSkill, html, deep: false, allowFix: false });
         const n = (it.versions.at(-1)?.n || 0) + 1;
-        it.versions.push({ n, html, skill: cur?.skill || it.spec.suggestedSkill, note: lead.slice(0, 300), createdAt: Date.now() });
+        it.versions.push({ n, html: g.html, q: g.q, skill: cur?.skill || it.spec.suggestedSkill, note: lead.slice(0, 300), createdAt: Date.now() });
         it.currentVersion = n; st.versionN = n; text = lead || "✓";
       }
       st.text = text.trim(); st.status = "done";
@@ -411,11 +761,20 @@ async function runAgent(agent, ideaId, note) {
 }
 
 /* ───────── views: skills, agents, run ───────── */
+function packRow(p) {
+  const L = lang(), on = packOn(p.id);
+  return `<div class="acard prow"><button class="rowmain" data-skill-open="${p.id}"><span class="ico">${skillIcon(p.id)}</span>
+    <span style="flex:1;min-width:0"><b>${packName(p)}</b><br><span class="muted">${p.summary[L]}</span><br><span class="faint" style="font-size:12px">${t("appliesTo")}：${p.applies.map((x) => sl(x)).join(" · ")}</span></span></button>
+    <button class="switch" role="switch" aria-checked="${on}" aria-label="${esc(packName(p))}" data-pack-toggle="${p.id}"></button></div>`;
+}
 function viewSkills() {
   const L = lang();
-  return `<div class="lib"><h1>${t("skillsTitle")}</h1><p class="muted" style="margin:0 0 16px">${t("skillsSub")}</p>
-    <div class="list">${LIB.map((k) => `<button class="acard" data-skill-open="${k.id}"><span class="ico">${skillIcon(k.id)}</span>
-      <span style="flex:1;min-width:0"><b>${sl(k.id)}</b> <span class="faint" style="font-size:12px">v${k.ver}</span><br><span class="muted">${k.desc[L]}</span><br><span class="faint" style="font-size:12px">${t("used").replace("{n}", skillCount(k.id))}</span></span>${svg("chevron")}</button>`).join("")}</div>
+  const core = LIB.map((k) => `<button class="acard" data-skill-open="${k.id}"><span class="ico">${skillIcon(k.id)}</span>
+      <span style="flex:1;min-width:0"><b>${sl(k.id)}</b> <span class="faint" style="font-size:12px">v${k.ver}</span><br><span class="muted">${k.desc[L]}</span><br><span class="faint" style="font-size:12px">${t("used").replace("{n}", skillCount(k.id))}</span></span>${svg("chevron")}</button>`).join("");
+  return `<div class="lib"><h1>${t("skillsTitle")}</h1><p class="muted" style="margin:0 0 8px">${t("skillsSub")}</p>
+    <h2 class="group">${t("coreTitle")}</h2><div class="list">${core}</div>
+    <h2 class="group">${t("craftTitle")}</h2><div class="list">${PACKS.filter((p) => p.kind === "craft").map(packRow).join("")}</div>
+    <h2 class="group">${t("workflowTitle")}</h2><div class="list">${PACKS.filter((p) => p.kind === "workflow").map(packRow).join("")}</div>
     <p class="note">${t("routerNote")}</p></div>`;
 }
 
@@ -454,7 +813,17 @@ function renderRunBody() {
 }
 
 /* ───────── sheets ───────── */
+function sheetPack(p) {
+  const L = lang(), on = packOn(p.id), wf = p.kind === "workflow";
+  return `<div class="handle"></div><h2>${packName(p)} <span class="tag">${wf ? t("workflowTag") : t("craftTag")}</span></h2><p class="muted" style="margin:0 0 14px">${p.summary[L]}</p>
+    <dl class="kv"><dt>${t("appliesTo")}</dt><dd>${p.applies.map((x) => sl(x)).join(" · ")}</dd><dt>${t("source")}</dt><dd>${esc(p.source)}</dd></dl>
+    <div class="setrow"><span id="pk-l">${wf ? t("gateOn") : t("packOn")}</span><button class="switch" role="switch" aria-checked="${on}" aria-labelledby="pk-l" data-pack-toggle="${p.id}"></button></div>
+    ${p.id === "ux-audit" ? `<button class="btn block" data-act="audit-current" style="margin-top:4px">${svg("shield")} ${t("auditCurrent")}</button>` : ""}
+    <details style="margin-top:14px"><summary class="label" style="cursor:pointer">${t("promptSrc")}</summary><pre class="src">${esc(p.body)}</pre></details>
+    <button class="btn ghost block" data-act="sheet-close" style="margin-top:10px">${t("close")}</button>`;
+}
 function sheetSkill(id) {
+  const pk = PACKS.find((x) => x.id === id); if (pk) return sheetPack(pk);
   const k = LIB.find((x) => x.id === id), L = lang();
   return `<div class="handle"></div><h2>${sl(id)} <span class="tag">v${k.ver}</span></h2><p class="muted" style="margin:0 0 14px">${k.desc[L]}</p>
     <dl class="kv"><dt>${t("gives")}</dt><dd>${k.gives[L]}</dd><dt>${t("getsBack")}</dt><dd>${k.gets[L]}</dd><dt>${t("tested")}</dt><dd>${k.evals} ${L ? "cases" : "個案例"}</dd></dl>
@@ -525,10 +894,9 @@ function route(text, artifactSkill) {
 const RULES = `Output rules (strict):
 - First, 1–2 short sentences to the user about what you built or changed. No headings, no lists.
 - Then ONE fenced \`\`\`html block with a COMPLETE single-file HTML document.
-- All CSS in <style>, all JS in <script>. No external scripts, no network requests, no CDNs, no external images (use CSS, emoji or inline SVG).
-- Write every visible line like a senior Hong Kong copywriter: hook-first headline, short lines, one clear low-friction CTA per screen, no translationese.
+- All CSS in <style>, all JS in <script>. No external scripts, no network requests, no CDNs, no external images (use CSS, inline SVG, or the user's ASSETS via src="asset:ID" when provided). A Google Fonts <link> is allowed.
 - Mobile-first portrait (360–430px), viewport meta, 100dvh, touch targets ≥ 44px, no hover-only interactions. No alert/confirm/prompt.
-- localStorage is allowed. Keep it compact: under ~250 lines, never truncate.`;
+- localStorage is allowed. Aim for 250-450 lines; never truncate. Fewer, better-finished components beat many half-finished ones.`;
 const SKILL_PROMPT = {
   "prototype-html": "You are a senior product designer-engineer. Build a working, clickable, mobile-first prototype of the idea as one HTML file. Make the core interaction actually work with realistic sample data. Polished, modern, generous spacing, one accent colour.",
   "game-prototype": "You are a mobile game prototyper. Build a playable PORTRAIT game on a full-screen <canvas>. Pointer events for touch (tap/drag) that work with one thumb, also mouse. touch-action:none, devicePixelRatio, resize, requestAnimationFrame. Start screen → play → game over with score and tap-to-restart; best score in localStorage. Gentle difficulty ramp, light juicy feedback.",
@@ -548,7 +916,7 @@ function buildMessages(skill, it, input, currentHtml) {
   while (hist.length && hist[0].role !== "user") hist.shift();
   const sys = skill === "chat"
     ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\nThe idea: ${specBlock(it.spec)}`
-    : `${SKILL_PROMPT[skill]}\n${RULES}\n${REGISTER[S.register]}\n${specBlock(it.spec)}`;
+    : designPrompt(skill, it);
   const iter = currentHtml ? `\n\nCURRENT PROTOTYPE (modify it — keep everything not asked to change, return the full updated document):\n\`\`\`html\n${currentHtml}\n\`\`\`` : "";
   const msgs = [...hist, { role: "user", content: input + iter }];
   // System instructions ride in the first user turn (memoryless sampler).
@@ -612,6 +980,7 @@ ${REGISTER[S.register]}
       title: String(sp.title || raw.slice(0, 30)), oneLiner: String(sp.oneLiner || ""), coreInteraction: String(sp.coreInteraction || ""),
       targetUser: String(sp.targetUser || ""), suggestedSkill: ok.includes(sp.suggestedSkill) ? sp.suggestedSkill : "prototype-html",
     };
+    S.spec.style = { tones: [], phil: "auto" };
     if (S.skillPick && S.skillPick !== "idea-capture") S.spec.suggestedSkill = S.skillPick;
   } catch (e) { toast(modelError(e)); }
   S.busy = false; S.status = ""; render();
@@ -645,7 +1014,7 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
   const iterating = skill !== "chat" && cur && cur.skill === skill && cur.html;
   const msgs = buildMessages(skill, it, input, iterating ? cur.html : null);
   it.messages.push({ role: "user", content: input, skill });
-  S.pending = { skill, text: "", chars: 0, confidence: r.confidence };
+  S.pending = { skill, text: "", chars: 0, confidence: r.confidence, stages: skill !== "chat" && S.gate ? { design: "running", audit: "pending", fix: "pending" } : null };
   render(); scrollEnd();
 
   abort = new AbortController();
@@ -664,10 +1033,15 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
     full = res.text || full;
     let content = full.trim(), versionN = null, outSkill = skill;
     if (skill !== "chat") {
-      const { note, html } = extract(full);
-      if (html) {
+      const { note, html: rawHtml } = extract(full);
+      if (rawHtml) {
+        let html = rawHtml, q = null;
+        if (S.gate) {
+          const g = await qualityGate({ it, skill, html: rawHtml, deep: !!regenerate || !(cur && cur.skill === skill && cur.q), signal: abort.signal });
+          html = g.html; q = g.q;
+        }
         versionN = (it.versions.at(-1)?.n || 0) + 1;
-        it.versions.push({ n: versionN, html, skill, note: note.slice(0, 300), createdAt: Date.now() });
+        it.versions.push({ n: versionN, html, q, skill, note: note.slice(0, 300), createdAt: Date.now() });
         it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
         content = note || "✓";
         if (res.truncated) toast(lang() ? "Output was cut short; it may be incomplete. Try “regenerate”." : "輸出被截短，可能唔完整。可以試下重新生成。");
@@ -675,7 +1049,7 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
     }
     it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
   } catch (e) {
-    if (e?.name !== "AbortError" && e?.code !== "aborted") toast(modelError(e));
+    if (!abort?.signal.aborted && e?.name !== "AbortError" && e?.code !== "aborted") toast(modelError(e));
     if (full.trim()) it.messages.push({ role: "assistant", content: full.trim(), skill: "chat", feedback: 0 });
   }
   it.updatedAt = Date.now(); S.pending = null; abort = null; persist(); render(); scrollEnd();
@@ -716,14 +1090,15 @@ async function downloadHtml(v, it) {
   const dl = await (window.claude?.use ? window.claude.use("downloads") : null);
   const name = (it.spec.title || "prototype").replace(/[^\w一-鿿-]+/g, "-").slice(0, 40) + `-v${v.n}.html`;
   if (!dl) {
-    try { await navigator.clipboard.writeText(v.html); toast(t("copied") + " (HTML)"); } catch { toast("—"); }
+    try { await navigator.clipboard.writeText(resolveAssets(v.html, it.id)); toast(t("copied") + " (HTML)"); } catch { toast("—"); }
     return;
   }
-  try { await dl.save({ filename: name, data: v.html }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
+  try { await dl.save({ filename: name, data: resolveAssets(v.html, it.id) }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
 }
 
 /* ───────── rendering ───────── */
 const $app = document.getElementById("app");
+let lastView = null;
 const prose = (s) => esc(s).split(/\n{2,}/).map((p) => `<p>${p.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>")}</p>`).join("");
 function scrollEnd() { requestAnimationFrame(() => { const s = document.getElementById("scroll"); if (s) s.scrollTop = s.scrollHeight; }); }
 function syncDraft() { const ta = document.getElementById("draft"); if (ta) { ta.value = S.draft; autosize(ta); } }
@@ -748,6 +1123,7 @@ function viewCapture() {
       <div class="field"><label class="label" for="sp-targetUser">${t("user")}</label>${f("targetUser")}</div>
       <div class="field"><span class="label">${t("buildAs")}</span><div style="display:flex;gap:8px;flex-wrap:wrap">
         ${["prototype-html","game-prototype","design-variants"].map((s) => `<button class="chip" data-skill="${s}" aria-pressed="${S.spec.suggestedSkill === s}">${skillIcon(s)} ${sl(s)}</button>`).join("")}</div></div>
+      ${styleFieldHtml()}
       <button class="btn primary lg block" id="gen">${S.skillPick === "idea-capture" ? t("saveOnly") : t("generate")}</button>
       <button class="btn ghost block" id="reset" style="margin-top:8px">${t("over")}</button></section></div>`;
   }
@@ -778,6 +1154,7 @@ function msgHtml(m, i, it, lastA) {
   return `<div class="msg">${m.skill && m.skill !== "chat" ? `<div class="route">${skillIcon(m.skill)} ${sl(m.skill)}</div>` : ""}
     <div class="prose">${prose(m.content)}</div>
     ${m.versionN ? `<button class="acard" data-act="open" data-n="${m.versionN}"><span class="ico">${skillIcon(m.skill)}</span><span style="flex:1;min-width:0"><b>${esc(it.spec.title)}</b><br><span class="muted">${t("version")} ${m.versionN}${m.versionN === it.currentVersion ? " · " + t("current") : ""}</span></span>${svg("play")}</button>` : ""}
+    ${m.versionN ? qualityHtml(it, m.versionN) : ""}
     <div class="acts"><button class="ib sm" data-act="copy" data-i="${i}" aria-label="Copy">${svg("copy")}</button>
       <button class="ib sm" data-act="fb" data-v="1" data-i="${i}" aria-label="Good" aria-pressed="${m.feedback === 1}" style="${m.feedback === 1 ? "color:var(--accent)" : ""}">${svg("up")}</button>
       <button class="ib sm" data-act="fb" data-v="-1" data-i="${i}" aria-label="Bad" aria-pressed="${m.feedback === -1}" style="${m.feedback === -1 ? "color:var(--danger)" : ""}">${svg("down")}</button>
@@ -788,7 +1165,7 @@ function pendingHtml() {
   const p = S.pending; if (!p) return "";
   return `<div class="msg" id="pending">${p.skill !== "chat" ? `<div class="route">${skillIcon(p.skill)} ${sl(p.skill)}</div>` : ""}
     <div class="prose" aria-live="polite" aria-busy="true">${p.text ? prose(p.text) : p.chars ? "" : `<span class="dots"><i></i><i></i><i></i></span>`}</div>
-    ${p.chars ? `<div class="prog" role="status"><span class="dots"><i></i><i></i><i></i></span>${t("building")} · ${(p.chars / 1000).toFixed(1)}k</div>` : ""}</div>`;
+    ${p.stages ? stagesHtml(p.stages) : ""}${p.chars && (!p.stages || p.stages.design === "running") ? `<div class="prog" role="status"><span class="dots"><i></i><i></i><i></i></span>${t("building")} · ${(p.chars / 1000).toFixed(1)}k</div>` : ""}</div>`;
 }
 function renderPending() { const el = document.getElementById("pending"); if (el) { el.outerHTML = pendingHtml(); scrollEnd(); } }
 
@@ -801,7 +1178,7 @@ function viewIdea() {
       <div class="pbar"><button class="ib" data-act="close" aria-label="Close">${svg("x")}</button><span class="t">${esc(it.spec.title)}</span>
         <label class="sr" for="ver">${t("version")}</label><select id="ver">${it.versions.map((x) => `<option value="${x.n}" ${x.n === viewN ? "selected" : ""}>v${x.n}${x.n === it.currentVersion ? " · " + t("current") : ""}</option>`).join("")}</select>
         ${viewN !== it.currentVersion ? `<button class="btn" style="min-height:34px" data-act="revert" data-n="${viewN}">${t("revert")}</button>` : ""}
-        <button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
+        <button class="ib" data-act="reaudit" data-n="${viewN}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
       <div class="stage">${v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${viewN}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`}</div></aside>` : "";
   const modelLabel = `${sl(S.pending?.skill || it.messages.at(-1)?.skill || it.spec.suggestedSkill)} · ${S.register === "en" ? "EN" : S.register === "yue" ? "廣東話" : "中英"}`;
   return `<div class="ws"><div class="chat">
@@ -850,10 +1227,12 @@ function render() {
   const navBtn = (v, icon, label) => `<button data-nav="${v}" aria-current="${cur === v ? "page" : "false"}">${svg(icon)}${label}</button>`;
   const nav = inIdea ? "" : `<nav class="nav" aria-label="Main">${navBtn("capture", "plus", t("newIdea"))}${navBtn("skills", "grid", t("navSkills"))}${navBtn("agents", "bot", t("navAgents"))}${navBtn("journal", "book", t("journal"))}</nav>`;
   const focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
+  const keepScroll = lastView === S.view ? ($app.querySelector(".main")?.scrollTop || 0) : 0; lastView = S.view;
   $app.innerHTML = top + `<main class="main" style="${inIdea ? "padding:0;overflow:hidden;display:flex;flex-direction:column" : ""}">${body}</main>` + nav;
+  if (keepScroll) $app.querySelector(".main").scrollTop = keepScroll;
   if (inIdea) { const ws = $app.querySelector(".ws"); if (ws) ws.style.flex = "1"; const sc = $app.querySelector(".chat"); sc.querySelectorAll(".col,.composer-wrap").forEach((e) => { e.style.paddingLeft = "max(16px, env(safe-area-inset-left,0px))"; e.style.paddingRight = "max(16px, env(safe-area-inset-right,0px))"; }); }
   const fr = document.getElementById("pframe");
-  if (fr && it) { const v = it.versions.find((x) => x.n === (S.viewN ?? it.currentVersion)); fr.srcdoc = wrap(v.html, it.store); }
+  if (fr && it) { const v = it.versions.find((x) => x.n === (S.viewN ?? it.currentVersion)); fr.srcdoc = wrap(resolveAssets(v.html, it.id), it.store); }
   const ta = document.getElementById("draft"); if (ta) autosize(ta);
   if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch {} } }
 }
@@ -866,6 +1245,14 @@ const onClick = async (e) => {
   if (b.dataset.reg) { S.register = b.dataset.reg; LS.set("i2p.register", S.register); return render(); }
   if (b.dataset.nav) { if (S.listening) dict?.stop().catch(() => {}); S.view = b.dataset.nav; S.previewOpen = false; S.editing = null; S.draft = ""; S.sheet = null; renderSheet(); if (S.view === "capture") S.skillPick = null; return render(); }
   if (b.dataset.ex) { S.draft = b.dataset.ex; return structure(S.draft); }
+  if (b.dataset.packToggle) {
+    const id = b.dataset.packToggle, p = PACKS.find((x) => x.id === id);
+    if (p.kind === "workflow") { S.gate = !S.gate; LS.set("i2p.gate", S.gate); } else { S.craft[id] = !packOn(id); LS.set("i2p.craft", S.craft); }
+    if (S.sheet) renderSheet();
+    return render();
+  }
+  if (b.dataset.tone) { const st = S.spec.style, i = st.tones.indexOf(b.dataset.tone); if (i >= 0) st.tones.splice(i, 1); else { st.tones.push(b.dataset.tone); if (st.tones.length > 2) st.tones.shift(); } return render(); }
+  if (b.dataset.phil) { S.spec.style.phil = b.dataset.phil; return render(); }
   if (b.dataset.skillOpen) { S.sheet = { kind: "skill", id: b.dataset.skillOpen }; return renderSheet(); }
   if (b.dataset.agentOpen) { S.sheet = { kind: "agent", id: b.dataset.agentOpen, ideaId: S.ideas.some((i) => i.id === S.ideaId) ? S.ideaId : S.ideas[0]?.id, note: "" }; return renderSheet(); }
   if (b.dataset.skillUse) { S.skillPick = b.dataset.skillUse; S.sheet = null; renderSheet(); S.view = "capture"; S.sug = pickSuggestions(S.skillPick); render(); return document.getElementById("draft")?.focus(); }
@@ -879,6 +1266,23 @@ const onClick = async (e) => {
   if (b.id === "reset") { S.spec = null; S.draft = ""; return render(); }
   const it = idea(); const i = +b.dataset.i;
   switch (b.dataset.act) {
+    case "reaudit": return reauditVersion(+b.dataset.n, { fix: false });
+    case "autofix": return reauditVersion(+b.dataset.n, { fix: true });
+    case "audit-current": {
+      const cur = idea(); if (!cur?.currentVersion) return toast(t("noProto"));
+      S.sheet = null; renderSheet(); S.view = "idea"; render(); return reauditVersion(cur.currentVersion, { fix: false });
+    }
+    case "tip-asset": S.assetSlot = b.dataset.slot; document.getElementById("assetfile").click(); return;
+    case "tip-decide": {
+      const v = it.versions.find((x) => x.n === +b.dataset.n), tp = v.q.tips[+b.dataset.i], opt = tp.options[+b.dataset.j];
+      tp.done = opt; persist(); render();
+      return turn({ input: lang() ? `Decision on "${tp.title}": ${opt}. Apply it.` : `「${tp.title}」我揀：${opt}。按呢個改。`, forceSkill: v.skill });
+    }
+    case "tip-content": {
+      const v = it.versions.find((x) => x.n === +b.dataset.n), tp = v.q.tips[+b.dataset.i];
+      S.draft = `${tp.title}：`; render(); const d = document.getElementById("draft"); d?.focus(); d?.setSelectionRange(d.value.length, d.value.length); return;
+    }
+    case "asset-remove": { const l = S.assets[S.ideaId] || []; const k = l.findIndex((a) => a.id === b.dataset.id); if (k >= 0) l.splice(k, 1); LS.set("i2p.assets", S.assets); return render(); }
     case "sheet-close": S.sheet = null; return renderSheet();
     case "sug-refresh": S.sug = pickSuggestions(S.skillPick); return render();
     case "skill-clear": S.skillPick = null; S.sug = pickSuggestions(); return render();
@@ -904,11 +1308,19 @@ const onClick = async (e) => {
     case "stop": abort?.abort(); return;
     case "del":
       if (!S.confirmDel) { S.confirmDel = true; toast(t("confirmDel")); return render(); }
-      S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); persist(); S.confirmDel = false; S.view = "journal"; return render();
+      S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); delete S.assets[S.ideaId]; LS.set("i2p.assets", S.assets); persist(); S.confirmDel = false; S.view = "journal"; return render();
   }
 };
 $app.addEventListener("click", onClick);
 document.getElementById("sheet").addEventListener("click", onClick);
+document.getElementById("assetfile").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0]; e.target.value = "";
+  const it = idea(); if (!f || !it) return;
+  const a = await addAsset(it.id, f, S.assetSlot || "photo"); if (!a) return;
+  toast(t("assetUsed")); render();
+  const cur = it.versions.find((v) => v.n === it.currentVersion);
+  turn({ input: lang() ? `Use the uploaded ${slotName(a.slot)} (asset:${a.id}) where it fits best.` : `將我上傳嘅${slotName(a.slot)}（asset:${a.id}）用落最啱嘅位置。`, forceSkill: cur?.skill || it.spec.suggestedSkill });
+});
 $app.addEventListener("input", (e) => {
   const el = e.target;
   if (el.id === "draft") { S.draft = el.value; autosize(el); const s = $app.querySelector('.sbtn[type="submit"]'); if (s) s.disabled = !S.draft.trim(); }
