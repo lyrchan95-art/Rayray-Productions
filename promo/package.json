@@ -1,0 +1,25 @@
+{
+  "name": "rayray-route92-promo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Remotion promo video for RayRayCoding Route 92 (9:16 and 16:9)",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts",
+    "render:mobile": "remotion render src/index.ts Route92Mobile out/route92-mobile-9x16.mp4 --crf=18",
+    "render:desktop": "remotion render src/index.ts Route92Desktop out/route92-desktop-16x9.mp4 --crf=17"
+  },
+  "dependencies": {
+    "@fontsource/figtree": "5.1.1",
+    "@remotion/cli": "4.0.290",
+    "@remotion/media-utils": "4.0.290",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.290"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "three": "^0.128.0",
+    "typescript": "5.6.3"
+  }
+}

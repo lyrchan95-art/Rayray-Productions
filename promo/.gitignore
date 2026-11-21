@@ -1,0 +1,5 @@
+node_modules/
+out/
+frames/
+public/footage/
+public/audio/*.wav
