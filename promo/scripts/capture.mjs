@@ -86,6 +86,7 @@ const PAGE_LIB = `(() => {
       }
       R.keys.fwd = B.speed < sp - 0.3; R.keys.back = B.speed > sp + 1.2;
       R.update(dt, t * 1000); R.updateProps(dt);
+      if (S.hit == null && R.props.some(p => !p.rest)) S.hit = f / spec.fps;
       const tm = t * 1000 + 3000;
       R.floaters.forEach(fl => { fl.g.position.y = 0.15 + Math.sin(tm * 0.0012 + fl.ph) * 0.18; fl.g.rotation.z = Math.sin(tm * 0.0009 + fl.ph) * 0.04; });
       R.clouds.forEach(c => { c.position.x += dt * 2.2; if (c.position.x > 480) c.position.x = -480; });
@@ -118,7 +119,7 @@ const PAGE_LIB = `(() => {
       R.renderer.render(R.scene, R.camera);
       return R.canvas.toDataURL('image/jpeg', 0.93);
     },
-    stats: () => ({ maxOff: S.maxOff, speed: R.bus.speed, idx: R.nearestRoad(R.bus.x, R.bus.z, 3).i })
+    stats: () => ({ hit: S.hit, maxOff: S.maxOff, speed: R.bus.speed, idx: R.nearestRoad(R.bus.x, R.bus.z, 3).i })
   };
   return true;
 })()`;
@@ -148,7 +149,7 @@ for (const spec of list) {
     if (data) { fs.writeFileSync(path.join(dir, scout ? `${spec.name}_${String(n++)}.jpg` : `f${String(f).padStart(5, '0')}.jpg`), Buffer.from(data.split(',')[1], 'base64')); }
   }
   const st = await page.evaluate(() => window.__cap.stats());
-  console.log(`${spec.name}: ${spec.frames} frames @${F.fps} canvas ${info.canvas.join('x')} spacing ${info.spacing.toFixed(2)}m in ${((Date.now() - t0) / 1000).toFixed(0)}s | lane error max ${st.maxOff.toFixed(1)}m end speed ${st.speed.toFixed(1)} idx ${st.idx}`);
+  console.log(`${spec.name}: ${spec.frames} frames @${F.fps} canvas ${info.canvas.join('x')} spacing ${info.spacing.toFixed(2)}m in ${((Date.now() - t0) / 1000).toFixed(0)}s | lane error max ${st.maxOff.toFixed(1)}m end speed ${st.speed.toFixed(1)} idx ${st.idx} | first prop hit ${st.hit == null ? 'none' : st.hit.toFixed(2) + 's'}`);
   await page.close();
 }
 await browser.close();

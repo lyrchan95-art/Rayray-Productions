@@ -161,10 +161,33 @@ def mobile():
     groove(m, 2.0, 12.5, arp=True, drums=False, bass_=False, stabs=False, hats=False)
     m.add(1.15, whoosh(0.9, 1), 0.9)                       # bus passes camera
     for t in (2.0, 4.5, 7.0, 9.5, 11.5): tick(m, t)           # every cut
-    m.add(5.95, thud(), 0.9); [m.add(5.98 + rng.uniform(0, 0.7), clack(), 0.8, pan=rng.uniform(-.5, .5), rev=0.1) for _ in range(9)]  # crates
+    m.add(5.47, thud(), 0.9); [m.add(5.50 + rng.uniform(0, 0.7), clack(), 0.8, pan=rng.uniform(-.5, .5), rev=0.1) for _ in range(9)]  # crates
     m.add(12.0, brake(0.7), 0.9); m.add(12.5, bell(84), 0.75, rev=0.4); m.add(12.5, bell(79), 0.5, rev=0.4)  # stop: ding, then the breath
     m.add(12.5, engine(0.5), 0.8)
     cta(m, 13.0, 2.0)
+    return m.render()
+
+
+def mobile40():
+    m = Mix(40.0)
+    groove(m, 0.0, 2.0)                                                      # hook
+    m.add(1.15, whoosh(0.9, 1), 0.9)
+    m.add(2.0, sea(4.0), 1.0, rev=0.3); m.add(2.0, pad(CHORDS[0], 4.0), 1.0, rev=0.6)   # aerial
+    groove(m, 2.0, 6.0, stabs=False, hats=False, half=True, vel=0.75)
+    for k in range(4): m.add(2.5 + k * 0.9, pluck(PENT[[0, 2, 4, 3][k]], 1.2), 0.5, pan=-0.3 + 0.2 * k, rev=0.7)
+    m.add(4.5, whoosh(1.5, 1), 0.5)
+    groove(m, 6.0, 21.5)                                                     # departure, modules, tools
+    groove(m, 9.0, 21.5, arp=True, drums=False, bass_=False, stabs=False, hats=False)
+    for k, t in enumerate((9.0, 10.5, 12.0, 13.5, 15.0)): m.add(t, bell(72 + [0, 2, 4, 7, 9][k], 1.2), 0.5, pan=-0.3 + 0.15 * k, rev=0.4)
+    for t in (2.0, 6.0, 16.5, 21.5, 25.5, 29.0, 32.5): tick(m, t)
+    m.add(19.23, thud(), 0.9); [m.add(19.26 + rng.uniform(0, 1.0), clack(), 0.8, pan=rng.uniform(-.6, .6), rev=0.1) for _ in range(12)]  # contact at 2.70s into the shot
+    m.add(21.5, pad(CHORDS[3] + [69], 4.0), 1.4, rev=0.7); m.add(21.5, sea(4.0), 1.5, rev=0.4)           # East Dam: open, half-time
+    groove(m, 21.5, 25.5, stabs=False, hats=False, half=True, vel=0.8)
+    m.add(24.0, whoosh(1.5, 1), 0.5)
+    groove(m, 25.5, 35.0); groove(m, 25.5, 35.0, arp=True, drums=False, bass_=False, stabs=False, hats=False)
+    m.add(33.8, brake(1.1), 0.9)
+    m.add(35.0, bell(84), 0.8, rev=0.4); m.add(35.0, bell(79), 0.55, rev=0.4); m.add(35.0, engine(1.0), 0.9)   # 1.0s breath
+    cta(m, 36.0, 4.0)
     return m.render()
 
 
@@ -178,7 +201,7 @@ def desktop():
     groove(m, 12.0, 29.5, arp=True, drums=False, bass_=False, stabs=False, hats=False)
     for k, t in enumerate((12.0, 13.5, 15.0, 16.5, 18.0)): m.add(t, bell(72 + [0, 2, 4, 7, 9][k], 1.2), 0.5, pan=-0.3 + 0.15 * k, rev=0.4)  # modules 01-05
     for t in (7.0, 19.5, 25.5, 29.5, 32.5, 36.5): tick(m, t)
-    m.add(22.95, thud(), 0.9); [m.add(22.98 + rng.uniform(0, 1.0), clack(), 0.8, pan=rng.uniform(-.6, .6), rev=0.1) for _ in range(12)]
+    m.add(22.42, thud(), 0.9); [m.add(22.45 + rng.uniform(0, 1.0), clack(), 0.8, pan=rng.uniform(-.6, .6), rev=0.1) for _ in range(12)]
     # East Dam: open, half-time, airy
     m.add(25.5, pad(CHORDS[3] + [69], 4.0), 1.4, rev=0.7); m.add(25.5, sea(4.0), 1.5, rev=0.4)
     groove(m, 25.5, 29.5, drums=True, bass_=True, stabs=False, hats=False, half=True, vel=0.8)
@@ -206,4 +229,5 @@ def finish(x, name, lufs=-14.0):
 
 if __name__ == '__main__':
     finish(mobile(), 'route92-mobile.wav')
+    finish(mobile40(), 'route92-mobile40.wav')
     finish(desktop(), 'route92-desktop.wav')

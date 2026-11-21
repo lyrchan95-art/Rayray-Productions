@@ -4,8 +4,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p public/footage
-for fmt in mobile desktop; do
-  fps=$([ "$fmt" = mobile ] && echo 30 || echo 24)
+for fmt in mobile mobile15 desktop; do
+  [ -d frames/$fmt ] || continue
+  fps=$([ "$fmt" = desktop ] && echo 24 || echo 30)
   for dir in frames/$fmt/*/; do
     name=$(basename "$dir")
     if [ "$#" -gt 0 ] && ! printf '%s\n' "$@" | grep -qx "$name"; then continue; fi

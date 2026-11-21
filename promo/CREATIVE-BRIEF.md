@@ -26,23 +26,42 @@ Why it works per platform:
 
 ---
 
-## 2. MOBILE version (9:16, 1080x1920, 30fps, 15.0s = 450 frames)
+## 2. MOBILE version (9:16, 1080x1920, 30fps)
 
-Hook rule met: no logo intro; frame 0 is the bus on the road. Beat = 15 frames (120 BPM). Safe area: no text above y=250 or below y=1540.
+Two lengths from the same footage and brand system: the **40s main cut** below, and the original **15s short cut** (`Route92Mobile15`, table at the end of this section).
+
+### 40s main cut (1200 frames)
+
+Hook rule met: no logo intro; frame 0 is the bus on the road. Beat = 15 frames (120 BPM). Safe area: no text above y=250 or below y=1540. Cards hold 6 words or fewer.
 
 | TIME | SHOT | VISUAL | ON-SCREEN TEXT | AUDIO / SFX | MOTION |
 |---|---|---|---|---|---|
-| 0.0-2.0 (0-60) | `m1_hook` | Low roadside camera, bus whooshes past at about 70 km/h, front 3/4, LED sign readable | LED plate: "DESCRIBE IT." at 0.0s, "SHIP IT." at 1.0s | Kick on beat 1, snare on beat 2, bus whoosh 1.15-2.05s | Camera tracks the pass, no zoom |
-| 2.0-4.5 (60-135) | `m2_gate` | Chase camera runs under green gantry "01 Spec before you prompt" | MODULE 1 / "Plan it in plain English" | Pluck tick on cut, groove continues | Slow 5% push-in |
-| 4.5-7.0 (135-210) | `m3_tools` | Bus ploughs through crates labelled Claude, Cursor, Lovable, Replit, v0, GitHub | Stop flag 北潭涌 Pak Tam Chung / "Pick the right AI tool" | Tick on cut; crate thud at 5.95s plus wood clacks | High chase from the left |
-| 7.0-9.5 (210-285) | `m4_billboard` | Bus approaches the @rayraycoding Instagram billboard | Stop flag 萬宜水庫東壩 East Dam / "Watch the builds on Instagram" | Tick on cut | Chase from the right, camera looks toward billboard |
-| 9.5-11.5 (285-345) | `m5_gallery` | Camera above the road; bus drives in front of the "APP 1-4 / Coming soon" houses | Stop flag 大網仔 Tai Mong Tsai / "Then build your own apps" | Tick on cut | Static high camera follows the bus |
-| 11.5-13.0 (345-390) | `m6_pier` | Chase through the WAITLIST arch; bus brakes | Stop flag 西貢碼頭 Sai Kung Pier / "Last stop: the waitlist" | Brake hiss 12.0s, bus-stop ding 12.5s, **music out 12.5-13.0** (engine idle only) | Chase, fast approach |
-| 13.0-15.0 (390-450) | end card | Navy card, route loop draws itself, bus completes the lap | Route 92 · 九十二號 / **RayRayCoding** / The vibe coding course / **Join the waitlist** / DM “VIBE” to @rayraycoding | CTA chord and bell at 13.0s, arpeggio, fade | Loop draws 0.1-1.2s, CTA springs in at 0.5s |
+| 0.0-2.0 | `m1_hook` | Low roadside camera, bus whooshes past at about 70 km/h, front 3/4, LED sign readable | LED plate: "DESCRIBE IT." 0.0s, "SHIP IT." 1.0s | Kick on 1, snare on 2, whoosh 1.15-2.05s | Camera tracks the pass |
+| 2.0-6.0 | `m2_aerial` | Island from above, curving down toward the bay | RayRayCoding presents / "A course you can drive" | Sea, pad, half-time groove, risers | Curved crane move |
+| 6.0-9.0 | `m3_depart` | Bus pulls out of Sai Kung town | Sai Kung Pier · 西貢碼頭 / "Five stops, one loop" | Full groove enters on the cut | Chase, behind-left |
+| 9.0-16.5 | `m4_gate1-5` | Five 1.5s runs under the green gantries | MODULE 1-5 / the module title (Spec before you prompt; Your first build with Claude; Logins, data and saving things; Fixing what breaks; Ship it and share it) | One rising bell note per sign, arpeggio joins | Chase, slight left/right alternation |
+| 16.5-21.5 | `m5_tools` | Past the Pak Tam Chung stop, then into the tool crates | Stop flag 北潭涌 / "Pick the right AI tool" | Thud and wood clacks at 19.2s (contact measured at 2.70s into the shot) | High chase from the left |
+| 21.5-25.5 | `m6_dam` | Sea-side view of the hexagonal columns and concrete blocks | Stop flag 萬宜水庫東壩 / "About 140 million years old" | Half-time groove, airy pad, sea; riser at 24.0s | Slow glide, low over the water |
+| 25.5-29.0 | `m7_billboard` | Bus approaches the @rayraycoding billboard | "Watch the builds on Instagram" | Full groove returns on the cut | Chase from the right |
+| 29.0-32.5 | `m8_gallery` | Bus passes in front of the "APP" houses | Stop flag 大網仔 / "Then build your own apps" | Groove with plucks | High static camera follows |
+| 32.5-36.0 | `m9_pier` | Chase through the WAITLIST arch, bus slows | Stop flag 西貢碼頭 / "Finish the loop, join the waitlist" | Brake hiss 33.8s, bell 35.0s, **music out 35.0-36.0** (engine idle only) | Chase, fast approach |
+| 36.0-40.0 | end card | Navy card, route loop draws itself, bus completes the lap | Route 92 · 九十二號 / **RayRayCoding** / The vibe coding course / **Join the waitlist** / DM “VIBE” to @rayraycoding | CTA chord and bell at 36.0s, arpeggio, fade | Loop draws over 2s, CTA springs in at 0.5s |
 
-Cuts: 2.0, 4.5, 7.0, 9.5, 11.5, 13.0s. A 10-frame red livery stripe sweeps over each cut.
+Cuts: 2.0, 6.0, 9.0, 10.5, 12.0, 13.5, 15.0, 16.5, 21.5, 25.5, 29.0, 32.5, 36.0s, all on beats. A 10-frame red livery stripe sweeps over each cut except between the gate shots, which cut hard so the montage keeps its rhythm.
 
-Vertical composition notes: bus kept in the middle third; caption card in the lower third (y 1190-1470); stop flag top-left under the top safe line; the hook text sits in the same lower-third slot as the captions (y 1190-1520), so the top of frame stays clear for the bus and the platform UI.
+Vertical composition: bus in the middle third; captions and the hook line share one lower-third slot (y 1190-1520); stop flag top-left under the top safe line.
+
+### 15s short cut (450 frames)
+
+| TIME | SHOT | Text |
+|---|---|---|
+| 0.0-2.0 | `m1_hook` | DESCRIBE IT. / SHIP IT. |
+| 2.0-4.5 | `m2_gate` | MODULE 1 / Plan it in plain English |
+| 4.5-7.0 | `m3_tools` | Pick the right AI tool (crate thud at 5.47s) |
+| 7.0-9.5 | `m4_billboard` | Watch the builds on Instagram |
+| 9.5-11.5 | `m5_gallery` | Then build your own apps |
+| 11.5-13.0 | `m6_pier` | Last stop: the waitlist (brake 12.0s, bell 12.5s, music out 12.5-13.0) |
+| 13.0-15.0 | end card | Same lockup and CTA |
 
 ---
 
@@ -55,7 +74,7 @@ Beat = 12 frames. Lower-third text sits 96px from the left and 92px from the bot
 | 0.0-7.0 | `d1_aerial` | The island from above, curving around to the bay, ending on the pier and seafood rafts | "RayRayCoding presents", LED plate 92 西貢 SAI KUNG, "The vibe coding course, as a bus ride." (from 1.25s) | Sea ambience, pad, sparse plucks, soft kicks and a riser from 5.0s | Curved crane move, high to low, 7s ease |
 | 7.0-12.0 | `d2_depart` | Bus pulls out of Sai Kung town past village houses and a taxi | Sai Kung Pier · 西貢碼頭 / "All aboard." / "Five modules, one loop around the island." | Full groove enters on the cut | Chase from behind-left |
 | 12.0-19.5 | `d3_gate1-5` | Five 1.5s shots, one per gantry, alternating chase and low roadside | Green road sign: 01 Spec before you prompt, 02 Your first build with Claude, 03 Logins, data and saving things, 04 Fixing what breaks, 05 Ship it and share it | Marimba-style bell rising up a pentatonic scale, one note per sign | Alternating chase and static low |
-| 19.5-25.5 | `d4_tools` | Bus drives past the Pak Tam Chung stop and into the tool crates | Stop flag 北潭涌 / "Know which AI tool to reach for" / chips: Claude, Cursor, Lovable, Replit, v0, GitHub | Thud and clacks at 22.95s | Chase, wide |
+| 19.5-25.5 | `d4_tools` | Bus drives past the Pak Tam Chung stop and into the tool crates | Stop flag 北潭涌 / "Know which AI tool to reach for" / chips: Claude, Cursor, Lovable, Replit, v0, GitHub | Thud and clacks at 22.4s (contact measured at 2.92s into the shot) | Chase, wide |
 | 25.5-29.5 | `d5_dam` | Sea-side view of the hexagonal columns and the concrete armour blocks | Stop flag 萬宜水庫東壩 / "140 million years in the making" / Hong Kong UNESCO Global Geopark (text moves to the top-left so it does not cover the columns) | Half-time groove, airy pad, sea | Slow gliding camera, low over the water |
 | 29.5-32.5 | `d6_front` | Upper-deck front seat, billboard growing on the right | "Follow the build on Instagram" / @rayraycoding | Riser into full groove | First person, slight yaw to the right |
 | 32.5-36.5 | `d7_gallery` | Bus passes in front of the four "APP" houses | Stop flag 大網仔 / "Real apps, each with a demo link" / "Coming soon" | Groove with plucks | Static high camera follows the bus |
@@ -93,7 +112,7 @@ Both tracks are **original, synthesized placeholders** made by `scripts/make-aud
 - **Instruments:** electric-piano stabs, plucked pentatonic arpeggio, round bass, kick, snare, hats; bell for the stop "ding".
 - **Loudness:** about -13 LUFS integrated, peak below -4 dBFS (measured with ffmpeg `ebur128`).
 
-**Beat-sync map (mobile):** every cut is on a beat: 2.0s (beat 5), 4.5s (beat 10), 7.0s (beat 15), 9.5s (beat 20), 11.5s (beat 24), 13.0s (beat 27). The hook line "SHIP IT." lands on beat 3 (1.0s).
+**Beat-sync map (mobile):** every cut is on a beat (see the cut lists in section 2). The hook line "SHIP IT." lands on beat 3 (1.0s).
 
 **Beat-sync map (desktop):** cuts at 7.0, 12.0, 13.5, 15.0, 16.5, 18.0, 19.5, 25.5, 29.5, 32.5, 36.5, 40.5s, all multiples of 0.5s.
 
@@ -106,7 +125,7 @@ Both tracks are **original, synthesized placeholders** made by `scripts/make-aud
 | m6_pier / d8_pier | Brake hiss, two-note bell, engine idle |
 | end cards | CTA chord, bell, four-note arpeggio |
 
-**Silence / breath before the CTA:** 0.5s on mobile (12.5-13.0s) and 1.5s on desktop (39.0-40.5s). Only the engine idle and the reverb tail remain. The CTA chord lands on the downbeat after it.
+**Silence / breath before the CTA:** 1.0s on the 40s mobile cut (35.0-36.0s), 0.5s on the 15s cut (12.5-13.0s) and 1.5s on desktop (39.0-40.5s). Only the engine idle and the reverb tail remain. The CTA chord lands on the downbeat after it.
 
 ---
 
@@ -135,13 +154,13 @@ Facts to confirm before posting: "140 million years" and "UNESCO Global Geopark"
 
 | | Mobile | Desktop |
 |---|---|---|
-| Size / rate | 1080x1920, 30fps | 1920x1080, 24fps |
+| Size / rate | 1080x1920, 30fps (40s and 15s cuts) | 1920x1080, 24fps |
 | Codec | H.264 (yuv420p), CRF 18 | H.264 (yuv420p), CRF 17; render ProRes for a master if needed |
 | Audio | AAC 48kHz stereo, about -13 LUFS | AAC 48kHz stereo, about -13 LUFS (target -14) |
-| File size | Under 30MB | n/a |
+| File size | 37MB (40s), 13MB (15s). Both are fine for Instagram and TikTok uploads | 60MB |
 | Captions | Burned in (sound-off first) | Burned in lower thirds |
 
-- **Cover frames:** mobile frame 51 (1.7s: bus front with the hook line); desktop frame 150 (6.25s: title over the bay).
+- **Cover frames:** mobile frame 51 (15s cut; the 40s cut opens identically) (1.7s: bus front with the hook line); desktop frame 150 (6.25s: title over the bay).
 - **Accessibility:** caption text is navy `#1b2a5c` on cream `#f7f1e3` (about 11:1) and white on a navy gradient for lower thirds (above 7:1). Each caption stays on screen 1.5s or longer. No flashing: the livery stripe crosses once per cut and nothing blinks.
 - **Not included:** voiceover (the plan did not call for one, and generating one spends credits), licensed music, Cantonese captions.
 

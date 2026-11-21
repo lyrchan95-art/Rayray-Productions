@@ -1,35 +1,45 @@
 import React from 'react';
 import { AbsoluteFill, Audio, Sequence, staticFile } from 'remotion';
-import { C, FONT } from './brand';
+import { C, FONT, MODULES } from './brand';
 import { CaptionCard, EndCard, FontGate, Footage, LedPlate, StopFlag, StripeWipe } from './components';
 
-// 9:16, 30fps, 15s. Every cut is on a beat at 120 BPM (15 frames).
-export const MOBILE = { width: 1080, height: 1920, fps: 30, frames: 450 };
+// 9:16, 30fps, 40s. Every cut is on a beat at 120 BPM (15 frames).
+export const MOBILE = { width: 1080, height: 1920, fps: 30, frames: 1200 };
 
 const SHOTS = [
   { id: 'm1_hook', from: 0, dur: 60 },
-  { id: 'm2_gate', from: 60, dur: 75 },
-  { id: 'm3_tools', from: 135, dur: 75 },
-  { id: 'm4_billboard', from: 210, dur: 75 },
-  { id: 'm5_gallery', from: 285, dur: 60 },
-  { id: 'm6_pier', from: 345, dur: 45 }
+  { id: 'm2_aerial', from: 60, dur: 120 },
+  { id: 'm3_depart', from: 180, dur: 90 },
+  { id: 'm4_gate1', from: 270, dur: 45 },
+  { id: 'm4_gate2', from: 315, dur: 45 },
+  { id: 'm4_gate3', from: 360, dur: 45 },
+  { id: 'm4_gate4', from: 405, dur: 45 },
+  { id: 'm4_gate5', from: 450, dur: 45 },
+  { id: 'm5_tools', from: 495, dur: 150 },
+  { id: 'm6_dam', from: 645, dur: 120 },
+  { id: 'm7_billboard', from: 765, dur: 105 },
+  { id: 'm8_gallery', from: 870, dur: 105 },
+  { id: 'm9_pier', from: 975, dur: 105 }
 ];
-const END_FROM = 390;
+const END_FROM = 1080;
 
-// Text stays inside the Reels/TikTok safe area: nothing above y=250 or below y=1540.
+// Cards stay inside the Reels/TikTok safe area (nothing above y=250 or below y=1540) and hold 6 words or fewer.
 const CAPTIONS: { shot: string; kicker: string; text: string; flag?: [string, string] }[] = [
-  { shot: 'm2_gate', kicker: 'Module 1', text: 'Plan it in plain English' },
-  { shot: 'm3_tools', kicker: 'Tool Workshop', text: 'Pick the right AI tool', flag: ['北潭涌', 'Pak Tam Chung'] },
-  { shot: 'm4_billboard', kicker: 'Follow along', text: 'Watch the builds on Instagram', flag: ['萬宜水庫東壩', 'East Dam'] },
-  { shot: 'm5_gallery', kicker: 'App Gallery', text: 'Then build your own apps', flag: ['大網仔', 'Tai Mong Tsai'] },
-  { shot: 'm6_pier', kicker: 'Sai Kung Pier', text: 'Last stop: the waitlist', flag: ['西貢碼頭', 'Sai Kung Pier'] }
+  { shot: 'm2_aerial', kicker: 'RayRayCoding presents', text: 'A course you can drive' },
+  { shot: 'm3_depart', kicker: 'Sai Kung Pier · 西貢碼頭', text: 'Five stops, one loop' },
+  ...MODULES.map((m, k) => ({ shot: `m4_gate${k + 1}`, kicker: `Module ${k + 1}`, text: m.title })),
+  { shot: 'm5_tools', kicker: 'Tool Workshop', text: 'Pick the right AI tool', flag: ['北潭涌', 'Pak Tam Chung'] },
+  { shot: 'm6_dam', kicker: 'Hexagonal rock columns', text: 'About 140 million years old', flag: ['萬宜水庫東壩', 'East Dam'] },
+  { shot: 'm7_billboard', kicker: 'Follow along', text: 'Watch the builds on Instagram', flag: ['萬宜水庫東壩', 'East Dam'] },
+  { shot: 'm8_gallery', kicker: 'App Gallery', text: 'Then build your own apps', flag: ['大網仔', 'Tai Mong Tsai'] },
+  { shot: 'm9_pier', kicker: 'Last stop', text: 'Finish the loop, join the waitlist', flag: ['西貢碼頭', 'Sai Kung Pier'] }
 ];
 
 export const Mobile: React.FC = () => (
   <FontGate>
     <AbsoluteFill style={{ background: C.ink, fontFamily: FONT }}>
       {SHOTS.map(s => (
-        <Sequence key={s.id} from={s.from} durationInFrames={s.dur}><Footage file={s.id} zoomTo={s.id === 'm1_hook' ? 1.0 : 1.05} /></Sequence>
+        <Sequence key={s.id} from={s.from} durationInFrames={s.dur}><Footage file={s.id} zoomTo={s.id === 'm1_hook' || s.id === 'm2_aerial' ? 1.0 : 1.05} /></Sequence>
       ))}
 
       {/* 0.0-2.0s hook: the line lands on the kick and the snare */}
@@ -50,12 +60,12 @@ export const Mobile: React.FC = () => (
         );
       })}
 
-      {[...SHOTS.slice(1).map(s => s.from), END_FROM].map(cut => (
+      {[...SHOTS.slice(1).filter(s => !/^m4_gate[2-5]$/.test(s.id)).map(s => s.from), END_FROM].map(cut => (
         <Sequence key={cut} from={cut - 5} durationInFrames={10}><StripeWipe len={10} /></Sequence>
       ))}
 
-      <Sequence from={END_FROM} durationInFrames={MOBILE.frames - END_FROM}><EndCard layout="mobile" drawFrames={36} /></Sequence>
-      <Audio src={staticFile('audio/route92-mobile.wav')} />
+      <Sequence from={END_FROM} durationInFrames={MOBILE.frames - END_FROM}><EndCard layout="mobile" drawFrames={60} /></Sequence>
+      <Audio src={staticFile('audio/route92-mobile40.wav')} />
     </AbsoluteFill>
   </FontGate>
 );

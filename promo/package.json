@@ -6,8 +6,9 @@
   "scripts": {
     "studio": "remotion studio src/index.ts",
     "still": "remotion still src/index.ts",
-    "render:mobile": "remotion render src/index.ts Route92Mobile out/route92-mobile-9x16.mp4 --crf=18",
-    "render:desktop": "remotion render src/index.ts Route92Desktop out/route92-desktop-16x9.mp4 --crf=17"
+    "render:mobile": "remotion render src/index.ts Route92Mobile out/route92-mobile-9x16-40s.mp4 --crf=18",
+    "render:desktop": "remotion render src/index.ts Route92Desktop out/route92-desktop-16x9.mp4 --crf=17",
+    "render:mobile15": "remotion render src/index.ts Route92Mobile15 out/route92-mobile-9x16-15s.mp4 --crf=18"
   },
   "dependencies": {
     "@fontsource/figtree": "5.1.1",
