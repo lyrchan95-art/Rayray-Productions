@@ -74,3 +74,16 @@ The artifact's own interface follows the head-designer constitution: three tones
 ## Output first, check in the background
 
 A prototype is delivered the moment generation finishes. While it writes, a work log shows the steps (spec read, skills applied, a live phase detected from the stream, elapsed time). The check agent then runs in the background with live steps: measure, expert review, fix, verify. A fix is saved as a new version and offered with a "switch" button; the version on screen never changes underneath you, and the preview iframe is never reloaded by the check.
+
+## Idea Studio (deep mode)
+
+For complex ideas, the spec review offers **Deep · Idea Studio** (the default for longer descriptions). Instead of building straight away, two model calls run in parallel and fill in progressively:
+
+- **Blueprint** (`skills/idea-grooming.md`): archetype (service, commerce, tool, content, marketplace, dashboard, game), value proposition, what is different, specific personas, a screen flow, 3-5 real trade-off decisions, facts to confirm, assets, risks and a definition of done.
+- **Style board** (`skills/style-board.md`): two tones, paper, ink, a curated type pairing, radius, density, motion and a signature detail, shown as a live specimen. A contrast guard deepens tones that would be illegible, keeping hue and saturation.
+
+**Branching:** every decision option carries effects (add or remove screens). Tapping an option reshapes the flow immediately; core screens can never be removed. A readiness score shows what is still open.
+
+**Build:** the blueprint, style tokens, archetype build pattern and (on first builds) a reference scaffold from `skills/premium-craft.md` go into the prompt. The product is multi-screen (`data-screen` / `data-go`), and the check agent walks every screen, verifies each blueprint screen exists and is reachable, and measures craft: 4px spacing rhythm, number of font sizes, families, corner radii and hues. The scaffold scores 100; a deliberately cheap page fails craft.
+
+Bad or missing model output falls back to a usable template, so the Studio never dead-ends.

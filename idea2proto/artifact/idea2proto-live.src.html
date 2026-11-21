@@ -325,6 +325,55 @@ summary.label{min-height:44px;display:flex;align-items:center}
 .chkpill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent-strong);white-space:nowrap;padding:0 4px}
 .chkpill[hidden]{display:none}
 .fixed-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--accent-soft);border-radius:var(--r-md);font-family:var(--sans);font-size:14px}
+
+/* Idea Studio */
+.studio .eyebrow{font:600 12px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-strong);margin:8px 0 6px}
+.studio h1{margin-bottom:6px}
+.rd{margin:16px 0 8px}
+.rd-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--sans);font-size:14px}
+.rd-n{font:800 20px/1 var(--head);font-variant-numeric:tabular-nums}
+.rdm{height:6px;background:var(--surface-3);margin-top:8px}
+.rdm span{display:block;height:100%;background:var(--accent);transition:width .18s var(--ease)}
+.persona{padding:12px 0;border-top:1px solid var(--border)}
+.pname{font-weight:600;margin-bottom:8px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+@media (max-width:420px){.pgrid{grid-template-columns:1fr}}
+.flow{list-style:none;padding:4px 0 12px;margin:8px 0 0;display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x proximity}
+.node{position:relative;flex:0 0 auto;min-width:120px;max-width:168px;padding:12px;border:1px solid var(--fg);border-radius:var(--r-md);display:flex;flex-direction:column;gap:2px;scroll-snap-align:start;font-family:var(--sans);font-size:14px;background:var(--bg)}
+.node + .node::before{content:"→";position:absolute;left:-19px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.node.added{border-color:var(--danger);border-width:2px}
+.node.flash{animation:flashin .9s var(--ease)}
+@keyframes flashin{0%{background:var(--accent-soft)}}
+.ni,.na{font-size:12px;color:var(--muted)}
+.screens{list-style:none;padding:0;margin:0}
+.screens li{padding:10px 0;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px;font-family:var(--sans);font-size:14px}
+.screens li div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag.t2{background:color-mix(in srgb,var(--tone2) 10%,var(--paper));color:var(--danger)}
+.dec{padding:14px 0;border-top:1px solid var(--border)}
+.dec h3{margin:0 0 4px;font-size:16px}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.opt{display:flex;align-items:flex-start;gap:12px;min-height:48px;padding:12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);text-align:left;font-family:var(--sans);font-size:14px;color:var(--fg)}
+.opt[aria-checked="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.opt[data-assumed="true"]{border-style:dashed;border-color:var(--muted)}
+.radio{flex:0 0 auto;width:18px;height:18px;margin-top:2px;border:2px solid var(--muted);border-radius:var(--r-sm)}
+.opt[aria-checked="true"] .radio{background:var(--fg);border-color:var(--fg);box-shadow:inset 0 0 0 3px var(--surface)}
+.ob{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.board{border:1px solid var(--fg);border-radius:var(--r-md);overflow:hidden;margin-top:12px}
+.spec-type{background:var(--b-paper);color:var(--b-ink);padding:24px 20px}
+.b-eyebrow{font:600 12px/1.4 var(--b-b);letter-spacing:.08em;text-transform:uppercase;color:var(--b-t1);margin:0 0 8px}
+.b-display{font:600 32px/1.1 var(--b-d);margin:0 0 8px;letter-spacing:-.01em}
+.b-body{font:400 16px/1.5 var(--b-b);margin:0 0 16px;max-width:34ch}
+.b-btn{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;background:var(--b-t1);color:var(--b-paper);border-radius:var(--b-r);font:500 15px var(--b-b)}
+.b-sw{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--fg)}
+.b-sw li{display:flex;flex-direction:column;font-family:var(--sans);font-size:12px;background:var(--surface);min-width:0}
+.b-sw i{display:block;height:44px}
+.b-sw span{padding:6px 8px;color:var(--fg);overflow-wrap:anywhere}
+.b-sw small{display:block;font-size:12px;color:var(--muted)}
+.subhead{display:block;font:600 13px var(--sans);color:var(--muted);margin:16px 0 8px}
+.assetrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--border);font-family:var(--sans);font-size:14px}
+.assetrow > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.skel-block .sk{height:56px;margin:12px 0;background:var(--surface-3);border-radius:var(--r-md);animation:blink 1.2s infinite}
+.studio .specbar .faint{font-family:var(--sans);font-size:13px}
 </style>
 
 <div class="app" id="app"></div>
@@ -419,6 +468,26 @@ const T = {
   chk_contrast:["字同底色對比夠","Text contrast"], chk_text:["字體唔會太細","Text size"], chk_labels:["標籤同替代文字","Labels and alt text"],
   chk_meta:["viewport 同標題","Viewport and title"], chk_offline:["冇外部連線","No external requests"], chk_dialogs:["冇 alert 彈窗","No alert dialogs"],
   chk_polish:["冇 lorem／TODO，動畫可關","No filler; motion-safe"],
+  chk_craft:["設計系統一致：間距、字級、圓角、色調","Craft: rhythm, type scale, radii, colour"], chk_screens:["每個畫面都去到","Every screen reachable"],
+  modeTitle:["整法","How to build"], modeQuick:["快速","Quick"], modeDeep:["深入 · Idea Studio","Deep · Idea Studio"],
+  modeHint:["深入：先整理定位、人物、畫面流程、取捨同風格，再砌多畫面產品。複雜 idea 用呢個。","Deep: shape positioning, people, the screen flow, trade-offs and style first, then build a multi-screen product. Use it for complex ideas."],
+  toStudio:["整理成產品藍圖","Shape the blueprint"], stEyebrow:["Idea Studio","Idea Studio"], stStart:["開始整理呢個 idea","Start shaping this idea"], stWorking:["整理緊","Shaping"],
+  stStepBp:["寫產品藍圖：類型、人物、畫面、決定","Writing the blueprint: archetype, people, screens, decisions"], stStepStyle:["配風格板：顏色、字體、節奏","Setting the style board: colour, type, rhythm"],
+  stFallback:["用咗基本範本，你可以自己改","Used a basic template; edit it freely"], stArch:["類型","Archetype"],
+  stArchConfirm:["換類型會重新整理藍圖，你嘅修改會冇咗。再撳一次確認。","Changing archetype rewrites the blueprint and drops your edits. Tap again to confirm."],
+  stReady:["藍圖完整度","Blueprint readiness"], rdValue:["未寫價值","Value not written"], rdDiff:["未寫差異","Difference not written"], rdPeople:["未有具體人物","No specific person"],
+  rdOpen:["{n} 個決定未揀","{n} decisions open"], rdStyle:["未有風格板","No style board"], rdFacts:["{n} 項資料未確認","{n} facts unconfirmed"],
+  stSharpen:["定位","Positioning"], stValue:["一句講晒價值","The value in one sentence"], stDiff:["同而家嘅做法有咩唔同","How it differs from today's way"],
+  stPeople:["人物","People"], stName:["名","Name"], stSituation:["處境","Situation"], stJob:["要搞掂嘅事","Job to be done"], stWorry:["最擔心","Main worry"],
+  stFlow:["畫面流程","Screen flow"], stFlowSub:["你揀嘅決定會即時改流程。","Your decisions reshape this flow live."], stCore:["必要","Core"], stAddedBy:["因為：{q}","Because: {q}"],
+  stDecide:["要你決定","Decisions"], stRecommended:["建議","Recommended"], stLook:["Look & feel","Look & feel"], stPaper:["紙色","Paper"], stInk:["墨色","Ink"],
+  stTone1:["主色","Brand tone"], stTone2:["點綴色","Accent tone"], stReroll:["換一組風格","Try another style"], stAdjusted:["主色已調深，確保字夠清楚","Brand tone deepened for legible contrast"],
+  st_sharp:["銳角","Sharp"], st_soft:["柔角","Soft"], st_airy:["鬆","Airy"], st_compact:["密","Compact"], st_calm:["沉穩","Calm"], st_snappy:["爽快","Snappy"], stCta:["開始","Start"], stStyleWait:["配緊風格板…","Setting the style board…"],
+  stContent:["資料同素材","Facts & assets"], stSample:["例如：","e.g. "], stRisks:["風險：會喺產品入面處理","Risks, handled in the product"], stDone:["完成標準","Definition of done"],
+  bpBuildBtn:["按藍圖砌產品","Build from the blueprint"], bpRebuildBtn:["按新藍圖重新砌","Rebuild from the blueprint"], bpBuild:["按呢份藍圖砌產品。","Build the product from this blueprint."],
+  bpRebuild:["藍圖改咗，按新藍圖重新砌。","The blueprint changed; rebuild from it."], stOpenDefault:["{n} 個未揀會用建議","{n} open will use the recommendation"],
+  stOpen:["產品藍圖","Blueprint"], stToWork:["工作區","Workspace"], assetSaved:["已加入素材","Asset added"], studioNew:["用 Idea Studio 整理新 idea","Shape a new idea in Idea Studio"],
+  stFonts:["字體","Typefaces"], stShape:["形狀同節奏","Shape and rhythm"],
   wlTitle:["做緊嘢","Working"], wlBrief:["讀取 spec 同設計方向","Reading the spec and design direction"], wlIter:["讀取目前版本同你嘅修改","Reading the current version and your change"],
   wlSkills:["套用技能","Applying skills"], wlGen:["生成原型","Writing the prototype"], wlHandoff:["交出原型，之後喺背景質檢","Hand over the prototype, then check in the background"],
   phWait:["諗緊點砌","Planning the build"], phStyle:["寫緊樣式（顏色、字體、版面）","Writing styles: colour, type, layout"], phBody:["砌緊版面同內容","Building layout and content"],
@@ -444,7 +513,7 @@ const S = {
   view: "capture", register: LS.get("i2p.register", "yue"), ideas: LS.get("i2p.ideas", []),
   ideaId: null, draft: "", spec: null, busy: false, status: "", pending: null, previewOpen: false, viewN: null,
   editing: null, q: "", filter: "", listening: false, partial: "", confirmDel: false,
-  skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [],
+  skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [], mode: "quick", modeLock: false, flash: [], archPending: null,
   craft: LS.get("i2p.craft", {}), gate: LS.get("i2p.gate", true), assets: LS.get("i2p.assets", {}), assetSlot: "photo",
 };
 const lang = () => (S.register === "en" ? 1 : 0);
@@ -493,7 +562,8 @@ S.sug = pickSuggestions();
 /* ───────── imported skill packs (built from skills/*.md) ───────── */
 const PACKS = /*__PACKS__*/[];
 const PACK_ICON = { "head-designer": "pencil", "frontend-designer": "grid", "fable-discipline": "check", "world-weaving": "game", "cantonese-copywriter": "lang", "ux-audit": "shield" };
-const packOn = (id) => { const p = PACKS.find((x) => x.id === id); return !p ? false : p.kind === "workflow" ? S.gate : (S.craft[id] ?? p.on); };
+const packOn = (id) => { const p = PACKS.find((x) => x.id === id); return !p ? false : p.kind === "workflow" ? (p.id === "ux-audit" ? S.gate : true) : (S.craft[id] ?? p.on); };
+const toggleable = (p) => p.kind === "craft" || p.id === "ux-audit";
 const packName = (p) => (lang() ? p.name : p.zh);
 
 const TONES = [
@@ -509,20 +579,21 @@ const PHIL = [
 const SLOT = { logo: ["logo", "logo"], photo: ["相片", "photo"], product: ["產品相", "product photo"], hero: ["主視覺", "hero image"] };
 const slotName = (k) => (SLOT[k] || SLOT.photo)[lang()];
 
-function craftBlock(skill) {
-  return PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en")).map((p) => p.body).join("\n\n");
+function craftBlock(skill, opts = {}) {
+  return PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en"))
+    .map((p) => (p.id === "premium-craft" && !opts.exemplar ? p.body.split("REFERENCE SCAFFOLD")[0].trim() : p.body)).join("\n\n");
 }
 function briefBlock(it) {
   const st = it.spec.style || {};
   const tn = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean);
   const ph = PHIL.find((p) => p.id === st.phil) || PHIL[0];
-  const tone = (i) => (tn[i] ? `${tn[i].en} ${tn[i].hex}` : "auto");
+  const tone = (i) => (it.style ? `${it.style["tone" + (i + 1)].name} ${it.style["tone" + (i + 1)].hex}` : tn[i] ? `${tn[i].en} ${tn[i].hex}` : "auto");
   const as = S.assets[it.id] || [];
   return `BRIEF:\n- project: ${it.spec.title}: ${it.spec.oneLiner}\n- tone 1: ${tone(0)}\n- tone 2: ${tone(1)}\n- reference philosophy: ${ph.id === "auto" ? "auto (choose confidently and state the choice in one short line of your reply)" : ph.en}`
     + (as.length ? `\nASSETS uploaded by the user (reference as src="asset:ID" or url(asset:ID); never invent other image URLs):\n${as.map((a) => `- ${a.id} (${a.slot}): ${a.name}`).join("\n")}` : "");
 }
-function designPrompt(skill, it) {
-  return [SKILL_PROMPT[skill], craftBlock(skill), briefBlock(it), RULES, REGISTER[S.register], specBlock(it.spec)].filter(Boolean).join("\n\n");
+function designPrompt(skill, it, opts = {}) {
+  return [SKILL_PROMPT[skill], craftBlock(skill, opts), blueprintBlock(skill, it), briefBlock(it), RULES, REGISTER[S.register], specBlock(it.spec)].filter(Boolean).join("\n\n");
 }
 
 /* ───────── assets: uploaded images are referenced as asset:ID tokens, never pasted into prompts ───────── */
@@ -561,7 +632,7 @@ function errProbe() {
   window.addEventListener("error", function (e) { window.__errs.push(String(e.message || e)); });
   window.addEventListener("unhandledrejection", function (e) { window.__errs.push("promise: " + String(e.reason)); });
 }
-function auditProbe(ID) {
+function auditProbe(ID, EXPECT) {
   function lum(c) { var a = [c[0], c[1], c[2]].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; }
   // Resolve ANY CSS colour (rgb, hsl, oklch, color-mix, color(srgb ...)) through the browser's own canvas instead of parsing strings.
   var cv = document.createElement("canvas"); cv.width = cv.height = 1; var cx = cv.getContext("2d", { willReadFrequently: true });
@@ -572,14 +643,22 @@ function auditProbe(ID) {
   function bgOf(el) { while (el && el.nodeType === 1) { var cs = getComputedStyle(el); if (cs.backgroundImage && cs.backgroundImage !== "none") return null; var c = parse(cs.backgroundColor); if (c && c[3] > 0.5) return c; el = el.parentElement; } return [255, 255, 255, 1]; }
   function visible(el) { var r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; }
   function nm(el) { return String(el.getAttribute("aria-label") || el.innerText || el.value || el.getAttribute("title") || el.tagName).replace(/\s+/g, " ").trim().slice(0, 24); }
-  function run() {
-    var out = { errors: (window.__errs || []).slice(0, 3), overflowBy: 0, textLen: 0, small: [], tiny: 0, contrast: [], imgNoAlt: 0, noLabel: 0, noName: 0, viewport: !!document.querySelector('meta[name="viewport"]'), lang: !!document.documentElement.getAttribute("lang"), title: !!(document.title || "").trim() };
+  function hueOf(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l = (mx + mn) / 2;
+    if (!d) return null; var sat = d / (1 - Math.abs(2 * l - 1)); if (sat < 0.28 || l < 0.12 || l > 0.9) return null;
+    var h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; if (h < 0) h += 360; return Math.round(h / 30) * 30 % 360;
+  }
+  // Craft accumulates across every screen visited: these are the "does it feel designed" signals.
+  var craft = { sizes: {}, fams: {}, radii: {}, hues: {}, sp: 0, spOk: 0 };
+  var SP = ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "marginTop", "marginBottom", "rowGap", "columnGap"];
+  function measure() {
+    var out = { overflowBy: 0, textLen: 0, small: [], tiny: 0, contrast: [], imgNoAlt: 0, noLabel: 0, noName: 0 };
     var de = document.documentElement; out.overflowBy = Math.max(0, de.scrollWidth - de.clientWidth);
     out.textLen = (document.body.innerText || "").trim().length;
     var els = document.body.querySelectorAll("*"), n = 0;
     for (var i = 0; i < els.length && n < 700; i++) {
       var el = els[i]; if (!visible(el)) continue; n++;
-      var tag = el.tagName, cs = getComputedStyle(el);
+      var tag = el.tagName, cs = getComputedStyle(el), rect = el.getBoundingClientRect();
       var inter = /^(A|BUTTON|SELECT|TEXTAREA|SUMMARY)$/.test(tag) || (tag === "INPUT" && el.type !== "hidden") || el.getAttribute("role") === "button" || el.hasAttribute("onclick");
       if (inter) {
         var box = (tag === "INPUT" && el.closest("label")) ? el.closest("label") : el, r = box.getBoundingClientRect();
@@ -588,11 +667,21 @@ function auditProbe(ID) {
         if (/^(INPUT|SELECT|TEXTAREA)$/.test(tag) && !/^(hidden|submit|button|reset|image)$/.test(el.type || "") && !el.getAttribute("aria-label") && !el.getAttribute("aria-labelledby") && !el.closest("label") && !(el.id && document.querySelector('label[for="' + el.id + '"]'))) out.noLabel++;
       }
       if (tag === "IMG" && !el.hasAttribute("alt")) out.imgNoAlt++;
+      if (!/^(svg|path|circle|rect|line|ellipse|polyline|polygon|g|use|text)$/i.test(tag)) {
+        var rr = Math.max(parseFloat(cs.borderTopLeftRadius) || 0, parseFloat(cs.borderTopRightRadius) || 0, parseFloat(cs.borderBottomLeftRadius) || 0, parseFloat(cs.borderBottomRightRadius) || 0);
+        if (rr >= 2 && rr < Math.min(rect.width, rect.height) / 2 - 1) craft.radii[Math.round(rr)] = 1;
+        for (var q = 0; q < SP.length; q++) { var v = parseFloat(cs[SP[q]]); if (v > 0 && v < 200) { craft.sp++; if (Math.abs(v / 4 - Math.round(v / 4)) < 0.06) craft.spOk++; } }
+        var bgc = parse(cs.backgroundColor); if (bgc && bgc[3] > 0.2) { var hb = hueOf(bgc); if (hb !== null) craft.hues[hb] = 1; }
+        if (parseFloat(cs.borderTopWidth) > 0) { var brc = parse(cs.borderTopColor); if (brc && brc[3] > 0.2) { var hr = hueOf(brc); if (hr !== null) craft.hues[hr] = 1; } }
+      }
       var own = ""; for (var k = 0; k < el.childNodes.length; k++) if (el.childNodes[k].nodeType === 3) own += el.childNodes[k].nodeValue;
       own = own.trim();
       if (own.length > 0 && !/^(SCRIPT|STYLE)$/.test(tag)) {
         var fs = parseFloat(cs.fontSize); if (fs < 12) out.tiny++;
+        craft.sizes[Math.round(fs * 2) / 2] = 1;
+        craft.fams[String(cs.fontFamily).split(",")[0].replace(/["']/g, "").trim().toLowerCase()] = 1;
         var fg = parse(cs.color), bg = bgOf(el);
+        if (fg) { var hf = hueOf(fg); if (hf !== null && fg[3] > 0.2) craft.hues[hf] = 1; }
         if (fg && bg) {
           var a = fg[3], f = [fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a)];
           var l1 = lum(f), l2 = lum(bg), ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
@@ -601,12 +690,46 @@ function auditProbe(ID) {
         }
       }
     }
-    parent.postMessage({ ch: "i2p-audit", id: ID, m: out }, "*");
+    return out;
   }
-  if (document.readyState === "complete") setTimeout(run, 700); else window.addEventListener("load", function () { setTimeout(run, 700); });
+  function shown(sec) { return !!sec && !sec.hidden && getComputedStyle(sec).display !== "none" && sec.getClientRects().length > 0; }
+  function run() {
+    var base = measure();
+    base.viewport = !!document.querySelector('meta[name="viewport"]'); base.lang = !!document.documentElement.getAttribute("lang"); base.title = !!(document.title || "").trim();
+    var declared = Array.prototype.map.call(document.querySelectorAll("[data-screen]"), function (s) { return s.getAttribute("data-screen"); });
+    var expect = EXPECT && EXPECT.length ? EXPECT : declared;
+    var found = expect.filter(function (id) { return declared.indexOf(id) >= 0; });
+    var reach = found.filter(function (id) { return shown(document.querySelector('[data-screen="' + id + '"]')); });
+    var seen = {}; base.small.concat(base.contrast).forEach(function (x) { seen[x] = 1; });
+    var i = 0;
+    // Walk every screen through the page's OWN navigation (data-go), measuring each state.
+    (function next() {
+      if (i >= found.length) return finish();
+      var id = found[i++], trig = document.querySelector('[data-go="' + id + '"]'), sec = document.querySelector('[data-screen="' + id + '"]');
+      if (trig) { try { trig.click(); } catch (e) {} }
+      setTimeout(function () {
+        if (shown(sec)) {
+          if (reach.indexOf(id) < 0) reach.push(id);
+          var m = measure();
+          m.small.forEach(function (x) { if (!seen[x]) { seen[x] = 1; base.small.push(id + ": " + x); } });
+          m.contrast.forEach(function (x) { if (!seen[x]) { seen[x] = 1; base.contrast.push(id + ": " + x); } });
+          base.tiny = Math.max(base.tiny, m.tiny); base.noLabel = Math.max(base.noLabel, m.noLabel); base.noName = Math.max(base.noName, m.noName);
+          base.imgNoAlt = Math.max(base.imgNoAlt, m.imgNoAlt); base.overflowBy = Math.max(base.overflowBy, m.overflowBy);
+        }
+        next();
+      }, 300);
+    })();
+    function finish() {
+      base.errors = (window.__errs || []).slice(0, 3);
+      base.screens = { expect: expect, found: found, reachable: reach, declared: declared };
+      base.craft = { sizes: Object.keys(craft.sizes).length, families: Object.keys(craft.fams).length, famList: Object.keys(craft.fams).slice(0, 5), radii: Object.keys(craft.radii).length, radiiList: Object.keys(craft.radii).slice(0, 8), hues: Object.keys(craft.hues).length, rhythm: craft.sp ? Math.round((craft.spOk / craft.sp) * 100) : 100 };
+      parent.postMessage({ ch: "i2p-audit", id: ID, m: base }, "*");
+    }
+  }
+  if (document.readyState === "complete") setTimeout(run, 900); else window.addEventListener("load", function () { setTimeout(run, 900); });
 }
 let auditSeq = 0;
-function measureHtml(html, ideaId) {
+function measureHtml(html, ideaId, expect = []) {
   return new Promise((resolve) => {
     const id = "a" + ++auditSeq, fr = document.createElement("iframe");
     fr.setAttribute("sandbox", "allow-scripts"); fr.setAttribute("aria-hidden", "true"); fr.tabIndex = -1;
@@ -614,9 +737,9 @@ function measureHtml(html, ideaId) {
     let done = false, to;
     const fin = (m) => { if (done) return; done = true; window.removeEventListener("message", on); clearTimeout(to); fr.remove(); resolve(m); };
     const on = (e) => { if (e.source === fr.contentWindow && e.data?.ch === "i2p-audit" && e.data.id === id) fin(e.data.m); };
-    to = setTimeout(() => fin(null), 7000);
+    to = setTimeout(() => fin(null), 7000 + 450 * Math.max(expect.length, 4));
     window.addEventListener("message", on);
-    const probe = `<script>(${errProbe.toString()})();<\/script>`, runner = `<script>(${auditProbe.toString()})(${JSON.stringify(id)});<\/script>`;
+    const probe = `<script>(${errProbe.toString()})();<\/script>`, runner = `<script>(${auditProbe.toString()})(${JSON.stringify(id)}, ${JSON.stringify(expect)});<\/script>`;
     let doc = wrap(resolveAssets(html, ideaId), {});
     doc = /<head[^>]*>/i.test(doc) ? doc.replace(/<head[^>]*>/i, (m) => m + probe) : probe + doc;
     doc = /<\/body>/i.test(doc) ? doc.replace(/<\/body>/i, () => runner + "</body>") : doc + runner;
@@ -644,6 +767,19 @@ function autoChecks(m, st) {
     const lab = m.imgNoAlt + m.noLabel + m.noName;
     add("labels", !lab ? "pass" : lab < 3 ? "warn" : "fail", lab ? `${m.noLabel} inputs, ${m.noName} buttons, ${m.imgNoAlt} images` : "");
     add("meta", !m.viewport ? "fail" : !m.title || !m.lang ? "warn" : "pass", !m.viewport ? "no viewport meta" : !m.title ? "no title" : !m.lang ? "no lang" : "");
+    if (m.craft) {
+      const k = m.craft, v = [];
+      if (k.rhythm < 75) v.push(`${k.rhythm}% of spacing on the 4px grid`);
+      if (k.sizes > 9) v.push(`${k.sizes} font sizes`);
+      if (k.families > 3) v.push(`${k.families} font families`);
+      if (k.radii > 5) v.push(`${k.radii} corner radii`);
+      if (k.hues > 3) v.push(`${k.hues} colour hues`);
+      add("craft", !v.length ? "pass" : v.length < 3 ? "warn" : "fail", v.join("; "));
+    }
+    if (m.screens && m.screens.expect.length > 1) {
+      const sc = m.screens, miss = sc.expect.filter((id) => !sc.found.includes(id)), unr = sc.found.filter((id) => !sc.reachable.includes(id)), bad = miss.length + unr.length;
+      add("screens", !bad ? "pass" : bad === 1 && sc.expect.length > 3 ? "warn" : "fail", [miss.length ? "missing: " + miss.join(", ") : "", unr.length ? "unreachable: " + unr.join(", ") : ""].filter(Boolean).join("; "));
+    }
   }
   add("offline", st.external ? "fail" : "pass", st.external ? "external script, request or link" : "");
   add("dialogs", st.dialogs ? "fail" : "pass", st.dialogs ? "alert/confirm/prompt" : "");
@@ -726,7 +862,7 @@ async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
   refreshQuality(ideaId, n);
   let checks = [], review = null;
   try {
-    checks = autoChecks(await measureHtml(v.html, ideaId), staticChecks(v.html));
+    checks = autoChecks(await measureHtml(v.html, ideaId, v.screens || []), staticChecks(v.html));
     step("measure", "done", { checks });
     if (deep) { step("review", "running"); review = await expertReview(it, v.skill, v.html, checks, signal); step("review", review ? "done" : "skip", { review }); }
     v.q = buildQ({ it, skill: v.skill, checks, review, deep }); persist();
@@ -738,13 +874,13 @@ async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
       if (!h2) { step("fix", "done", { rejected: true }); step("recheck", "skip"); }
       else {
         step("fix", "done"); step("recheck", "running");
-        const c2 = autoChecks(await measureHtml(h2, ideaId), staticChecks(h2));
+        const c2 = autoChecks(await measureHtml(h2, ideaId, v.screens || []), staticChecks(h2));
         const r2 = deep ? await expertReview(it, v.skill, h2, c2, signal) : null;
         // Accept only a measurable improvement: better automated score, or equal automated score and a higher expert score.
         const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
         if (better) {
           const nn = (it.versions.at(-1)?.n || 0) + 1;
-          it.versions.push({ n: nn, html: h2, q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
+          it.versions.push({ n: nn, html: h2, screens: v.screens || [], q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
           v.q.fixedBy = nn;
           it.messages.push({ role: "assistant", content: t("chkFixMsg"), skill: v.skill, versionN: nn, feedback: 0 });
           step("recheck", "done", { from: v.q.score ?? v.q.autoScore, to: it.versions.at(-1).q.score ?? it.versions.at(-1).q.autoScore, nn });
@@ -816,6 +952,319 @@ function tipsHtml(it, v) {
   const thumbs = as.length ? `<div class="assets"><span class="faint">${t("assetsTitle")}</span>${as.map((a) => `<span class="thumb"><img src="${a.url}" alt="${esc(a.name)}"><button class="ib sm" data-act="asset-remove" data-id="${a.id}" aria-label="${t("assetRemove")}">${svg("x")}</button></span>`).join("")}</div>` : "";
   return `<section class="tips" aria-label="${t("tipsTitle")}"><h3>${t("tipsTitle")}</h3>${cards ? `<ul>${cards}</ul>` : ""}${thumbs}</section>`;
 }
+/* ───────── Idea Studio: archetype branching, blueprint grooming, style board ───────── */
+const ARCHETYPES = [
+  { id: "service", zh: "預約服務", en: "Booking service" }, { id: "commerce", zh: "網店／商品", en: "Storefront" }, { id: "tool", zh: "工具", en: "Tool" },
+  { id: "content", zh: "品牌／內容", en: "Brand & content" }, { id: "marketplace", zh: "社群／平台", en: "Marketplace" }, { id: "dashboard", zh: "後台／數據", en: "Dashboard" }, { id: "game", zh: "遊戲", en: "Game" },
+];
+// The generation-side branch: how each archetype should be BUILT.
+const ARCH_PATTERN = {
+  service: "Mobile app: bottom tab bar (home, book, mine). Booking is a stack: choose service, then slot, then details, then confirm. Custom date and time-slot picker; the confirmation offers add-to-calendar and a WhatsApp share.",
+  commerce: "Catalogue in a 2-column grid with filter chips, product detail with a CSS/SVG gallery and a variant picker, a sticky add-to-cart bar, a cart sheet and a checkout summary with HK$ totals.",
+  tool: "One focused screen: inputs at the top, a large live result, saved history in a drawer, and a shareable result card.",
+  content: "Editorial long scroll with a quiet sticky nav: a hero statement, proof (work, numbers, press), detail sections, and one clear conversion at the end.",
+  marketplace: "Feed with filters, a listing detail with trust signals (reviews, verification), a create-listing stepper, and a profile.",
+  dashboard: "Summary strip of 3-4 key numbers, then a chart or table region and filters. Dense but calm, with real empty and error states.",
+  game: "Title screen, play, results; a persistent best score and a visible next goal.",
+};
+const PAIRINGS = [
+  { id: "editorial", display: "Fraunces", body: "Inter", q: "family=Fraunces:wght@400;600&family=Inter:wght@400;500", mood: "warm, editorial, crafted" },
+  { id: "modern", display: "Space Grotesk", body: "Inter", q: "family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500", mood: "precise, technical, confident" },
+  { id: "luxe", display: "Cormorant Garamond", body: "Jost", q: "family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500", mood: "luxury, hospitality, fashion" },
+  { id: "clean", display: "DM Sans", body: "DM Sans", q: "family=DM+Sans:wght@400;500;700", mood: "friendly, clean, product" },
+  { id: "bold", display: "Bricolage Grotesque", body: "Inter", q: "family=Bricolage+Grotesque:wght@500;800&family=Inter:wght@400;500", mood: "expressive, young, food and culture" },
+  { id: "classic", display: "Playfair Display", body: "Source Sans 3", q: "family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;600", mood: "classic, finance, culture" },
+  { id: "hk", display: "Noto Sans TC", body: "Noto Sans TC", q: "family=Noto+Sans+TC:wght@400;500;800", mood: "Hong Kong signage, local, bold" },
+  { id: "heritage", display: "Noto Serif TC", body: "Noto Sans TC", q: "family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500", mood: "literary, heritage, calm" },
+];
+const pairingOf = (id) => PAIRINGS.find((x) => x.id === id) || PAIRINGS[0];
+const fontLink = (id) => `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${pairingOf(id).q}&display=swap">`;
+const loadedFonts = new Set();
+function loadFonts(id) { if (loadedFonts.has(id)) return; loadedFonts.add(id); const l = document.createElement("link"); l.rel = "stylesheet"; l.href = `https://fonts.googleapis.com/css2?${pairingOf(id).q}&display=swap`; document.head.appendChild(l); }
+const GROOM = {};                                  // ideaId -> live grooming state; never persisted
+
+// Colour maths for the style board's contrast guard.
+const isHex = (h) => /^#[0-9a-f]{6}$/i.test(String(h || ""));
+const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const rgbHex = (c) => "#" + c.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
+const relLum = (c) => { const a = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; };
+const contrastHex = (a, b) => { const x = relLum(hexRgb(a)), y = relLum(hexRgb(b)); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mixHex = (a, b, k) => { const p = hexRgb(a), q = hexRgb(b); return rgbHex(p.map((v, i) => v * (1 - k) + q[i] * k)); };
+const toHsl = ([r, g, b]) => { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn; if (!d) return [0, 0, l]; const s = d / (1 - Math.abs(2 * l - 1)); let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; return [h < 0 ? h + 360 : h, s, l]; };
+const fromHsl = ([h, s, l]) => { const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2; const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x]; return [(r + m) * 255, (g + m) * 255, (b + m) * 255]; };
+/** Deepen (or, on a dark paper, lighten) colour c until it reaches `min` contrast on bg, keeping its hue and saturation so it stays the same colour, not a muddy grey. */
+function ensureContrast(c, bg, min) {
+  if (contrastHex(c, bg) >= min) return c;
+  const darkBg = relLum(hexRgb(bg)) < 0.3; let [h, s, l] = toHsl(hexRgb(c));
+  for (let i = 0; i < 60 && contrastHex(rgbHex(fromHsl([h, s, l])), bg) < min; i++) l = darkBg ? Math.min(1, l + 0.015) : Math.max(0, l - 0.015);
+  return rgbHex(fromHsl([h, s, l]));
+}
+
+const cut = (x, n) => String(x ?? "").replace(/\s+/g, " ").trim().slice(0, n);
+const kebab = (x, i) => String(x || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "s" + i;
+function guessArchetype(it) {
+  if (it.spec.suggestedSkill === "game-prototype") return "game";
+  const x = `${it.spec.title} ${it.spec.oneLiner} ${it.spec.coreInteraction} ${it.raw || ""}`.toLowerCase();
+  if (/預約|預訂|booking|book |appointment|班|課|salon|診所|餐廳訂座/.test(x)) return "service";
+  if (/買|賣|網店|shop|store|商品|訂購|order|外賣|落單/.test(x)) return "commerce";
+  if (/作品|品牌|portfolio|landing|介紹|brand|newsletter/.test(x)) return "content";
+  if (/社群|平台|交換|marketplace|配對|match|街坊/.test(x)) return "marketplace";
+  if (/後台|數據|dashboard|報表|銷售額|kpi/.test(x)) return "dashboard";
+  return "tool";
+}
+
+function normalizeBlueprint(j, it, forced) {
+  if (!j || typeof j !== "object") return null;
+  const used = new Set(), map = {};
+  const screen = (x, i, core) => {
+    let id = kebab(x?.id, i); while (used.has(id)) id += "-b"; used.add(id);
+    map[String(x?.id || "")] = id; map[kebab(x?.id, i)] = id;
+    return { id, name: cut(x?.name || id, 40), purpose: cut(x?.purpose, 140), action: cut(x?.action, 40), core: core === undefined ? !!x?.core : core };
+  };
+  const screens = (Array.isArray(j.screens) ? j.screens : []).slice(0, 6).map((x, i) => screen(x, i));
+  if (screens.length < 3) return null;
+  if (!screens.some((x) => x.core)) screens[0].core = true;
+  const optionalScreens = (Array.isArray(j.optionalScreens) ? j.optionalScreens : []).slice(0, 4).map((x, i) => screen(x, i + 10, false));
+  const core = new Set(screens.filter((x) => x.core).map((x) => x.id));
+  const toId = (x) => map[String(x)] || map[kebab(x, 0)];
+  const decisions = (Array.isArray(j.decisions) ? j.decisions : []).slice(0, 5).map((d, i) => {
+    const options = (Array.isArray(d?.options) ? d.options : []).slice(0, 3).map((o) => ({
+      label: cut(o?.label, 40),
+      effect: {
+        add: (Array.isArray(o?.effect?.add) ? o.effect.add : []).map(toId).filter(Boolean),
+        remove: (Array.isArray(o?.effect?.remove) ? o.effect.remove : []).map(toId).filter((x) => x && !core.has(x)),   // core screens can never be removed
+        note: cut(o?.effect?.note, 90),
+      },
+    })).filter((o) => o.label);
+    return { id: "d" + (i + 1), question: cut(d?.question, 90), why: cut(d?.why, 140), recommended: Math.max(0, Math.min(options.length - 1, Number(d?.recommended) || 0)), options, chosen: null };
+  }).filter((d) => d.question && d.options.length >= 2);
+  const arch = ARCHETYPES.some((a) => a.id === forced) ? forced : ARCHETYPES.some((a) => a.id === j.archetype) ? j.archetype : guessArchetype(it);
+  const list = (v, n, len) => (Array.isArray(v) ? v : []).slice(0, n).map((x) => cut(x, len)).filter(Boolean);
+  return {
+    archetype: arch, valueProp: cut(j.valueProp, 200), different: cut(j.different, 200),
+    personas: (Array.isArray(j.personas) ? j.personas : []).slice(0, 2).map((p) => ({ name: cut(p?.name, 40), situation: cut(p?.situation, 160), job: cut(p?.job, 120), worry: cut(p?.worry, 120) })).filter((p) => p.name || p.situation),
+    screens, optionalScreens, decisions,
+    facts: (Array.isArray(j.facts) ? j.facts : []).slice(0, 5).map((f, i) => ({ key: kebab(f?.key, i), label: cut(f?.label, 60), sample: cut(f?.sample, 120), value: "" })).filter((f) => f.label),
+    assets: (Array.isArray(j.assets) ? j.assets : []).slice(0, 3).map((a) => ({ slot: SLOT[a?.slot] ? a.slot : "photo", why: cut(a?.why, 120) })),
+    risks: list(j.risks, 4, 160), done: list(j.done, 3, 160), signature: cut(j.signature, 160), tone: list(j.tone, 3, 16), source: "model", at: Date.now(),
+  };
+}
+function fallbackBlueprint(it, forced) {
+  const L = lang(), z = (a, b) => (L ? b : a);
+  return {
+    archetype: forced || guessArchetype(it), valueProp: it.spec.oneLiner, different: "",
+    personas: [{ name: z("主要用戶", "Main user"), situation: it.spec.targetUser, job: it.spec.coreInteraction, worry: "" }],
+    screens: [
+      { id: "home", name: z("首頁", "Home"), purpose: z("一眼睇到價值同主要行動", "Show the value and the main action"), action: z("開始", "Start"), core: true },
+      { id: "main", name: z("主要功能", "Main task"), purpose: it.spec.coreInteraction, action: z("完成", "Complete"), core: true },
+      { id: "result", name: z("結果", "Result"), purpose: z("確認完成咗乜嘢", "Confirm what was done"), action: z("返首頁", "Back home"), core: true },
+      { id: "mine", name: z("我的", "Mine"), purpose: z("記錄同設定", "History and settings"), action: z("查看", "View"), core: false },
+    ],
+    optionalScreens: [{ id: "signin", name: z("登入", "Sign in"), purpose: z("記住用戶", "Remember the user"), action: z("登入", "Sign in"), core: false }],
+    decisions: [{ id: "d1", question: z("要唔要登入？", "Require sign-in?"), why: z("登入可以記住用戶，但會令第一次用慢咗", "Accounts remember people but slow the first visit"), recommended: 0, chosen: null,
+      options: [{ label: z("唔使，訪客都用得", "No, guests can use it"), effect: { add: [], remove: [], note: "" } }, { label: z("要，先登入", "Yes, sign in first"), effect: { add: ["signin"], remove: [], note: z("加一個登入畫面", "Adds a sign-in screen") } }] }],
+    facts: [], assets: [{ slot: "logo", why: z("有真 logo 會即刻似真", "A real logo makes it feel real") }], risks: [], done: [], signature: "", tone: [], source: "fallback", at: Date.now(),
+  };
+}
+function defaultPairing(it) { return { tool: "modern", dashboard: "modern", commerce: "luxe", game: "bold", marketplace: "clean" }[it.blueprint?.archetype] || "editorial"; }
+function normalizeStyle(j, it) {
+  const st = it.spec.style || {}, picked = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean);
+  const paper = isHex(j?.paper) ? j.paper.toLowerCase() : "#eeece5";
+  const dark = relLum(hexRgb(paper)) < 0.3;
+  const ink = ensureContrast(isHex(j?.ink) ? j.ink.toLowerCase() : dark ? "#ece9e1" : "#1c1b18", paper, 10, dark ? "#ffffff" : "#000000");
+  const pick = (k, i, dflt) => (picked[i] ? { name: lang() ? picked[i].en : picked[i].zh, hex: picked[i].hex } : isHex(j?.[k]?.hex) ? { name: cut(j[k].name, 20) || dflt.name, hex: j[k].hex.toLowerCase() } : dflt);
+  const t1 = pick("tone1", 0, { name: lang() ? "Jade" : "翡翠綠", hex: "#0c6a56" }), t2 = pick("tone2", 1, { name: lang() ? "Vermilion" : "朱紅", hex: "#c13a24" });
+  const raw1 = t1.hex;
+  t1.hex = ensureContrast(t1.hex, paper, 4.5, ink); t2.hex = ensureContrast(t2.hex, paper, 4.5, ink);
+  return {
+    tone1: t1, tone2: t2, paper, ink, adjusted: t1.hex !== raw1,
+    pairing: PAIRINGS.some((p) => p.id === j?.pairing) ? j.pairing : defaultPairing(it),
+    radius: j?.radius === "sharp" ? "sharp" : "soft", density: j?.density === "compact" ? "compact" : "airy", motion: j?.motion === "snappy" ? "snappy" : "calm",
+    imagery: cut(j?.imagery, 160), signature: cut(j?.signature, 160), source: j ? "model" : "fallback",
+  };
+}
+/** Branching: base screens, then each decision (chosen, or the recommendation) adds or removes screens. */
+function activeScreens(bp) {
+  const byId = Object.fromEntries([...bp.screens, ...bp.optionalScreens].map((x) => [x.id, x]));
+  let ids = bp.screens.map((x) => x.id); const why = {};
+  for (const d of bp.decisions) {
+    const o = d.options[d.chosen ?? d.recommended]; if (!o) continue;
+    for (const r of o.effect.remove) if (!byId[r]?.core) ids = ids.filter((x) => x !== r);
+    for (const a of o.effect.add) if (!ids.includes(a) && byId[a]) {
+      const lastCore = Math.max(...ids.map((x, i) => (byId[x]?.core ? i : -1)));
+      ids.splice(lastCore + 1, 0, a); why[a] = d.question;
+    }
+  }
+  return ids.map((id) => ({ ...byId[id], addedBy: why[id] || null }));
+}
+function readiness(bp, it) {
+  const miss = []; let sc = 0;
+  if (bp.valueProp.length >= 10) sc += 15; else miss.push(t("rdValue"));
+  if (bp.different.length >= 10) sc += 10; else miss.push(t("rdDiff"));
+  if (bp.personas.some((p) => p.situation.length >= 10)) sc += 10; else miss.push(t("rdPeople"));
+  if (activeScreens(bp).length >= 3) sc += 15;
+  const open = bp.decisions.filter((d) => d.chosen === null).length;
+  sc += bp.decisions.length ? Math.round(25 * (1 - open / bp.decisions.length)) : 25;
+  if (open) miss.push(t("rdOpen").replace("{n}", open));
+  if (it.style) sc += 15; else miss.push(t("rdStyle"));
+  const unfilled = bp.facts.filter((f) => !f.value.trim()).length;
+  sc += bp.facts.length ? Math.round(10 * (1 - unfilled / bp.facts.length)) : 10;
+  if (unfilled) miss.push(t("rdFacts").replace("{n}", unfilled));
+  return { score: Math.min(100, sc), miss, open };
+}
+const packBody = (id) => PACKS.find((p) => p.id === id)?.body || "";
+function groomPrompt(it, forced) {
+  return `[Instructions]\n${packBody("idea-grooming")}\n${REGISTER[S.register]}\n[/Instructions]\n\nIDEA SPEC: ${JSON.stringify(it.spec)}\nORIGINAL WORDS: ${it.raw || it.spec.oneLiner}${forced ? `\nARCHETYPE (decided by the user, keep it): ${forced}` : ""}${S.register === "en" ? "" : "\nWrite every text field in Hong Kong Cantonese (Traditional Chinese)."}`;
+}
+function stylePrompt(it) {
+  const st = it.spec.style || {}, picked = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean), ph = PHIL.find((p) => p.id === st.phil);
+  return `[Instructions]\n${packBody("style-board")}\nPAIRINGS:\n${PAIRINGS.map((p) => `- ${p.id}: ${p.display} + ${p.body} (${p.mood})`).join("\n")}\n${REGISTER[S.register]}\n[/Instructions]\n\nIDEA SPEC: ${JSON.stringify(it.spec)}`
+    + (picked.length ? `\nUSER-PICKED TONES (keep exactly): ${picked.map((x) => x.en + " " + x.hex).join(", ")}` : "")
+    + (it.blueprint ? `\nARCHETYPE: ${it.blueprint.archetype}; VOICE: ${it.blueprint.tone.join(", ")}` : "")
+    + (ph && ph.id !== "auto" ? `\nREFERENCE PHILOSOPHY: ${ph.en}` : "");
+}
+function blueprintBlock(skill, it) {
+  const bp = it.blueprint, st = it.style; if (!bp && !st) return "";
+  const out = [];
+  if (bp) {
+    out.push("BLUEPRINT (groomed with the founder; build exactly this):", `- archetype: ${bp.archetype}. Build pattern: ${ARCH_PATTERN[bp.archetype]}`, `- value: ${bp.valueProp}`);
+    if (bp.different) out.push(`- different because: ${bp.different}`);
+    bp.personas.forEach((p) => out.push(`- persona: ${p.name}, ${p.situation}. Job: ${p.job}. Worry: ${p.worry}`));
+    if (skill === "game-prototype") out.push("- map the screens to game states (title, play, results); canvas game, no router.");
+    else out.push("- screens (ids are binding: data-screen and data-go use exactly these, in this order):");
+    activeScreens(bp).forEach((x) => out.push(`  - ${x.id}: ${x.name}. ${x.purpose} Primary action: ${x.action}`));
+    bp.decisions.forEach((d) => { const o = d.options[d.chosen ?? d.recommended]; out.push(`- decided: ${d.question} => ${o.label}${o.effect.note ? " (" + o.effect.note + ")" : ""}${d.chosen === null ? " [default]" : ""}`); });
+    bp.facts.forEach((f) => out.push(`- fact, ${f.label}: ${f.value.trim() ? f.value.trim() + " (confirmed by the founder)" : f.sample + " (sample: mark it subtly as a sample)"}`));
+    if (bp.signature) out.push(`- signature interaction: ${bp.signature}`);
+    if (bp.tone.length) out.push(`- voice: ${bp.tone.join(", ")}`);
+    bp.risks.forEach((r) => out.push(`- handle this risk visibly: ${r}`));
+    bp.done.forEach((d) => out.push(`- done means: ${d}`));
+  }
+  if (st) {
+    const pr = pairingOf(st.pairing);
+    out.push("STYLE BOARD (exact tokens; do not invent others):", `- paper ${st.paper}; ink ${st.ink}; tone1 ${st.tone1.hex} (${st.tone1.name}); tone2 ${st.tone2.hex} (${st.tone2.name})`,
+      `- fonts: display "${pr.display}", body "${pr.body}". Use exactly this link: ${fontLink(st.pairing)}`,
+      `- radius: ${st.radius === "sharp" ? "2-4px" : "6-8px"}; density: ${st.density}; motion: ${st.motion}`, "- dark theme: invert paper and ink, lighten the same tones");
+    if (st.imagery) out.push(`- imagery: ${st.imagery}`);
+    if (st.signature) out.push(`- visual signature: ${st.signature}`);
+  }
+  return out.join("\n");
+}
+
+async function runGrooming(ideaId, { forced = null, only = null } = {}) {
+  const it = findIdea(ideaId); if (!it || GROOM[ideaId]) return;
+  const sample = await sampler();
+  const g = (GROOM[ideaId] = { t0: Date.now(), ctl: new AbortController(), steps: { blueprint: only === "style" ? "skip" : "running", style: "running" } });
+  const here = () => S.view === "studio" && S.ideaId === ideaId;
+  g.timer = setInterval(() => { if (here()) refreshStudioLog(); }, 1000);
+  if (here()) render();
+  const jobs = [];
+  if (only !== "style") jobs.push((async () => {
+    let bp = null;
+    try { if (sample?.json) bp = normalizeBlueprint(await sample.json(groomPrompt(it, forced), { signal: g.ctl.signal, cache: false, modelTier: "default" }), it, forced); } catch (e) {}
+    if (!bp) bp = fallbackBlueprint(it, forced);
+    g.steps.blueprint = bp.source === "fallback" ? "fallback" : "done";
+    it.blueprint = bp; it.updatedAt = Date.now(); persist(); if (here()) render();
+  })());
+  jobs.push((async () => {
+    let raw = null;
+    try { if (sample?.json) raw = await sample.json(stylePrompt(it), { signal: g.ctl.signal, cache: false, modelTier: "quick" }); } catch (e) {}
+    it.style = normalizeStyle(raw && typeof raw === "object" ? raw : null, it);
+    g.steps.style = it.style.source === "fallback" ? "fallback" : "done";
+    loadFonts(it.style.pairing); persist(); if (here()) render();
+  })());
+  await Promise.all(jobs);
+  clearInterval(g.timer); delete GROOM[ideaId];
+  if (!sample) toast(t("noModel"));
+  if (here()) render();
+}
+function buildFromBlueprint() {
+  const it = idea(); if (!it?.blueprint || S.pending) return;
+  const first = !it.versions.length;
+  it.blueprint.builtAt = Date.now(); persist();
+  S.view = "idea"; S.viewN = null; S.previewOpen = false; render();
+  turn({ input: first ? t("bpBuild") : t("bpRebuild"), forceSkill: it.spec.suggestedSkill, fresh: true });
+}
+function setPath(obj, path, v) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[/^\d+$/.test(k[i]) ? +k[i] : k[i]]; o[k.at(-1)] = v; }
+
+/* ───────── Idea Studio view ───────── */
+function studioLogHtml(g) {
+  const el = Math.round((Date.now() - g.t0) / 1000);
+  const rows = [["blueprint", t("stStepBp")], ["style", t("stStepStyle")]].filter(([k]) => g.steps[k] !== "skip");
+  const mk = (x, i) => (x === "done" ? `<span class="mark done">${svg("check")}</span>` : x === "fallback" ? `<span class="mark">!</span>` : x === "running" ? `<span class="mark run"><i class="pd"></i></span>` : `<span class="mark">${i + 1}</span>`);
+  return `<section class="worklog-wrap" id="studio-log"><div class="chkhead"><b>${t("stWorking")}</b><span class="faint" role="status">${t("elapsed").replace("{s}", el)}</span></div>
+    <ol class="worklog">${rows.map(([k, label], i) => `<li data-s="${g.steps[k] === "fallback" ? "done" : g.steps[k]}">${mk(g.steps[k], i)}<span class="cl-body"><span class="cl-t">${label}</span>${g.steps[k] === "fallback" ? `<span class="cl-o">${t("stFallback")}</span>` : ""}</span></li>`).join("")}</ol></section>`;
+}
+function refreshStudioLog() { const it = idea(), g = it && GROOM[it.id], el = document.getElementById("studio-log"); if (g && el) el.outerHTML = studioLogHtml(g); }
+const rdHtml = (rd) => `<div class="rd-top"><b>${t("stReady")}</b><span class="rd-n">${rd.score}%</span></div><div class="rdm" role="progressbar" aria-valuenow="${rd.score}" aria-valuemin="0" aria-valuemax="100" aria-label="${t("stReady")}"><span style="width:${rd.score}%"></span></div>${rd.miss.length ? `<p class="faint" style="margin:8px 0 0;font-size:13px">${rd.miss.join(" · ")}</p>` : ""}`;
+const rdLine = (rd) => `${t("stReady")} ${rd.score}%${rd.open ? " · " + t("stOpenDefault").replace("{n}", rd.open) : ""}`;
+function boardHtml(it) {
+  const st = it.style, bp = it.blueprint, L = lang();
+  if (!st) return `<p class="muted">${t("stStyleWait")}</p><div class="skel-block" aria-hidden="true"><div class="sk"></div><div class="sk"></div></div>`;
+  const pr = pairingOf(st.pairing); loadFonts(st.pairing);
+  const sw = [[st.tone1.name, st.tone1.hex], [st.tone2.name, st.tone2.hex], [t("stPaper"), st.paper], [t("stInk"), st.ink]];
+  const seg = (k, vals) => `<div class="seg" role="group" aria-label="${k}">${vals.map((v) => `<button data-sopt="${k}:${v}" aria-pressed="${st[k] === v}">${t("st_" + v)}</button>`).join("")}</div>`;
+  const tones = (n) => TONES.map((x) => `<button class="swatch" data-stone="${n}:${x.id}" style="background:${x.hex}" aria-pressed="${mixHex(x.hex, st.ink, 0) === st["tone" + n].hex}" aria-label="${L ? x.en : x.zh}" title="${L ? x.en : x.zh}"></button>`).join("");
+  return `<div class="board" style="--b-paper:${st.paper};--b-ink:${st.ink};--b-t1:${st.tone1.hex};--b-t2:${st.tone2.hex};--b-d:'${pr.display}',Georgia,serif;--b-b:'${pr.body}',system-ui,sans-serif;--b-r:${st.radius === "sharp" ? "3px" : "8px"}">
+      <div class="spec-type"><p class="b-eyebrow">${esc((bp?.tone || []).join(" · ") || pr.mood)}</p><p class="b-display">${esc(it.spec.title)}</p><p class="b-body">${esc(bp?.valueProp || it.spec.oneLiner)}</p><span class="b-btn">${esc((bp && activeScreens(bp)[0]?.action) || t("stCta"))}</span></div>
+      <ul class="b-sw">${sw.map(([n, h]) => `<li><i style="background:${h}"></i><span>${esc(n)}<small>${h}</small></span></li>`).join("")}</ul></div>
+    <p class="faint" style="font-size:13px;margin:8px 0 0">${pr.display} + ${pr.body} · ${t("st_" + st.radius)} · ${t("st_" + st.density)} · ${t("st_" + st.motion)}${st.adjusted ? " · " + t("stAdjusted") : ""}</p>
+    ${st.signature ? `<p class="muted" style="margin:8px 0 0">${esc(st.signature)}</p>` : ""}
+    <span class="subhead">${t("stFonts")}</span><div class="chips">${PAIRINGS.map((p) => `<button class="chip" data-pair="${p.id}" aria-pressed="${st.pairing === p.id}">${p.display}</button>`).join("")}</div>
+    <span class="subhead">${t("stTone1")}</span><div class="swatches">${tones(1)}</div>
+    <span class="subhead">${t("stTone2")}</span><div class="swatches">${tones(2)}</div>
+    <span class="subhead">${t("stShape")}</span><div class="chips">${seg("radius", ["sharp", "soft"])}${seg("density", ["airy", "compact"])}${seg("motion", ["calm", "snappy"])}</div>
+    <button class="btn ghost" data-act="reroll-style" style="margin-top:12px" ${GROOM[it.id] ? "disabled" : ""}>${svg("shuffle")} ${t("stReroll")}</button>`;
+}
+function viewStudio() {
+  const it = idea(); if (!it) { S.view = "journal"; return viewJournal(); }
+  const L = lang(), bp = it.blueprint, g = GROOM[it.id];
+  const head = `<p class="eyebrow">${t("stEyebrow")}</p><h1>${esc(it.spec.title)}</h1><p class="muted" style="margin:0">${esc(it.spec.oneLiner)}</p>`;
+  if (!bp) return `<div class="lib studio">${head}${g ? studioLogHtml(g) : `<button class="btn primary lg block" data-act="groom" style="margin-top:20px">${t("stStart")}</button>`}<div class="skel-block" aria-hidden="true">${'<div class="sk"></div>'.repeat(5)}</div></div>`;
+  const act = activeScreens(bp), rd = readiness(bp, it), flash = new Set(S.flash || []);
+  const resolved = bp.decisions.filter((d) => d.chosen !== null).length;
+  const as = S.assets[it.id] || [];
+  return `<div class="lib studio">${head}${g ? studioLogHtml(g) : ""}
+    <div class="rd" id="rd">${rdHtml(rd)}</div>
+    <span class="subhead">${t("stArch")}</span><div class="chips" role="group" aria-label="${t("stArch")}">${ARCHETYPES.map((a) => `<button class="chip" data-arch="${a.id}" aria-pressed="${bp.archetype === a.id}">${L ? a.en : a.zh}</button>`).join("")}</div>
+    ${S.archPending ? `<p class="error" role="status" style="font-size:13px">${t("stArchConfirm")}</p>` : ""}
+
+    <h2 class="group">${t("stSharpen")}</h2>
+    <div class="field" style="margin-top:12px"><label class="label" for="bp-v">${t("stValue")}</label><textarea class="ta" id="bp-v" rows="2" data-bp="valueProp">${esc(bp.valueProp)}</textarea></div>
+    <div class="field"><label class="label" for="bp-d">${t("stDiff")}</label><textarea class="ta" id="bp-d" rows="2" data-bp="different">${esc(bp.different)}</textarea></div>
+
+    <h2 class="group">${t("stPeople")}</h2>
+    ${bp.personas.map((p, i) => `<div class="persona"><input class="input pname" id="bp-p${i}n" data-bp="personas.${i}.name" value="${esc(p.name)}" aria-label="${t("stName")}">
+      <label class="label" for="bp-p${i}s">${t("stSituation")}</label><textarea class="ta" rows="2" id="bp-p${i}s" data-bp="personas.${i}.situation">${esc(p.situation)}</textarea>
+      <div class="pgrid"><div><label class="label" for="bp-p${i}j">${t("stJob")}</label><input class="input" id="bp-p${i}j" data-bp="personas.${i}.job" value="${esc(p.job)}"></div>
+      <div><label class="label" for="bp-p${i}w">${t("stWorry")}</label><input class="input" id="bp-p${i}w" data-bp="personas.${i}.worry" value="${esc(p.worry)}"></div></div></div>`).join("")}
+
+    <h2 class="group">${t("stFlow")}</h2><p class="faint" style="font-size:13px;margin:8px 0 0">${t("stFlowSub")}</p>
+    <ol class="flow" aria-label="${t("stFlow")}">${act.map((x, i) => `<li class="node${x.addedBy ? " added" : ""}${flash.has(x.id) ? " flash" : ""}" data-screen-id="${x.id}"><span class="ni">${i + 1}</span><b>${esc(x.name)}</b><span class="na">${esc(x.action)}</span></li>`).join("")}</ol>
+    <ul class="screens">${act.map((x) => `<li><div><b>${esc(x.name)}</b>${x.core ? `<span class="tag">${t("stCore")}</span>` : ""}${x.addedBy ? `<span class="tag t2">${t("stAddedBy").replace("{q}", esc(cut(x.addedBy, 26)))}</span>` : ""}</div><span class="muted">${esc(x.purpose)}</span></li>`).join("")}</ul>
+
+    ${bp.decisions.length ? `<h2 class="group">${t("stDecide")} · ${resolved}/${bp.decisions.length}</h2>
+    ${bp.decisions.map((d) => `<section class="dec" aria-labelledby="dq-${d.id}"><h3 id="dq-${d.id}">${esc(d.question)}</h3>${d.why ? `<p class="muted" style="margin:0">${esc(d.why)}</p>` : ""}
+      <div class="opts" role="radiogroup" aria-labelledby="dq-${d.id}">${d.options.map((o, j) => `<button class="opt" role="radio" aria-checked="${d.chosen === j}" data-assumed="${d.chosen === null && d.recommended === j}" data-dec="${d.id}" data-opt="${j}"><span class="radio" aria-hidden="true"></span><span class="ob"><b>${esc(o.label)}</b>${o.effect.note ? `<span class="muted">${esc(o.effect.note)}</span>` : ""}</span>${d.recommended === j ? `<span class="tag">${t("stRecommended")}</span>` : ""}</button>`).join("")}</div></section>`).join("")}` : ""}
+
+    <h2 class="group">${t("stLook")}</h2>${boardHtml(it)}
+
+    ${bp.facts.length || bp.assets.length ? `<h2 class="group">${t("stContent")}</h2>
+    ${bp.facts.map((f, i) => `<div class="field" style="margin-top:12px"><label class="label" for="bp-f${i}">${esc(f.label)}</label><input class="input" id="bp-f${i}" data-bp="facts.${i}.value" value="${esc(f.value)}" placeholder="${esc(t("stSample") + f.sample)}"></div>`).join("")}
+    ${bp.assets.map((a) => `<div class="assetrow"><span><b>${slotName(a.slot)}</b><span class="muted">${esc(a.why)}</span></span><button class="btn" data-act="tip-asset" data-slot="${a.slot}">${svg("upload")} ${t("tipAsset").replace("{slot}", slotName(a.slot))}</button></div>`).join("")}
+    ${as.length ? `<div class="assets"><span class="faint">${t("assetsTitle")}</span>${as.map((a) => `<span class="thumb"><img src="${a.url}" alt="${esc(a.name)}"><button class="ib sm" data-act="asset-remove" data-id="${a.id}" aria-label="${t("assetRemove")}">${svg("x")}</button></span>`).join("")}</div>` : ""}` : ""}
+
+    ${bp.risks.length ? `<h2 class="group">${t("stRisks")}</h2><ul class="plain" style="margin-top:12px">${bp.risks.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
+    ${bp.done.length ? `<h2 class="group">${t("stDone")}</h2><ul class="plain" style="margin-top:12px">${bp.done.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
+
+    <div class="specbar"><p class="faint" style="margin:0" id="rd-line">${rdLine(rd)}</p><button class="btn primary lg block" data-act="build-bp" ${S.pending || g ? "disabled" : ""}>${it.versions.length ? t("bpRebuildBtn") : t("bpBuildBtn")}</button></div>
+  </div>`;
+}
+function modeFieldHtml() {
+  return `<div class="field"><span class="label">${t("modeTitle")}</span><div class="seg" role="group" aria-label="${t("modeTitle")}"><button data-mode="quick" aria-pressed="${S.mode !== "deep"}">${t("modeQuick")}</button><button data-mode="deep" aria-pressed="${S.mode === "deep"}">${t("modeDeep")}</button></div>
+    <p class="faint" style="margin:8px 0 0;font-size:13px">${t("modeHint")}</p></div>`;
+}
+
 function styleFieldHtml() {
   if (S.skillPick === "idea-capture") return "";
   const L = lang(), st = (S.spec.style ||= { tones: [], phil: "auto" });
@@ -946,7 +1395,7 @@ function packRow(p) {
   const L = lang(), on = packOn(p.id);
   return `<div class="acard prow"><button class="rowmain" data-skill-open="${p.id}"><span class="ico">${skillIcon(p.id)}</span>
     <span style="flex:1;min-width:0"><b>${packName(p)}</b><br><span class="muted">${p.summary[L]}</span><br><span class="faint" style="font-size:12px">${t("appliesTo")}：${p.applies.map((x) => sl(x)).join(" · ")}</span></span></button>
-    <button class="switch" role="switch" aria-checked="${on}" aria-label="${esc(packName(p))}" data-pack-toggle="${p.id}"></button></div>`;
+    ${toggleable(p) ? `<button class="switch" role="switch" aria-checked="${on}" aria-label="${esc(packName(p))}" data-pack-toggle="${p.id}"></button>` : `<span class="ib" aria-hidden="true">${svg("chevron")}</span>`}</div>`;
 }
 function viewSkills() {
   const L = lang();
@@ -998,7 +1447,8 @@ function sheetPack(p) {
   const L = lang(), on = packOn(p.id), wf = p.kind === "workflow";
   return `<div class="handle"></div><h2>${packName(p)} <span class="tag">${wf ? t("workflowTag") : t("craftTag")}</span></h2><p class="muted" style="margin:0 0 14px">${p.summary[L]}</p>
     <dl class="kv"><dt>${t("appliesTo")}</dt><dd>${p.applies.map((x) => sl(x)).join(" · ")}</dd><dt>${t("source")}</dt><dd>${esc(p.source)}</dd></dl>
-    <div class="setrow"><span id="pk-l">${wf ? t("gateOn") : t("packOn")}</span><button class="switch" role="switch" aria-checked="${on}" aria-labelledby="pk-l" data-pack-toggle="${p.id}"></button></div>
+    ${toggleable(p) ? `<div class="setrow"><span id="pk-l">${wf ? t("gateOn") : t("packOn")}</span><button class="switch" role="switch" aria-checked="${on}" aria-labelledby="pk-l" data-pack-toggle="${p.id}"></button></div>` : ""}
+    ${p.id === "idea-grooming" ? `<button class="btn primary block" data-act="studio-new" style="margin-top:12px">${t("studioNew")}</button>` : ""}
     ${p.id === "ux-audit" ? `<button class="btn block" data-act="audit-current" style="margin-top:4px">${svg("shield")} ${t("auditCurrent")}</button>` : ""}
     <details style="margin-top:14px"><summary class="label" style="cursor:pointer">${t("promptSrc")}</summary><pre class="src">${esc(p.body)}</pre></details>
     <button class="btn ghost block" data-act="sheet-close" style="margin-top:10px">${t("close")}</button>`;
@@ -1097,7 +1547,7 @@ function buildMessages(skill, it, input, currentHtml) {
   while (hist.length && hist[0].role !== "user") hist.shift();
   const sys = skill === "chat"
     ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\nThe idea: ${specBlock(it.spec)}`
-    : designPrompt(skill, it);
+    : designPrompt(skill, it, { exemplar: !currentHtml });
   const iter = currentHtml ? `\n\nCURRENT PROTOTYPE (modify it — keep everything not asked to change, return the full updated document):\n\`\`\`html\n${currentHtml}\n\`\`\`` : "";
   const msgs = [...hist, { role: "user", content: input + iter }];
   // System instructions ride in the first user turn (memoryless sampler).
@@ -1162,23 +1612,25 @@ ${REGISTER[S.register]}
       targetUser: String(sp.targetUser || ""), suggestedSkill: ok.includes(sp.suggestedSkill) ? sp.suggestedSkill : "prototype-html",
     };
     S.spec.style = { tones: [], phil: "auto" };
+    if (!S.modeLock) S.mode = raw.trim().length >= 50 ? "deep" : "quick";
     if (S.skillPick && S.skillPick !== "idea-capture") S.spec.suggestedSkill = S.skillPick;
   } catch (e) { toast(modelError(e)); }
   S.busy = false; S.status = ""; render();
 }
 
-function createIdea(generate = true) {
+function createIdea(generate = true) {   // generate: true = build now, false = save only, "deep" = open Idea Studio
   const now = Date.now();
   const it = { id: "i" + now.toString(36), spec: S.spec, raw: S.draft, messages: [], versions: [], currentVersion: null, store: {}, createdAt: now, updatedAt: now };
   S.ideas.unshift(it); persist();
-  S.ideaId = it.id; S.spec = null; S.draft = ""; S.view = "idea"; S.viewN = null; S.previewOpen = false;
+  S.ideaId = it.id; S.spec = null; S.draft = ""; S.view = generate === "deep" ? "studio" : "idea"; S.viewN = null; S.previewOpen = false;
   render();
-  S.skillPick = null;
-  if (generate) turn({ input: t("first"), forceSkill: it.spec.suggestedSkill });
+  S.skillPick = null; S.modeLock = false;
+  if (generate === "deep") runGrooming(it.id);
+  else if (generate) turn({ input: t("first"), forceSkill: it.spec.suggestedSkill });
 }
 
 let abort = null;
-async function turn({ input, forceSkill, regenerate, editIndex }) {
+async function turn({ input, forceSkill, regenerate, editIndex, fresh }) {
   const it = idea(); if (!it || S.pending) return;
   const sample = await sampler();
   if (!sample) return toast(t("noModel"));
@@ -1192,7 +1644,7 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
   const cur = it.versions.find((v) => v.n === it.currentVersion);
   const r = forceSkill ? { skill: forceSkill, confidence: 1 } : route(input, cur?.skill);
   const skill = r.skill;
-  const iterating = skill !== "chat" && cur && cur.skill === skill && cur.html;
+  const iterating = !fresh && skill !== "chat" && cur && cur.skill === skill && cur.html;
   const msgs = buildMessages(skill, it, input, iterating ? cur.html : null);
   it.messages.push({ role: "user", content: input, skill });
   S.pending = { skill, text: "", chars: 0, confidence: r.confidence, t0: Date.now(), log: skill !== "chat" ? { phase: "wait", iterating: !!iterating, brief: briefLine(it, skill), skills: skillsLine(skill) } : null };
@@ -1219,7 +1671,7 @@ async function turn({ input, forceSkill, regenerate, editIndex }) {
       const { note, html } = extract(full);
       if (html) {
         versionN = (it.versions.at(-1)?.n || 0) + 1;
-        it.versions.push({ n: versionN, html, q: null, skill, note: note.slice(0, 300), createdAt: Date.now() });
+        it.versions.push({ n: versionN, html, q: null, skill, screens: it.blueprint && skill === "prototype-html" ? activeScreens(it.blueprint).map((x) => x.id) : [], note: note.slice(0, 300), createdAt: Date.now() });
         if (S.gate) kick = { n: versionN, deep: !!regenerate || !(cur && cur.skill === skill && cur.q) };
         it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
         content = note || "✓";
@@ -1303,8 +1755,9 @@ function viewCapture() {
       <div class="field"><label class="label" for="sp-targetUser">${t("user")}</label>${f("targetUser")}</div>
       <div class="field"><span class="label">${t("buildAs")}</span><div style="display:flex;gap:8px;flex-wrap:wrap">
         ${["prototype-html","game-prototype","design-variants"].map((s) => `<button class="chip" data-skill="${s}" aria-pressed="${S.spec.suggestedSkill === s}">${skillIcon(s)} ${sl(s)}</button>`).join("")}</div></div>
-      ${styleFieldHtml()}
-      <div class="specbar"><button class="btn primary lg block" id="gen">${S.skillPick === "idea-capture" ? t("saveOnly") : t("generate")}</button>
+      ${S.skillPick === "idea-capture" ? "" : modeFieldHtml()}
+      ${S.mode === "deep" ? "" : styleFieldHtml()}
+      <div class="specbar"><button class="btn primary lg block" id="gen">${S.skillPick === "idea-capture" ? t("saveOnly") : S.mode === "deep" ? t("toStudio") : t("generate")}</button>
       <button class="btn ghost block" id="reset">${t("over")}</button></div></section></div>`;
   }
   const L = lang();
@@ -1413,22 +1866,25 @@ function viewJournal() {
 }
 
 function render() {
-  const inIdea = S.view === "idea";
+  const inIdea = S.view === "idea", focus = inIdea || S.view === "studio";
   const it = idea();
   document.documentElement.lang = S.register === "en" ? "en" : "zh-HK";
   const top = inIdea
     ? `<div class="top"><button class="ib" data-nav="journal" aria-label="${t("journal")}">${svg("back")}</button><span class="brand" style="font-size:16px">${esc(it?.spec.title || "")}</span>
        ${it?.currentVersion ? `<button class="ib" data-act="toggle-preview" aria-label="Preview" aria-pressed="${S.previewOpen}">${svg("play")}</button>` : ""}
+       <button class="ib" data-act="open-studio" aria-label="${t("stOpen")}" title="${t("stOpen")}">${svg("layers")}</button>
        <button class="ib" data-act="del" aria-label="${t("del")}" style="${S.confirmDel ? "color:var(--danger)" : ""}" title="${S.confirmDel ? t("confirmDel") : t("del")}">${svg("trash")}</button></div>`
+    : S.view === "studio"
+    ? `<div class="top"><button class="ib" data-nav="journal" aria-label="${t("journal")}">${svg("back")}</button><span class="brand" style="font-size:16px">${esc(it?.spec.title || "")}</span>${it?.versions.length ? `<button class="btn ghost" data-act="to-idea">${t("stToWork")}</button>` : ""}</div>`
     : S.view === "run" && S.run
     ? `<div class="top"><button class="ib" data-nav="agents" aria-label="${t("navAgents")}">${svg("back")}</button><span class="brand" style="font-size:16px">${AGENTS.find((a) => a.id === S.run.agentId).name[lang()]}</span>${S.run.status === "running" ? `<button class="btn" data-act="stop-run">${t("stopRun")}</button>` : ""}</div>`
     : `<div class="top"><span class="brand">Idea2Proto<b>.</b></span>${regSeg()}</div>`;
-  const body = ({ capture: viewCapture, skills: viewSkills, agents: viewAgents, run: viewRun, journal: viewJournal, idea: viewIdea })[S.view]();
+  const body = ({ capture: viewCapture, skills: viewSkills, agents: viewAgents, run: viewRun, journal: viewJournal, idea: viewIdea, studio: viewStudio })[S.view]();
   const cur = S.view === "run" ? "agents" : S.view;
   const navBtn = (v, icon, label) => `<button data-nav="${v}" aria-current="${cur === v ? "page" : "false"}">${svg(icon)}${label}</button>`;
-  const nav = inIdea ? "" : `<nav class="nav" aria-label="Main">${navBtn("capture", "plus", t("newIdea"))}${navBtn("skills", "grid", t("navSkills"))}${navBtn("agents", "bot", t("navAgents"))}${navBtn("journal", "book", t("journal"))}</nav>`;
+  const nav = focus ? "" : `<nav class="nav" aria-label="Main">${navBtn("capture", "plus", t("newIdea"))}${navBtn("skills", "grid", t("navSkills"))}${navBtn("agents", "bot", t("navAgents"))}${navBtn("journal", "book", t("journal"))}</nav>`;
   const focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
-  $app.classList.toggle("hasnav", !inIdea);
+  $app.classList.toggle("hasnav", !focus);
   const keepScroll = lastView === S.view ? ($app.querySelector(".main")?.scrollTop || 0) : 0; lastView = S.view;
   $app.innerHTML = top + `<main class="main" style="${inIdea ? "padding:0;overflow:hidden;display:flex;flex-direction:column" : ""}">${body}</main>` + nav;
   if (keepScroll) $app.querySelector(".main").scrollTop = keepScroll;
@@ -1445,8 +1901,27 @@ const onClick = async (e) => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id !== "mic" && b.dataset.act !== "del") S.confirmDel = false;
   if (b.dataset.reg) { S.register = b.dataset.reg; LS.set("i2p.register", S.register); return render(); }
-  if (b.dataset.nav) { if (S.listening) dict?.stop().catch(() => {}); S.view = b.dataset.nav; S.previewOpen = false; S.editing = null; S.draft = ""; S.sheet = null; renderSheet(); if (S.view === "capture") S.skillPick = null; return render(); }
+  if (b.dataset.nav) { if (S.listening) dict?.stop().catch(() => {}); S.view = b.dataset.nav; S.previewOpen = false; S.editing = null; S.draft = ""; S.sheet = null; renderSheet(); if (S.view === "capture") { S.skillPick = null; S.modeLock = false; } return render(); }
   if (b.dataset.ex) { S.draft = b.dataset.ex; return structure(S.draft); }
+  if (b.dataset.mode) { S.mode = b.dataset.mode; return render(); }
+  if (b.dataset.arch) {
+    const it = idea(); if (!it?.blueprint || GROOM[it.id] || b.dataset.arch === it.blueprint.archetype) return;
+    if (S.archPending !== b.dataset.arch) { S.archPending = b.dataset.arch; return render(); }
+    S.archPending = null; return runGrooming(it.id, { forced: b.dataset.arch });
+  }
+  if (b.dataset.dec) {
+    const it = idea(), bp = it.blueprint, d = bp.decisions.find((x) => x.id === b.dataset.dec);
+    const before = activeScreens(bp).map((x) => x.id); d.chosen = +b.dataset.opt;
+    S.flash = activeScreens(bp).map((x) => x.id).filter((x) => !before.includes(x));
+    it.updatedAt = Date.now(); persist(); render(); setTimeout(() => { S.flash = []; }, 1200); return;
+  }
+  if (b.dataset.pair) { const it = idea(); it.style.pairing = b.dataset.pair; loadFonts(b.dataset.pair); persist(); return render(); }
+  if (b.dataset.stone) {
+    const it = idea(), [n, id] = b.dataset.stone.split(":"), x = TONES.find((y) => y.id === id);
+    const hex = ensureContrast(x.hex, it.style.paper, 4.5, it.style.ink);
+    it.style["tone" + n] = { name: lang() ? x.en : x.zh, hex }; if (n === "1") it.style.adjusted = hex !== x.hex; persist(); return render();
+  }
+  if (b.dataset.sopt) { const it = idea(), [k, v] = b.dataset.sopt.split(":"); it.style[k] = v; persist(); return render(); }
   if (b.dataset.packToggle) {
     const id = b.dataset.packToggle, p = PACKS.find((x) => x.id === id);
     if (p.kind === "workflow") { S.gate = !S.gate; LS.set("i2p.gate", S.gate); } else { S.craft[id] = !packOn(id); LS.set("i2p.craft", S.craft); }
@@ -1462,9 +1937,9 @@ const onClick = async (e) => {
   if (b.dataset.agentRun) return runAgent(AGENTS.find((a) => a.id === b.dataset.agentRun), document.getElementById("agent-idea")?.value, (document.getElementById("agent-note")?.value || "").trim());
   if (b.dataset.skill) { S.spec.suggestedSkill = b.dataset.skill; return render(); }
   if (b.dataset.filter != null) { S.filter = b.dataset.filter; return render(); }
-  if (b.dataset.openIdea) { S.ideaId = b.dataset.openIdea; S.view = "idea"; S.viewN = null; S.previewOpen = matchMedia("(min-width:900px)").matches && !!idea()?.currentVersion; render(); return scrollEnd(); }
+  if (b.dataset.openIdea) { S.ideaId = b.dataset.openIdea; S.view = (() => { const x = idea(); return x && !x.versions.length && x.blueprint ? "studio" : "idea"; })(); S.viewN = null; S.previewOpen = matchMedia("(min-width:900px)").matches && !!idea()?.currentVersion; render(); return scrollEnd(); }
   if (b.id === "mic") return toggleMic();
-  if (b.id === "gen") return S.spec.title.trim() && createIdea(S.skillPick !== "idea-capture");
+  if (b.id === "gen") return S.spec.title.trim() && createIdea(S.skillPick === "idea-capture" ? false : S.mode === "deep" ? "deep" : true);
   if (b.id === "reset") { S.spec = null; S.draft = ""; return render(); }
   const it = idea(); const i = +b.dataset.i;
   switch (b.dataset.act) {
@@ -1487,6 +1962,12 @@ const onClick = async (e) => {
       S.draft = `${tp.title}：`; render(); const d = document.getElementById("draft"); d?.focus(); d?.setSelectionRange(d.value.length, d.value.length); return;
     }
     case "asset-remove": { const l = S.assets[S.ideaId] || []; const k = l.findIndex((a) => a.id === b.dataset.id); if (k >= 0) l.splice(k, 1); LS.set("i2p.assets", S.assets); return render(); }
+    case "groom": return runGrooming(S.ideaId);
+    case "reroll-style": return runGrooming(S.ideaId, { only: "style" });
+    case "build-bp": return buildFromBlueprint();
+    case "open-studio": S.view = "studio"; S.previewOpen = false; S.archPending = null; return render();
+    case "to-idea": S.view = "idea"; return render();
+    case "studio-new": S.sheet = null; renderSheet(); S.mode = "deep"; S.modeLock = true; S.skillPick = null; S.view = "capture"; return render();
     case "sheet-close": S.sheet = null; return renderSheet();
     case "sug-refresh": S.sug = pickSuggestions(S.skillPick); return render();
     case "skill-clear": S.skillPick = null; S.sug = pickSuggestions(); return render();
@@ -1521,6 +2002,7 @@ document.getElementById("assetfile").addEventListener("change", async (e) => {
   const f = e.target.files?.[0]; e.target.value = "";
   const it = idea(); if (!f || !it) return;
   const a = await addAsset(it.id, f, S.assetSlot || "photo"); if (!a) return;
+  if (S.view === "studio") { toast(t("assetSaved")); return render(); }
   toast(t("assetUsed")); render();
   const cur = it.versions.find((v) => v.n === it.currentVersion);
   turn({ input: lang() ? `Use the uploaded ${slotName(a.slot)} (asset:${a.id}) where it fits best.` : `將我上傳嘅${slotName(a.slot)}（asset:${a.id}）用落最啱嘅位置。`, forceSkill: cur?.skill || it.spec.suggestedSkill });
@@ -1529,6 +2011,12 @@ $app.addEventListener("input", (e) => {
   const el = e.target;
   if (el.id === "draft") { S.draft = el.value; autosize(el); const s = $app.querySelector('.sbtn[type="submit"]'); if (s) s.disabled = !S.draft.trim(); }
   if (el.dataset.spec) S.spec[el.dataset.spec] = el.value;
+  if (el.dataset.bp) {
+    const it = idea(); if (!it?.blueprint) return;
+    setPath(it.blueprint, el.dataset.bp, el.value); it.updatedAt = Date.now(); persist();
+    const rd = readiness(it.blueprint, it), a = document.getElementById("rd"), l = document.getElementById("rd-line");
+    if (a) a.innerHTML = rdHtml(rd); if (l) l.textContent = rdLine(rd);
+  }
   if (el.id === "jq") { S.q = el.value; render(); }
 });
 $app.addEventListener("change", (e) => { if (e.target.id === "ver") { S.viewN = +e.target.value; render(); } });

@@ -22,6 +22,8 @@ Review lenses:
 6. Spec conformance: does it do what the spec's core interaction says? Is anything faked that cannot work in one file?
 7. Art direction: if HEAD DESIGNER is on, check its NEVER list (neon glow, glossy 3D, pills, card spam, symmetry, more than 3 tones, no negative space, sterile flat). For games: first 60 seconds, the odd detail, feedback, persistence and open loop.
 8. Generic-AI tells: cream + serif + terracotta, purple-to-blue gradient hero, emoji section markers, everything centred, rounded-lg everywhere.
+9. Premium feel: would this pass for a funded product? Spacing rhythm on a 4px grid, a clear type scale with real hierarchy, restraint (three tones, two radii), one light direction, skeleton and empty and error states, real specific content (never "Item 1" or lorem), pressed and focus states, meaningful 120-180ms motion, a signature moment. The AUTOMATED MEASUREMENTS include a craft line (rhythm, font sizes, families, radii, hues) and a screens line (every blueprint screen present and reachable): trust them.
+10. Blueprint conformance (when a BLUEPRINT is given): every active screen exists, each decision is reflected in the product, the signature interaction is present, and nothing the blueprint ruled out was built.
 
 Severity: high = blocks the core task, badly fails AA, or looks broken. medium = noticeably lowers quality. low = polish.
 Score: start at 100; high -15, medium -7, low -3 each. verdict is "pass" when score is 80 or more and there is no high issue, otherwise "revise".
