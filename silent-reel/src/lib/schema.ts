@@ -5,7 +5,7 @@ import { z } from "zod";
  * The renderer consumes this and nothing else. Bump SCHEMA_VERSION on any
  * breaking change so old scripts keep rendering the way they did.
  */
-export const SCHEMA_VERSION = "1.0" as const;
+export const SCHEMA_VERSION = "1.1" as const; // 1.1 adds brand.text (text color + background)
 export const FPS = 30;
 export const DURATION_SEC = 15;
 export const WIDTH = 1080;
@@ -16,6 +16,19 @@ export const TEXT_ANIMATIONS = ["word-by-word", "punch-in", "typewriter", "rise"
 export const TEXT_ROLES = ["hook", "body", "detail", "cta"] as const;
 export const POSITIONS = ["top", "center", "bottom"] as const;
 export const TRANSITIONS = ["cut", "crossfade", "flash", "zoom-through"] as const;
+
+const Hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+export const TEXT_BACKGROUNDS = ["auto", "none", "band", "box", "highlight"] as const;
+
+/** User-owned text styling. "auto" means the renderer decides from the photo. */
+export const TextStyleSchema = z.object({
+  textColor: z.union([z.literal("auto"), Hex]),
+  background: z.enum(TEXT_BACKGROUNDS),
+  backgroundColor: z.union([z.literal("auto"), Hex]),
+  backgroundOpacity: z.number().min(0).max(1),
+});
+export type TextStyle = z.infer<typeof TextStyleSchema>;
+export const DEFAULT_TEXT_STYLE: TextStyle = { textColor: "auto", background: "auto", backgroundColor: "auto", backgroundOpacity: 0.7 };
 
 const Focus = z.object({
   x: z.number().min(0).max(1),
@@ -42,13 +55,14 @@ export const SceneSchema = z.object({
 
 export const VideoScriptSchema = z
   .object({
-    schemaVersion: z.literal(SCHEMA_VERSION),
+    schemaVersion: z.enum(["1.0", SCHEMA_VERSION]), // 1.0 scripts still render (text style defaults to auto)
     title: z.string().min(1).max(80),
     fps: z.literal(FPS),
     durationSec: z.literal(DURATION_SEC),
     brand: z.object({
-      color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      color: Hex,
       font: z.enum(["grotesk", "serif", "condensed", "mono"]),
+      text: TextStyleSchema.default(DEFAULT_TEXT_STYLE),
     }),
     scenes: z.array(SceneSchema).min(6).max(10),
   })
@@ -94,11 +108,11 @@ export function formatIssues(err: z.ZodError): string[] {
 
 /** Human-readable schema description handed to the script agent. */
 export const SCHEMA_PROMPT = `{
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "title": string (<=80 chars),
   "fps": 30,
   "durationSec": 15,
-  "brand": { "color": "#RRGGBB", "font": "grotesk" | "serif" | "condensed" | "mono" },
+  "brand": { ... copied verbatim from the brief, do not change ... },
   "scenes": [            // 6 to 10 scenes, durations MUST sum to exactly 15
     {
       "id": string (short, unique, e.g. "s1"),

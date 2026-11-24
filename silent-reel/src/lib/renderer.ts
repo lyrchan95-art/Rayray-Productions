@@ -126,6 +126,65 @@ export function analyzeImage(img: CanvasImageSource & { width: number; height: n
   return out;
 }
 
+export interface ResolvedStyle {
+  textColor: string;
+  textL: number;
+  light: boolean;
+  bg: "none" | "band" | "box" | "highlight"; // "auto" resolves to a solved band
+  auto: boolean;
+  bgRGB: string; // "r,g,b"
+  bgAlpha: number;
+  shadow: string | null;
+  underL: number; // worst-case luminance behind the text after the background
+  contrast: number;
+}
+
+function hexRGB(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+/** Combine the user's text style with the photo's measured band. */
+export function resolveStyle(script: VideoScript, band: BandStats & { legibility: Legibility }): ResolvedStyle {
+  const st = script.brand.text;
+  const textColor = st.textColor === "auto" ? band.legibility.textColor : st.textColor;
+  const textL = hexLum(textColor);
+  const light = textL > 0.18;
+  const worst = light ? band.p85 : band.p15;
+  const bgHex = st.backgroundColor === "auto" ? (light ? "#08080a" : "#faf9f6") : st.backgroundColor;
+  const bgL = hexLum(bgHex);
+  const blend = (a: number) => worst * (1 - a) + bgL * a;
+
+  let bg: ResolvedStyle["bg"];
+  let a: number;
+  if (st.background === "auto") {
+    bg = "band";
+    a = 0;
+    while (a < 0.9 && contrast(textL, blend(a)) < TARGET) a += 0.02;
+    a = Math.max(light ? 0.18 : 0.12, Math.min(0.9, a + band.busy * 0.6));
+  } else if (st.background === "none") {
+    bg = "none";
+    a = 0;
+  } else {
+    bg = st.background;
+    a = st.backgroundOpacity;
+  }
+  const underL = blend(a);
+  const solidBehind = (bg === "box" || bg === "highlight") && a >= 0.6;
+  return {
+    textColor,
+    textL,
+    light,
+    bg,
+    auto: st.background === "auto",
+    bgRGB: hexRGB(bgHex),
+    bgAlpha: a,
+    shadow: solidBehind ? null : light ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.5)",
+    underL,
+    contrast: contrast(textL, underL),
+  };
+}
+
 function naturalSize(img: CanvasImageSource & { width: number; height: number }) {
   if (img instanceof HTMLImageElement) return { sw: img.naturalWidth, sh: img.naturalHeight };
   return { sw: img.width, sh: img.height };
@@ -389,7 +448,7 @@ export function drawFrame(ctx: CanvasRenderingContext2D, input: RenderInput, fra
 
 function drawText(ctx: CanvasRenderingContext2D, input: RenderInput, scene: Scene, local: number, exitP: number) {
   const { script, analysis } = input;
-  const leg = analysis[scene.text.position].legibility;
+  const rs = resolveStyle(script, analysis[scene.text.position]);
   const marginX = 90;
   const maxW = WIDTH - marginX * 2;
   const isCta = scene.text.role === "cta";
@@ -398,17 +457,17 @@ function drawText(ctx: CanvasRenderingContext2D, input: RenderInput, scene: Scen
   const bandCenter = { top: 0.24, center: 0.5, bottom: 0.76 }[scene.text.position] * HEIGHT;
   const top = bandCenter - L.blockH / 2;
   const left = isCta ? (WIDTH - L.blockW) / 2 : marginX;
-
-  // Scrim: a soft band, sized to the block, faded with the text.
   const textIn = clamp01(local / 0.25);
-  const scrimA = leg.scrimAlpha * textIn * (1 - exitP);
-  if (scrimA > 0.01 && !isCta) {
+
+  // Band background: a soft full-width gradient, faded with the text.
+  const bandA = rs.bgAlpha * textIn * (1 - exitP);
+  if (rs.bg === "band" && bandA > 0.01 && !isCta) {
     const pad = 220;
     const g = ctx.createLinearGradient(0, top - pad, 0, top + L.blockH + pad);
-    g.addColorStop(0, `rgba(${leg.scrimColor},0)`);
-    g.addColorStop(0.32, `rgba(${leg.scrimColor},${scrimA})`);
-    g.addColorStop(0.68, `rgba(${leg.scrimColor},${scrimA})`);
-    g.addColorStop(1, `rgba(${leg.scrimColor},0)`);
+    g.addColorStop(0, `rgba(${rs.bgRGB},0)`);
+    g.addColorStop(0.32, `rgba(${rs.bgRGB},${bandA})`);
+    g.addColorStop(0.68, `rgba(${rs.bgRGB},${bandA})`);
+    g.addColorStop(1, `rgba(${rs.bgRGB},0)`);
     ctx.fillStyle = g;
     ctx.fillRect(0, top - pad, WIDTH, L.blockH + pad * 2);
   }
@@ -426,8 +485,10 @@ function drawText(ctx: CanvasRenderingContext2D, input: RenderInput, scene: Scen
   }
 
   const brand = script.brand.color;
-  const bgUnder = leg.text === "light" ? 0.06 : 0.9; // approx luminance under text after scrim
-  const brandReadable = contrast(hexLum(brand), bgUnder) >= 3;
+  const brandL = hexLum(brand);
+  // Brand tint on the emphasis word only if it reads on what's actually behind the text
+  // and is distinguishable from the body text color; otherwise it becomes an underline.
+  const brandReadable = contrast(brandL, rs.underL) >= 3 && contrast(brandL, rs.textL) >= 1.6;
 
   if (isCta) {
     drawCta(ctx, script, L, left, top, ascent, local);
@@ -435,10 +496,61 @@ function drawText(ctx: CanvasRenderingContext2D, input: RenderInput, scene: Scen
     return;
   }
 
-  if (leg.shadow) {
-    ctx.shadowColor = "rgba(0,0,0,0.45)";
+  // Box / highlight backgrounds move with the text (including punch-in scale).
+  if ((rs.bg === "box" || rs.bg === "highlight") && rs.bgAlpha > 0.01) {
+    ctx.save();
+    if (scene.text.animation === "punch-in") {
+      const s = 1 + 0.38 * (1 - easeOutBack(clamp01(local / 0.32)));
+      const cx = left + L.blockW / 2,
+        cy = top + L.blockH / 2;
+      ctx.translate(cx, cy);
+      ctx.scale(s, s);
+      ctx.translate(-cx, -cy);
+    }
+    ctx.fillStyle = `rgb(${rs.bgRGB})`;
+    const padX = L.size * 0.3;
+    const padY = L.size * 0.16;
+    if (rs.bg === "box") {
+      ctx.globalAlpha *= rs.bgAlpha * easeOutCubic(clamp01(local / 0.22));
+      ctx.beginPath();
+      ctx.roundRect(left - padX, top - padY, L.blockW + padX * 2, L.blockH + padY * 2 - (L.lineH - L.size), L.size * 0.22);
+      ctx.fill();
+    } else {
+      ctx.globalAlpha *= rs.bgAlpha * clamp01(local / 0.12);
+      ctx.beginPath();
+      // Typewriter: each strip ends at the typed cursor instead of growing on its own.
+      const typed =
+        scene.text.animation === "typewriter"
+          ? (() => {
+              const total = L.words.reduce((m, w) => Math.max(m, w.charStart + w.text.length), 0);
+              return Math.floor(Math.max(0, local - 0.05) * Math.max(22, total / 0.9));
+            })()
+          : -1;
+      L.lines.forEach((ln, li) => {
+        let w: number;
+        if (typed >= 0) {
+          let right = 0;
+          for (const wd of L.words) {
+            if (wd.line !== li) continue;
+            const c = typed - wd.charStart;
+            if (c <= 0) break;
+            right = wd.x + ctx.measureText(wd.text.slice(0, Math.min(wd.text.length, c))).width;
+          }
+          w = right > 0 ? right + padX * 2 : 0;
+        } else {
+          w = (ln.w + padX * 2) * easeOutExpo(clamp01((local - li * 0.06) / 0.32));
+        }
+        if (w > 1) ctx.roundRect(left - padX, top + ln.y - padY * 0.6, w, L.size + padY * 1.4, L.size * 0.12);
+      });
+      ctx.fill(); // one fill so overlapping line boxes don't double up
+    }
+    ctx.restore();
+  }
+
+  if (rs.shadow) {
+    ctx.shadowColor = rs.shadow;
     ctx.shadowBlur = 28;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowOffsetY = rs.light ? 4 : 0;
   }
 
   const anim = scene.text.animation;
@@ -459,13 +571,13 @@ function drawText(ctx: CanvasRenderingContext2D, input: RenderInput, scene: Scen
       ctx.scale(scale, scale);
       ctx.translate(-cx, -cy);
     }
-    const color = w.emph && brandReadable ? brand : leg.textColor;
+    const color = w.emph && brandReadable ? brand : rs.textColor;
     ctx.fillStyle = color;
     ctx.fillText(txt, x, y + dy);
     if (w.emph && !brandReadable) {
       // Brand color fails contrast as text: use it as an underline bar instead.
       ctx.shadowColor = "transparent";
-      ctx.fillStyle = brand;
+      ctx.fillStyle = contrast(brandL, rs.underL) >= 3 ? brand : rs.textColor;
       const wTxt = clipChars !== undefined ? ctx.measureText(txt).width : w.w;
       ctx.fillRect(x, y + dy + L.size * 0.12, wTxt, Math.max(8, L.size * 0.09));
     }
@@ -509,7 +621,7 @@ function drawText(ctx: CanvasRenderingContext2D, input: RenderInput, scene: Scen
         if (cw) {
           ctx.save();
           ctx.shadowColor = "transparent";
-          ctx.fillStyle = brandReadable ? brand : leg.textColor;
+          ctx.fillStyle = brandReadable ? brand : rs.textColor;
           const y = top + L.lines[cw.line].y;
           ctx.fillRect(cx, y + L.size * 0.12, Math.max(10, L.size * 0.09), L.size * 0.82);
           ctx.restore();

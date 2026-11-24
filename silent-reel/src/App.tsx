@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Monitor } from "@/components/Monitor";
 import { generateScript, getSample, templateScript, type AgentLog, type BriefForm, type FontPref } from "@/lib/agent";
 import { exportVideo } from "@/lib/export";
-import { analyzeImage, buildTimeline, FONT_FAMILIES, loadRenderFonts, type Band, type RenderInput } from "@/lib/renderer";
+import { analyzeImage, buildTimeline, FONT_FAMILIES, loadRenderFonts, resolveStyle, type Band, type RenderInput } from "@/lib/renderer";
 import { makeSamplePhoto } from "@/lib/samplePhoto";
-import { SCHEMA_VERSION, VideoScriptSchema, formatIssues, type VideoScript } from "@/lib/schema";
+import { SCHEMA_VERSION, TEXT_BACKGROUNDS, VideoScriptSchema, formatIssues, type TextStyle, type VideoScript } from "@/lib/schema";
 
 type Photo = { el: HTMLImageElement | HTMLCanvasElement; name: string; sample: boolean; thumb: string };
 
@@ -19,7 +19,77 @@ const SAMPLE_FORM: BriefForm = {
   cta: "Shop the first batch",
   color: "#2f6b5a",
   font: "grotesk",
+  text: { textColor: "auto", background: "highlight", backgroundColor: "auto", backgroundOpacity: 0.85 },
 };
+
+const BG_LABEL: Record<TextStyle["background"], string> = {
+  auto: "Auto",
+  none: "None",
+  band: "Band",
+  box: "Box",
+  highlight: "Highlight",
+};
+const BG_HELP: Record<TextStyle["background"], string> = {
+  auto: "A soft band, as strong as the photo needs.",
+  none: "Text only, with a shadow.",
+  band: "A soft full-width band behind the text.",
+  box: "One solid card behind the whole line.",
+  highlight: "A marker-style strip behind each line.",
+};
+const READABLE = 4.5;
+
+function ColorChoice({
+  id,
+  label,
+  value,
+  brand,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  brand: string;
+  onChange: (v: string) => void;
+}) {
+  const presets: { key: string; label: string; hex: string | "auto" }[] = [
+    { key: "auto", label: "Auto", hex: "auto" },
+    { key: "white", label: "White", hex: "#ffffff" },
+    { key: "black", label: "Black", hex: "#141414" },
+    { key: "brand", label: "Brand", hex: brand },
+  ];
+  const isPreset = presets.some((p) => p.hex === value);
+  return (
+    <div className="field">
+      <span className="label" id={`${id}-l`}>
+        {label}
+      </span>
+      <div className="swatches" role="radiogroup" aria-labelledby={`${id}-l`}>
+        {presets.map((p) => (
+          <button
+            key={p.key}
+            id={`${id}-${p.key}`}
+            role="radio"
+            aria-checked={value === p.hex}
+            className={`swatch-btn ${value === p.hex ? "on" : ""}`}
+            onClick={() => onChange(p.hex)}
+          >
+            <span className={`swatch ${p.hex === "auto" ? "auto" : ""}`} style={p.hex === "auto" ? undefined : { background: p.hex }} aria-hidden="true" />
+            {p.label}
+          </button>
+        ))}
+        <label className={`swatch-btn ${!isPreset ? "on" : ""}`} htmlFor={`${id}-custom`}>
+          <input
+            id={`${id}-custom`}
+            type="color"
+            value={value === "auto" ? "#ffffff" : value}
+            onChange={(e) => onChange(e.target.value.toLowerCase())}
+          />
+          Custom
+        </label>
+      </div>
+    </div>
+  );
+}
 
 type DownloadsNS = { save: (r: { filename: string; data: Blob }) => Promise<unknown> };
 
@@ -76,12 +146,12 @@ export default function App() {
   // Brand color and font are the user's: apply them to the script live.
   useEffect(() => {
     setScript((s) => {
-      if (s.brand.color === form.color && s.brand.font === form.font) return s;
-      const next = { ...s, brand: { color: form.color, font: form.font } };
+      if (s.brand.color === form.color && s.brand.font === form.font && JSON.stringify(s.brand.text) === JSON.stringify(form.text)) return s;
+      const next = { ...s, brand: { color: form.color, font: form.font, text: form.text } };
       setScriptText(JSON.stringify(next, null, 2));
       return next;
     });
-  }, [form.color, form.font]);
+  }, [form.color, form.font, form.text]);
 
   const briefDirty = useMemo(() => {
     const a = JSON.parse(briefAtScript) as BriefForm;
@@ -150,8 +220,8 @@ export default function App() {
     setScript(r.data);
     setSource("edited");
     setResult(null);
-    if (r.data.brand.color !== form.color || r.data.brand.font !== form.font) {
-      setForm((f) => ({ ...f, color: r.data.brand.color, font: r.data.brand.font }));
+    if (r.data.brand.color !== form.color || r.data.brand.font !== form.font || JSON.stringify(r.data.brand.text) !== JSON.stringify(form.text)) {
+      setForm((f) => ({ ...f, color: r.data.brand.color, font: r.data.brand.font, text: r.data.brand.text }));
     }
   };
 
@@ -187,6 +257,17 @@ export default function App() {
   };
 
   const set = <K extends keyof BriefForm>(k: K, v: BriefForm[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const setText = (patch: Partial<TextStyle>) => setForm((f) => ({ ...f, text: { ...f.text, ...patch } }));
+
+  // Per-band readability with the current style, for bands the script actually uses.
+  const bandStyles = analysis
+    ? (["top", "center", "bottom"] as Band[]).map((b) => ({
+        band: b,
+        used: script.scenes.some((s) => s.text.position === b && s.text.role !== "cta"),
+        rs: resolveStyle(script, analysis[b]),
+      }))
+    : [];
+  const weak = bandStyles.filter((b) => b.used && b.rs.contrast < READABLE);
   const valid = issues.length === 0;
   const totalFrames = renderInput?.timeline.totalFrames ?? 450;
 
@@ -333,6 +414,73 @@ export default function App() {
             </div>
           </div>
 
+          <fieldset className="textstyle">
+            <legend className="eyebrow">Text style</legend>
+            <ColorChoice id="tc" label="Text color" value={form.text.textColor} brand={form.color} onChange={(v) => setText({ textColor: v })} />
+
+            <div className="field">
+              <span className="label" id="bg-l">
+                Background
+              </span>
+              <div className="seg" role="radiogroup" aria-labelledby="bg-l">
+                {TEXT_BACKGROUNDS.map((b) => (
+                  <button
+                    key={b}
+                    id={`bg-${b}`}
+                    role="radio"
+                    aria-checked={form.text.background === b}
+                    className={`seg-btn ${form.text.background === b ? "on" : ""}`}
+                    onClick={() => setText({ background: b })}
+                  >
+                    <span className={`bgicon bg-${b}`} aria-hidden="true">
+                      <i />
+                    </span>
+                    {BG_LABEL[b]}
+                  </button>
+                ))}
+              </div>
+              <span className="hint">{BG_HELP[form.text.background]}</span>
+            </div>
+
+            {form.text.background !== "none" && (
+              <ColorChoice
+                id="bc"
+                label="Background color"
+                value={form.text.backgroundColor}
+                brand={form.color}
+                onChange={(v) => setText({ backgroundColor: v })}
+              />
+            )}
+
+            {form.text.background !== "none" && form.text.background !== "auto" && (
+              <div className="field">
+                <label htmlFor="bg-op">
+                  Background opacity <span className="count">{Math.round(form.text.backgroundOpacity * 100)}%</span>
+                </label>
+                <input
+                  id="bg-op"
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={Math.round(form.text.backgroundOpacity * 100)}
+                  onChange={(e) => setText({ backgroundOpacity: Number(e.target.value) / 100 })}
+                />
+              </div>
+            )}
+
+            {weak.length > 0 ? (
+              <p className="warnline" role="status">
+                Hard to read in the {weak.map((w) => `${w.band} (${w.rs.contrast.toFixed(1)}:1)`).join(" and ")} band
+                {weak.length > 1 ? "s" : ""}. Aim for 4.5:1: add a background, raise its opacity, or set colors to Auto.
+              </p>
+            ) : (
+              <p className="okline" role="status">
+                Readable everywhere text appears (lowest {bandStyles.filter((b) => b.used).reduce((m, b) => Math.min(m, b.rs.contrast), 99).toFixed(1)}:1).
+              </p>
+            )}
+          </fieldset>
+
           <div className="actions">
             {busy ? (
               <button id="stop-btn" className="btn" onClick={() => agentCtl.current?.abort()}>
@@ -442,29 +590,30 @@ export default function App() {
                   <tr>
                     <th>Band</th>
                     <th>Text</th>
-                    <th>Scrim</th>
+                    <th>Behind</th>
                     <th>Contrast</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(["top", "center", "bottom"] as Band[]).map((b) => {
-                    const l = analysis[b].legibility;
-                    const used = script.scenes.some((s) => s.text.position === b);
-                    return (
-                      <tr key={b} className={used ? "" : "unused"}>
-                        <td>{b}</td>
-                        <td>
-                          <span className={`sw ${l.text}`} aria-hidden="true" />
-                          {l.text}
-                        </td>
-                        <td>{Math.round(l.scrimAlpha * 100)}%</td>
-                        <td>{l.contrast.toFixed(1)}:1</td>
-                      </tr>
-                    );
-                  })}
+                  {bandStyles.map(({ band, used, rs }) => (
+                    <tr key={band} className={used ? "" : "unused"}>
+                      <td>{band}</td>
+                      <td>
+                        <span className="sw" style={{ background: rs.textColor }} aria-hidden="true" />
+                        {rs.textColor}
+                      </td>
+                      <td>
+                        {rs.bg === "none" ? "shadow" : `${rs.bg} ${Math.round(rs.bgAlpha * 100)}%`}
+                        {rs.auto ? " (auto)" : ""}
+                      </td>
+                      <td className={rs.contrast < READABLE ? "low" : ""}>
+                        {rs.contrast.toFixed(1)}:1{rs.contrast < READABLE ? " low" : ""}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-              <p className="hint">Measured from your photo. The script can't override these.</p>
+              <p className="hint">Worst case, measured from your photo with your text style. The script can't override this.</p>
             </div>
           )}
 

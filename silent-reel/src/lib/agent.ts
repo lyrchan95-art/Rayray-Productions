@@ -1,5 +1,6 @@
 import {
   CAMERA_MOVES,
+  type TextStyle,
   DURATION_SEC,
   FPS,
   SCHEMA_PROMPT,
@@ -21,6 +22,7 @@ export interface BriefForm {
   cta: string;
   color: string;
   font: FontPref;
+  text: TextStyle;
 }
 
 export type AgentLog = { kind: "info" | "warn" | "error"; text: string };
@@ -71,7 +73,7 @@ Silent-first rules:
 - Place text where it will not cover the subject (if the subject is low in the frame, put text at top, and vice versa).
 - Copy must be short and scannable: hook <= 5 words, other lines <= 8 words. No hashtags, no emoji.
 - The final scene's text is the call to action, role "cta".
-- Do not decide colors for legibility; the renderer handles contrast. Only use brand.color and brand.font as given.
+- Do not decide colors or text backgrounds; the user and the renderer own legibility. Leave "brand" out or copy it as given; it is overwritten.
 
 Brief from the user:
 - Goal: ${form.goal}
@@ -168,7 +170,7 @@ export async function generateScript(
 function forceFixed(raw: unknown, form: BriefForm): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const r = raw as Record<string, unknown>;
-  return { ...r, schemaVersion: SCHEMA_VERSION, fps: FPS, durationSec: DURATION_SEC, brand: { color: form.color, font: form.font } };
+  return { ...r, schemaVersion: SCHEMA_VERSION, fps: FPS, durationSec: DURATION_SEC, brand: { color: form.color, font: form.font, text: form.text } };
 }
 
 function normalizeTimings(raw: unknown): unknown {
@@ -240,7 +242,7 @@ export function templateScript(form: BriefForm): VideoScript {
     title: words(form.message || form.goal || "Silent reel", 10),
     fps: FPS,
     durationSec: DURATION_SEC,
-    brand: { color: form.color, font: form.font },
+    brand: { color: form.color, font: form.font, text: form.text },
     scenes: lines.map((l, i) => {
       const firstWord = l.content.split(" ").sort((a, b) => b.length - a.length)[0]?.replace(/[^\p{L}\p{N}'-]/gu, "");
       return {
