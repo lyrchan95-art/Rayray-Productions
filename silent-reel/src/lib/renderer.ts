@@ -1,23 +1,74 @@
-import { FPS, HEIGHT, WIDTH, type Scene, type VideoScript } from "./schema";
+import { FPS, HEIGHT, WIDTH, isCJK, type Language, type Scene, type VideoScript } from "./schema";
 
 // ---------------------------------------------------------------------------
 // Fonts
 // ---------------------------------------------------------------------------
 
-export const FONT_FAMILIES: Record<VideoScript["brand"]["font"], { family: string; weight: number; upper: boolean; tracking: number; label: string }> = {
+type FontKey = VideoScript["brand"]["font"];
+export interface FontSpec {
+  family: string;
+  weight: number;
+  upper: boolean;
+  tracking: number;
+  label: string;
+}
+
+export const FONT_FAMILIES: Record<FontKey, FontSpec> = {
   grotesk: { family: "'Schibsted Grotesk', 'Helvetica Neue', Arial, sans-serif", weight: 800, upper: false, tracking: -0.025, label: "Grotesk" },
   serif: { family: "'Fraunces', Georgia, 'Times New Roman', serif", weight: 600, upper: false, tracking: -0.02, label: "Serif" },
   condensed: { family: "'Anton', 'Impact', 'Arial Narrow', sans-serif", weight: 400, upper: true, tracking: 0.01, label: "Condensed" },
   mono: { family: "'JetBrains Mono', 'Courier New', monospace", weight: 700, upper: false, tracking: -0.04, label: "Mono" },
 };
 
+const LATIN_PRIMARY: Record<FontKey, string> = {
+  grotesk: "'Schibsted Grotesk'",
+  serif: "'Fraunces'",
+  condensed: "'Anton'",
+  mono: "'JetBrains Mono'",
+};
+
+/** Latin face first (for any English words or numbers), then a CJK face, then system CJK fonts. */
+export function fontSpec(font: FontKey, lang: Language): FontSpec {
+  const base = FONT_FAMILIES[font];
+  if (!isCJK(lang)) return base;
+  const hans = lang === "zh-Hans";
+  const serif = font === "serif";
+  const cjk = hans ? (serif ? "'Noto Serif SC'" : "'Noto Sans SC'") : serif ? "'Noto Serif TC'" : "'Noto Sans TC'";
+  const system = hans
+    ? "'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', 'WenQuanYi Zen Hei'"
+    : "'PingFang HK', 'PingFang TC', 'Microsoft JhengHei', 'Heiti TC', 'WenQuanYi Zen Hei'";
+  return {
+    family: `${LATIN_PRIMARY[font]}, ${cjk}, ${system}, sans-serif`,
+    weight: serif ? 700 : font === "mono" ? 700 : 900,
+    upper: false,
+    tracking: 0.01,
+    label: base.label,
+  };
+}
+
+const layoutCache = new Map<string, Layout>();
+export function clearLayoutCache() {
+  layoutCache.clear();
+}
+
+/**
+ * Load the faces a script needs. Chinese fonts are split into unicode-range
+ * slices, so each load names the actual characters on screen.
+ */
+export async function loadScriptFonts(script: VideoScript): Promise<void> {
+  if (!document.fonts) return;
+  const text = script.scenes.map((sc) => sc.text.content).join("") + script.title;
+  const spec = fontSpec(script.brand.font, script.language);
+  await Promise.all([
+    document.fonts.load(`${spec.weight} 64px ${spec.family}`, text).catch(() => undefined),
+    document.fonts.load(`${spec.weight} 64px ${spec.family}`, "Aa").catch(() => undefined),
+  ]);
+  clearLayoutCache(); // earlier layouts may have been measured with a fallback face
+}
+
 export async function loadRenderFonts(): Promise<void> {
   if (!document.fonts) return;
-  await Promise.all(
-    Object.values(FONT_FAMILIES).map((f) =>
-      document.fonts.load(`${f.weight} 64px ${f.family}`).catch(() => undefined),
-    ),
-  );
+  await Promise.all(Object.values(FONT_FAMILIES).map((f) => document.fonts.load(`${f.weight} 64px ${f.family}`).catch(() => undefined)));
 }
 
 // ---------------------------------------------------------------------------
@@ -314,61 +365,127 @@ interface Layout {
 }
 
 const ROLE_SIZE: Record<Scene["text"]["role"], number> = { hook: 138, body: 98, detail: 86, cta: 82 };
+const CJK_SCALE = 0.84; // CJK glyphs fill the whole em box, so they read larger at the same size
 
 function fontString(script: VideoScript, size: number) {
-  const f = FONT_FAMILIES[script.brand.font];
+  const f = fontSpec(script.brand.font, script.language);
   return `${f.weight} ${size}px ${f.family}`;
 }
 
 function setTracking(ctx: CanvasRenderingContext2D, script: VideoScript, size: number) {
-  const f = FONT_FAMILIES[script.brand.font];
+  const f = fontSpec(script.brand.font, script.language);
   const c = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
   if ("letterSpacing" in c) c.letterSpacing = `${(f.tracking * size).toFixed(1)}px`;
 }
 
-const layoutCache = new Map<string, Layout>();
+// Chinese has no spaces. Split into words with the browser's own segmenter,
+// then keep punctuation attached so a line never starts with 。or ，.
+const CLOSING = /^[\p{P}\p{S}\s]+$/u;
+const OPENING = /^[「『（(《〈【“‘]+$/u;
+type Seg = { text: string; emph: boolean };
+
+function segmentChinese(text: string): string[] {
+  const SegmenterCtor = (Intl as unknown as { Segmenter?: new (l: string, o: { granularity: string }) => { segment: (s: string) => Iterable<{ segment: string }> } }).Segmenter;
+  const raw = SegmenterCtor ? [...new SegmenterCtor("zh", { granularity: "word" }).segment(text)].map((x) => x.segment) : [...text];
+  const out: string[] = [];
+  let carry = "";
+  for (const r of raw) {
+    if (/^\s+$/.test(r)) continue;
+    if (OPENING.test(r)) {
+      carry += r;
+      continue;
+    }
+    if (CLOSING.test(r) && out.length) {
+      out[out.length - 1] += r;
+      continue;
+    }
+    out.push(carry + r);
+    carry = "";
+  }
+  if (carry) out.push(carry);
+  return out;
+}
+
+function tokenizeChinese(content: string, emphasis?: string): Seg[] {
+  const i = emphasis ? content.indexOf(emphasis) : -1;
+  if (!emphasis || i < 0) return segmentChinese(content).map((t) => ({ text: t, emph: false }));
+  const before = segmentChinese(content.slice(0, i)).map((t) => ({ text: t, emph: false }));
+  const after = segmentChinese(content.slice(i + emphasis.length));
+  const segs: Seg[] = [...before, { text: emphasis, emph: true }, ...after.map((t) => ({ text: t, emph: false }))];
+  // Punctuation-only pieces (e.g. a comma right after the emphasised word) stay on the previous word's line.
+  const merged: Seg[] = [];
+  for (const sg of segs) {
+    if (merged.length && CLOSING.test(sg.text)) merged[merged.length - 1] = { ...merged[merged.length - 1], text: merged[merged.length - 1].text + sg.text };
+    else merged.push(sg);
+  }
+  return merged;
+}
 
 function layoutText(ctx: CanvasRenderingContext2D, script: VideoScript, scene: Scene, maxW: number): Layout {
-  const f = FONT_FAMILIES[script.brand.font];
+  const lang = script.language;
+  const cjk = isCJK(lang);
+  const f = fontSpec(script.brand.font, lang);
   const content = f.upper ? scene.text.content.toUpperCase() : scene.text.content;
-  const key = `${script.brand.font}|${scene.text.role}|${content}|${scene.text.emphasis ?? ""}|${maxW}`;
+  const key = `${lang}|${script.brand.font}|${scene.text.role}|${content}|${scene.text.emphasis ?? ""}|${maxW}`;
   const hit = layoutCache.get(key);
   if (hit) return hit;
 
-  let size = ROLE_SIZE[scene.text.role] * (f.upper ? 1.08 : 1);
+  let size = ROLE_SIZE[scene.text.role] * (f.upper ? 1.08 : 1) * (cjk ? CJK_SCALE : 1);
   const emph = scene.text.emphasis?.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, "");
-  const tokens = content.split(/\s+/).filter(Boolean);
+  const segs: Seg[] = cjk
+    ? tokenizeChinese(content, scene.text.emphasis)
+    : content.split(/\s+/).filter(Boolean).map((t) => ({ text: t, emph: !!emph && t.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, "") === emph }));
 
   for (let attempt = 0; attempt < 8; attempt++) {
     ctx.font = fontString(script, size);
     setTracking(ctx, script, size);
-    const space = ctx.measureText(" ").width;
-    const lineH = size * (f.upper ? 1.02 : 1.08);
-    const words: Word[] = [];
-    const lines: { y: number; w: number }[] = [];
-    let line = 0,
-      x = 0,
-      charPos = 0,
-      tooWide = false;
-    for (const t of tokens) {
-      const w = ctx.measureText(t).width;
-      if (w > maxW) tooWide = true;
-      if (x > 0 && x + w > maxW) {
-        lines.push({ y: line * lineH, w: x - space });
-        line++;
-        x = 0;
+    const space = cjk ? 0 : ctx.measureText(" ").width;
+    const lineH = size * (f.upper ? 1.02 : cjk ? 1.2 : 1.08);
+    const place = (width: number) => {
+      const words: Word[] = [];
+      const lines: { y: number; w: number }[] = [];
+      let line = 0,
+        x = 0,
+        charPos = 0,
+        tooWide = false;
+      for (const sg of segs) {
+        const t = sg.text;
+        const w = ctx.measureText(t).width;
+        if (w > width) tooWide = true;
+        if (x > 0 && x + w > width) {
+          lines.push({ y: line * lineH, w: x - space });
+          line++;
+          x = 0;
+        }
+        words.push({ text: t, x, w, line, emph: sg.emph, charStart: charPos });
+        x += w + space;
+        charPos += t.length + (cjk ? 0 : 1);
       }
-      words.push({ text: t, x, w, line, emph: !!emph && t.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, "") === emph, charStart: charPos });
-      x += w + space;
-      charPos += t.length + 1;
-    }
-    lines.push({ y: line * lineH, w: x - space });
-    if ((tooWide || lines.length > 3) && attempt < 7) {
+      lines.push({ y: line * lineH, w: x - space });
+      return { words, lines, tooWide };
+    };
+    let r = place(maxW);
+    if ((r.tooWide || r.lines.length > 3) && attempt < 7) {
       size *= 0.9;
       continue;
     }
-    const blockW = Math.max(...lines.map((l) => l.w));
-    const out = { words, lines, size, lineH, blockW, blockH: lines.length * lineH };
+    // Chinese has no spaces to break on, so a greedy fill can strand one character on the last line.
+    // Narrow the measure as far as it goes without adding a line, so the lines come out even.
+    if (cjk && r.lines.length > 1) {
+      const n = r.lines.length;
+      let lo = Math.max(...r.lines.map((l) => l.w)) * 0.5,
+        hi = maxW;
+      for (let k = 0; k < 12; k++) {
+        const mid = (lo + hi) / 2;
+        const t = place(mid);
+        if (!t.tooWide && t.lines.length === n) {
+          r = t;
+          hi = mid;
+        } else lo = mid;
+      }
+    }
+    const blockW = Math.max(...r.lines.map((l) => l.w));
+    const out = { words: r.words, lines: r.lines, size, lineH, blockW, blockH: r.lines.length * lineH };
     layoutCache.set(key, out);
     return out;
   }

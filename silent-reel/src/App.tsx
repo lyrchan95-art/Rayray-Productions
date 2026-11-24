@@ -1,26 +1,62 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Monitor } from "@/components/Monitor";
-import { generateScript, getSample, templateScript, type AgentLog, type BriefForm, type FontPref } from "@/lib/agent";
+import { LANGUAGE_LABEL, generateScript, getSample, templateScript, type AgentLog, type BriefForm, type FontPref } from "@/lib/agent";
 import { exportVideo } from "@/lib/export";
-import { analyzeImage, buildTimeline, FONT_FAMILIES, loadRenderFonts, resolveStyle, type Band, type RenderInput } from "@/lib/renderer";
+import { analyzeImage, buildTimeline, fontSpec, loadScriptFonts, resolveStyle, type Band, type RenderInput } from "@/lib/renderer";
 import { makeSamplePhoto } from "@/lib/samplePhoto";
-import { SCHEMA_VERSION, TEXT_BACKGROUNDS, VideoScriptSchema, formatIssues, type TextStyle, type VideoScript } from "@/lib/schema";
+import { LANGUAGES, SCHEMA_VERSION, TEXT_BACKGROUNDS, isCJK, type Language, VideoScriptSchema, formatIssues, type TextStyle, type VideoScript } from "@/lib/schema";
 
 type Photo = { el: HTMLImageElement | HTMLCanvasElement; name: string; sample: boolean; thumb: string };
 
 const TONES = ["Calm", "Confident", "Playful", "Luxurious", "Warm", "Bold"];
 const FONTS: FontPref[] = ["grotesk", "serif", "condensed", "mono"];
 
-const SAMPLE_FORM: BriefForm = {
-  goal: "Launch our new stoneware mug",
-  tone: "Calm",
-  audience: "Slow-morning coffee people",
-  message: "Hand-thrown in small batches, glazed to feel like river stone",
-  cta: "Shop the first batch",
-  color: "#2f6b5a",
-  font: "grotesk",
-  text: { textColor: "auto", background: "highlight", backgroundColor: "auto", backgroundOpacity: 0.85 },
+const STYLE_DEFAULT: TextStyle = { textColor: "auto", background: "highlight", backgroundColor: "auto", backgroundOpacity: 0.85 };
+const SAMPLE_BASE = { tone: "Calm", color: "#2f6b5a", font: "grotesk" as FontPref, text: STYLE_DEFAULT };
+
+/** One sample brief per language, so switching language on an untouched form shows a real example. */
+const SAMPLES: Record<Language, BriefForm> = {
+  en: {
+    ...SAMPLE_BASE,
+    language: "en",
+    goal: "Launch our new stoneware mug",
+    audience: "Slow-morning coffee people",
+    message: "Hand-thrown in small batches, glazed to feel like river stone",
+    cta: "Shop the first batch",
+  },
+  "zh-Hant": {
+    ...SAMPLE_BASE,
+    language: "zh-Hant",
+    goal: "新款石陶杯登場",
+    audience: "喜愛慢活早晨的咖啡人",
+    message: "小批量手工拉坯，釉色如河石般溫潤",
+    cta: "立即預訂首批",
+  },
+  yue: {
+    ...SAMPLE_BASE,
+    language: "yue",
+    goal: "全新石陶杯面世",
+    audience: "鍾意慢活早晨嘅咖啡友",
+    message: "小批量手工拉坯，釉色似河石咁溫潤",
+    cta: "即刻預訂首批",
+  },
+  "zh-Hans": {
+    ...SAMPLE_BASE,
+    language: "zh-Hans",
+    goal: "全新炻器杯上市",
+    audience: "热爱慢生活早晨的咖啡人",
+    message: "小批量手工拉坯，釉色温润如河石",
+    cta: "立即预订首批",
+  },
 };
+const SAMPLE_FORM = SAMPLES.en;
+const LANGUAGE_NOTE: Record<Language, string> = {
+  en: "English",
+  "zh-Hant": "Written Chinese, Traditional characters",
+  yue: "Spoken-style Hong Kong Cantonese, Traditional characters",
+  "zh-Hans": "Mainland Chinese, Simplified characters",
+};
+const SAMPLE_KEYS = ["goal", "audience", "message", "cta"] as const;
 
 const BG_LABEL: Record<TextStyle["background"], string> = {
   auto: "Auto",
@@ -97,7 +133,7 @@ function slug(s: string) {
   return (
     s
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/[^\p{L}\p{N}]+/gu, "-")
       .replace(/^-|-$/g, "")
       .slice(0, 40) || "reel"
   );
@@ -110,7 +146,7 @@ export default function App() {
   const [scriptText, setScriptText] = useState(() => JSON.stringify(templateScript(SAMPLE_FORM), null, 2));
   const [issues, setIssues] = useState<string[]>([]);
   const [briefAtScript, setBriefAtScript] = useState<string>(JSON.stringify(SAMPLE_FORM));
-  const [fontsReady, setFontsReady] = useState(false);
+  const [fontTick, setFontTick] = useState(0);
   const [source, setSource] = useState<"sample" | "claude" | "claude-repaired" | "template" | "edited">("sample");
   const [log, setLog] = useState<AgentLog[]>([]);
   const [busy, setBusy] = useState(false);
@@ -128,7 +164,6 @@ export default function App() {
   useEffect(() => {
     const c = makeSamplePhoto();
     setPhoto({ el: c, name: "sample-mug.jpg", sample: true, thumb: c.toDataURL("image/jpeg", 0.7) });
-    loadRenderFonts().finally(() => setFontsReady(true));
     getSample().then((s) => setClaudeAvail(!!s));
     if (window.claude?.use) {
       (window.claude.use("downloads") as Promise<DownloadsNS | null>).then(setDownloads).catch(() => setDownloads(null));
@@ -139,23 +174,34 @@ export default function App() {
   const renderInput: RenderInput | null = useMemo(() => {
     if (!photo || !analysis) return null;
     return { script, timeline: buildTimeline(script), image: photo.el, analysis };
-    // fontsReady forces a new object so the monitor repaints with real fonts
+    // fontTick forces a new object so the monitor repaints once the right fonts are in
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [photo, analysis, script, fontsReady]);
+  }, [photo, analysis, script, fontTick]);
 
-  // Brand color and font are the user's: apply them to the script live.
+  // Load the faces this script needs (Chinese fonts arrive in slices keyed by the characters used).
+  const fontKey = `${script.language}|${script.brand.font}|${script.title}|${script.scenes.map((sc) => sc.text.content).join("")}`;
+  useEffect(() => {
+    let live = true;
+    loadScriptFonts(script).finally(() => live && setFontTick((t) => t + 1));
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fontKey]);
+
+  // Brand color, font and language are the user's: apply them to the script live.
   useEffect(() => {
     setScript((s) => {
-      if (s.brand.color === form.color && s.brand.font === form.font && JSON.stringify(s.brand.text) === JSON.stringify(form.text)) return s;
-      const next = { ...s, brand: { color: form.color, font: form.font, text: form.text } };
+      if (s.language === form.language && s.brand.color === form.color && s.brand.font === form.font && JSON.stringify(s.brand.text) === JSON.stringify(form.text)) return s;
+      const next = { ...s, language: form.language, brand: { color: form.color, font: form.font, text: form.text } };
       setScriptText(JSON.stringify(next, null, 2));
       return next;
     });
-  }, [form.color, form.font, form.text]);
+  }, [form.color, form.font, form.text, form.language]);
 
   const briefDirty = useMemo(() => {
     const a = JSON.parse(briefAtScript) as BriefForm;
-    return a.goal !== form.goal || a.tone !== form.tone || a.audience !== form.audience || a.message !== form.message || a.cta !== form.cta;
+    return (a.language ?? "en") !== form.language || a.goal !== form.goal || a.tone !== form.tone || a.audience !== form.audience || a.message !== form.message || a.cta !== form.cta;
   }, [briefAtScript, form]);
 
   const applyScript = (s: VideoScript, src: typeof source) => {
@@ -164,6 +210,22 @@ export default function App() {
     setIssues([]);
     setSource(src);
     setResult(null);
+  };
+
+  const setLanguage = (lang: Language) => {
+    if (lang === form.language) return;
+    const prev = SAMPLES[form.language];
+    const untouched = SAMPLE_KEYS.every((k) => form[k] === prev[k]);
+    if (untouched) {
+      // The brief is still the sample, so swap in the sample for the new language and rebuild the preview.
+      const next: BriefForm = { ...form, language: lang, ...Object.fromEntries(SAMPLE_KEYS.map((k) => [k, SAMPLES[lang][k]])) };
+      setForm(next);
+      applyScript(templateScript(next), "sample");
+      setBriefAtScript(JSON.stringify(next));
+      setLog([]);
+    } else {
+      setForm({ ...form, language: lang });
+    }
   };
 
   const onFile = (file: File | undefined) => {
@@ -235,6 +297,7 @@ export default function App() {
     if (result) URL.revokeObjectURL(result.url);
     setResult(null);
     try {
+      await loadScriptFonts(renderInput.script);
       const r = await exportVideo(renderInput, (p) => setExp((x) => ({ ...x, progress: p })), ctl.signal);
       setResult({ url: URL.createObjectURL(r.blob), blob: r.blob, ext: r.ext, ms: r.ms });
       setExp({ progress: 1, running: false });
@@ -332,6 +395,30 @@ export default function App() {
           </label>
 
           <div className="field">
+            <span className="label" id="lang-l">
+              Reel language
+            </span>
+            <div className="langs" role="radiogroup" aria-labelledby="lang-l">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l}
+                  id={`lang-${l}`}
+                  role="radio"
+                  aria-checked={form.language === l}
+                  className={`lang-btn ${form.language === l ? "on" : ""}`}
+                  lang={l === "en" ? "en" : l === "yue" ? "yue-Hant-HK" : l}
+                  onClick={() => setLanguage(l)}
+                >
+                  {LANGUAGE_LABEL[l]}
+                </button>
+              ))}
+            </div>
+            <span className="hint">
+              {LANGUAGE_NOTE[form.language]}.{form.language !== "en" ? " Your brief can be in any language; Claude adapts it." : ""}
+            </span>
+          </div>
+
+          <div className="field">
             <label htmlFor="f-goal">Goal</label>
             <input id="f-goal" value={form.goal} maxLength={80} onChange={(e) => set("goal", e.target.value)} />
           </div>
@@ -404,11 +491,11 @@ export default function App() {
                 >
                   <span
                     className="aa"
-                    style={{ fontFamily: FONT_FAMILIES[f].family, fontWeight: FONT_FAMILIES[f].weight }}
+                    style={{ fontFamily: fontSpec(f, form.language).family, fontWeight: fontSpec(f, form.language).weight }}
                   >
-                    {FONT_FAMILIES[f].upper ? "AA" : "Aa"}
+                    {isCJK(form.language) ? "字Aa" : fontSpec(f, form.language).upper ? "AA" : "Aa"}
                   </span>
-                  <span className="fl">{FONT_FAMILIES[f].label}</span>
+                  <span className="fl">{fontSpec(f, form.language).label}</span>
                 </button>
               ))}
             </div>
@@ -514,7 +601,7 @@ export default function App() {
               {script.title}
             </span>
           </div>
-          <Monitor input={renderInput} fontsReady={fontsReady} />
+          <Monitor input={renderInput} fontsReady={fontTick} />
 
           <div className="export">
             {exp.running ? (

@@ -8,7 +8,7 @@ export function timecode(frame: number): string {
   return `00:00:${String(s).padStart(2, "0")}:${String(f).padStart(2, "0")}`;
 }
 
-export function Monitor({ input, fontsReady }: { input: RenderInput | null; fontsReady: boolean }) {
+export function Monitor({ input, fontsReady }: { input: RenderInput | null; fontsReady: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(true);

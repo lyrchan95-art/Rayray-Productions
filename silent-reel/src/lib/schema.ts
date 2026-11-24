@@ -5,7 +5,7 @@ import { z } from "zod";
  * The renderer consumes this and nothing else. Bump SCHEMA_VERSION on any
  * breaking change so old scripts keep rendering the way they did.
  */
-export const SCHEMA_VERSION = "1.1" as const; // 1.1 adds brand.text (text color + background)
+export const SCHEMA_VERSION = "1.2" as const; // 1.1 added brand.text; 1.2 adds language
 export const FPS = 30;
 export const DURATION_SEC = 15;
 export const WIDTH = 1080;
@@ -18,6 +18,9 @@ export const POSITIONS = ["top", "center", "bottom"] as const;
 export const TRANSITIONS = ["cut", "crossfade", "flash", "zoom-through"] as const;
 
 const Hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+export const LANGUAGES = ["en", "zh-Hant", "yue", "zh-Hans"] as const;
+export type Language = (typeof LANGUAGES)[number];
+export const isCJK = (l: Language) => l !== "en";
 export const TEXT_BACKGROUNDS = ["auto", "none", "band", "box", "highlight"] as const;
 
 /** User-owned text styling. "auto" means the renderer decides from the photo. */
@@ -55,7 +58,8 @@ export const SceneSchema = z.object({
 
 export const VideoScriptSchema = z
   .object({
-    schemaVersion: z.enum(["1.0", SCHEMA_VERSION]), // 1.0 scripts still render (text style defaults to auto)
+    schemaVersion: z.enum(["1.0", "1.1", SCHEMA_VERSION]), // older scripts still render (text style auto, language en)
+    language: z.enum(LANGUAGES).default("en"),
     title: z.string().min(1).max(80),
     fps: z.literal(FPS),
     durationSec: z.literal(DURATION_SEC),
@@ -89,6 +93,14 @@ export const VideoScriptSchema = z
     if (last && last.text.role !== "cta") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["scenes", s.scenes.length - 1, "text", "role"], message: "Last scene must be the CTA" });
     }
+    if (isCJK(s.language)) {
+      s.scenes.forEach((sc, i) => {
+        const max = sc.text.role === "hook" ? 10 : 22;
+        if ([...sc.text.content].length > max) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["scenes", i, "text", "content"], message: `Chinese ${sc.text.role} text must be ${max} characters or fewer` });
+        }
+      });
+    }
     const ids = new Set<string>();
     s.scenes.forEach((sc, i) => {
       if (ids.has(sc.id)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["scenes", i, "id"], message: "Duplicate scene id" });
@@ -108,7 +120,8 @@ export function formatIssues(err: z.ZodError): string[] {
 
 /** Human-readable schema description handed to the script agent. */
 export const SCHEMA_PROMPT = `{
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.2",
+  "language": "en" | "zh-Hant" | "yue" | "zh-Hans",   // copied from the brief
   "title": string (<=80 chars),
   "fps": 30,
   "durationSec": 15,
@@ -123,7 +136,7 @@ export const SCHEMA_PROMPT = `{
         "intensity": 0..1
       },
       "text": {
-        "content": string (<=60 chars; hook <=5 words, others <=8 words),
+        "content": string (<=60 chars; English: hook <=5 words, others <=8 words; Chinese: hook <=8 characters, others <=14 characters),
         "role": ${TEXT_ROLES.map((m) => `"${m}"`).join(" | ")},   // first = "hook", last = "cta"
         "animation": ${TEXT_ANIMATIONS.map((m) => `"${m}"`).join(" | ")},
         "position": "top" | "center" | "bottom",
