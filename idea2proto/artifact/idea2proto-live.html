@@ -117,8 +117,20 @@ svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke
 .sbtn{width:38px;height:38px;border:0;border-radius:var(--r-md);background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center}
 .sbtn:disabled{background:var(--surface-3);color:var(--faint);cursor:default}
 .preview{display:flex;flex-direction:column;background:var(--surface)}
-@media (max-width:899px){.preview{position:fixed;inset:0;z-index:50;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:rise .18s var(--ease)}}
-@media (min-width:900px){.preview{width:min(46vw,560px);flex-shrink:0;border-left:1px solid var(--border)}}
+.preview[hidden]{display:none}
+@media (max-width:899px){.preview{position:fixed;inset:0;z-index:50;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
+@media (min-width:900px){.preview{position:fixed;top:0;right:0;bottom:0;z-index:20;width:min(46vw,560px);border-left:1px solid var(--border)}body.pvdock .app{margin-right:min(46vw,560px);max-width:none}}
+.pvbody{flex:1;min-height:0;display:flex;flex-direction:column}
+.pvbody>[hidden]{display:none!important}
+.pvtabs{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;flex-shrink:0}
+.pvtabs button{min-height:44px;padding:0 12px;border:0;background:none;color:var(--muted);font-size:13px}
+.pvtabs button[aria-pressed="true"]{background:var(--surface-3);color:var(--fg);font-weight:600}
+.spec{flex:1;min-height:0;overflow-y:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));background:var(--bg);font:15px/1.6 var(--sans)}
+.spec h1{font-family:var(--serif);font-size:26px;line-height:1.2;margin:0 0 6px}.spec h2{font-size:16px;margin:24px 0 6px;padding-top:12px;border-top:1px solid var(--border)}
+.spec ul,.spec ol{padding-left:20px;margin:4px 0}.spec li{margin:2px 0}.spec p{margin:6px 0}.spec blockquote{margin:0 0 8px;color:var(--muted);font-size:16px}
+.spec code{font:13px/1.4 ui-monospace,monospace;background:var(--surface-2);padding:1px 4px;border-radius:3px}
+.spec .specacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.cloudline{font-size:13px;margin:4px 0 12px}
 @keyframes rise{from{transform:translateY(24px);opacity:0}}
 .pbar{display:flex;align-items:center;gap:4px;min-height:52px;padding:0 8px;border-bottom:1px solid var(--border);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
 .pbar .t{flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
@@ -401,6 +413,7 @@ summary.label{min-height:44px;display:flex;align-items:center}
 </style>
 
 <div class="app" id="app"></div>
+<aside class="preview" id="pv" aria-label="Prototype preview" hidden><div class="pbar" id="pv-bar"></div><div id="pv-notes"></div><div class="pvbody"><div class="stage" id="pv-stage"></div><div class="spec" id="pv-spec" hidden></div></div></aside>
 <div id="overlay"></div>
 <div id="sheet"></div>
 <input type="file" id="assetfile" accept="image/*" hidden>
@@ -544,7 +557,12 @@ const T = {
   chkNoFix:["唔使修正","No fix needed"], chkFixRejected:["修正版冇更好，保留原版","The fix wasn't better, keeping the original"],
   chkFixMsg:["質檢搞掂，修正版已經準備好。","The check is done and a fixed version is ready."], chkFixReady:["修正版 v{n} 準備好","Fixed version v{n} is ready"],
   chkUse:["切換到 v{n}","Switch to v{n}"], chkUnchecked:["未質檢","Not checked yet"], chkRun:["運行質檢","Run check"], chkStop:["停止質檢","Stop check"],
-  qFixedFrom:["已自動修正（由 v{n}）","Auto-fixed from v{n}"], qFixedBy:["修正版 v{n} 已準備好","Fixed version v{n} is ready"],
+  qFixedFrom:["已自動修正（由 v{n}）","Auto-fixed from v{n}"],
+  pvHide:["收埋預覽","Hide preview"], pvView:["睇邊樣","View"], pvProto:["原型","Prototype"], pvDlReadme:["下載 README.md","Download README.md"],
+  pvSpecNote:["每次改動都會自動更新，AI 亦會靠佢記住成個產品。","Updates itself after every change, and the AI reads it as its memory of the product."],
+  cloudLocal:["只係存喺呢部機。","Saved on this device only."], cloudSync:["同步緊你嘅帳戶…","Syncing with your account…"], cloudOn:["已經存入你嘅帳戶，換機或者清咗瀏覽器都唔會唔見。","Saved to your account, so a new device or a cleared browser keeps your ideas."],
+  cloudErr:["暫時連唔到帳戶，資料照樣存喺呢部機。","Can't reach your account right now; everything is still saved on this device."], cloudFull:["帳戶儲存空間滿咗，刪走舊點子先再同步到。","Your account storage is full; delete old ideas to keep syncing."],
+  edDone:["改好咗，只係重寫咗相關畫面。","Done. Only the affected screens were rewritten."], wlPlan:["諗清楚要改邊幾版","Working out which screens change"], wlStyle:["改整體風格","Updating the shared style"], qFixedBy:["修正版 v{n} 已準備好","Fixed version v{n} is ready"],
 };
 const SKILL_LABEL = {"prototype-html":["網頁原型","Web prototype"],"game-prototype":["小遊戲","Game prototype"],"design-variants":["設計方向","Design variants"],"chat":["傾偈","Chat"],"idea-capture":["記低點子","Idea capture"]};
 
@@ -861,7 +879,7 @@ async function polish(it, skill, html, checks, review, signal, v = {}) {
   const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- [${i.sev}/${i.area}] ${i.problem} => ${i.fix}`);
   const prompt = `[Instructions]\n${designPrompt(skill, it)}\n[/Instructions]\n\nAUDIT FINDINGS. Fix every item below, keep everything that already works, and return the full updated document in the same output format.\nAUTOMATED:\n${auto.join("\n") || "- none"}\nEXPERT:\n${exp.join("\n") || "- none"}\n\nCURRENT PROTOTYPE:\n\`\`\`html\n${html}\n\`\`\``;
   if (v.build) return polishChunked(it, v, checks, review, signal);
-  const res = await ask("c_" + it.id, prompt, { tier: "complex", signal });
+  const res = await ask("c_" + it.id, prompt, { tier: "default", signal });
   return extract(res.text || "").html;
 }
 const fallbackTips = (it, skill) => (skill !== "game-prototype" && !(S.assets[it.id] || []).length ? [{ kind: "asset", slot: "logo", title: t("fbAssetTitle"), why: t("fbAssetWhy"), options: [], done: null }] : []);
@@ -986,7 +1004,7 @@ function qualityCard(it, v) {
     ${q.strengths.length ? `<p class="label">${t("qStrengths")}</p><ul class="plain">${q.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${iss ? `<p class="label">${q.fixedBy || q.fixedFrom ? t("qFixedList") : t("qReview")}</p><ul class="issues">${iss}</ul>` : ""}
     ${fixedNote}
-    <div class="qact"><button class="btn" data-act="reaudit" data-n="${n}">${t("reaudit")}</button>${q.issues.length && !q.fixedBy && !q.fixedFrom ? `<button class="btn" data-act="autofix" data-n="${n}">${t("autofix")}</button>` : ""}</div></details>`;
+    <div class="qact"><button class="btn" data-act="reaudit" data-n="${n}">${t("reaudit")}</button>${(q.issues.length || q.auto.some((c) => c.status !== "pass")) && !q.fixedBy && !q.fixedFrom ? `<button class="btn" data-act="autofix" data-n="${n}">${t("autofix")}</button>` : ""}</div></details>`;
 }
 function tipsHtml(it, v) {
   const tips = v.q.tips, as = S.assets[it.id] || [];
@@ -1435,24 +1453,20 @@ const skillCount = (id) => (id === "idea-capture" ? S.ideas.length : S.ideas.red
 
 /* ───────── agents: multi-step runs over an idea ───────── */
 const AGENTS = [
- {id:"validator",name:["市場驗證員","Idea validator"],tag:["四步幫你睇清楚個 idea 值唔值得做。","Four steps to see whether the idea is worth building."],
+ {id:"validator",name:["市場驗證員","Idea validator"],tag:["兩路同時分析，大約半分鐘睇清楚個 idea 值唔值得做。","Two analyses side by side: about half a minute to see whether the idea is worth building."],
   steps:[
-   {key:"users",title:["邊個真係需要？","Who really needs it?"],tier:"default",ins:"List the 3 most specific target user segments in Hong Kong for this idea. For each: the pain point in their own words, how they solve it today, and how often it happens. Max 180 words."},
-   {key:"market",title:["市場上有咩替代品？","What are people using instead?"],tier:"default",ins:"Name 3 to 5 alternatives (apps, services, workarounds) this idea competes with. For each: what it does better, and where this idea can win. Say 'likely' when unsure and never invent a company name. Max 200 words."},
-   {key:"tests",title:["一個禮拜內點驗證？","How to test it within a week"],tier:"default",ins:"Propose 3 cheap validation experiments one founder can run within 7 days in Hong Kong (for example a WhatsApp group test, a landing page signup, 5 street interviews). For each: what to do, a numeric success threshold, and the cost. Max 200 words."},
-   {key:"verdict",title:["結論同下一步","Verdict and next move"],tier:"default",ins:"Give a verdict: Go, Pivot or Stop (in the reply language), with a 2-sentence reason, the single biggest risk, and the one action to take tomorrow. Start with the verdict in bold. Max 100 words."},
+   {key:"users",par:true,title:["邊個需要、而家用緊咩","Who needs it, and what they use now"],tier:"default",ins:"Part 1: the 3 most specific target user segments in Hong Kong for this idea. For each: the pain in their own words and how often it happens. Part 2: 3 to 5 alternatives (apps, services, workarounds) people use today; for each, what it does better and where this idea can win. Say 'likely' when unsure and never invent a company name. Max 220 words."},
+   {key:"verdict",par:true,title:["一個禮拜點驗證、結論","A one-week test, and the verdict"],tier:"default",ins:"Start with a verdict in bold: Go, Pivot or Stop (in the reply language), with a 2-sentence reason and the single biggest risk. Then 3 cheap validation experiments one founder can run within 7 days in Hong Kong; for each: what to do, a numeric success threshold, and the cost. End with the one action to take tomorrow. Max 220 words."},
   ]},
- {id:"sprint",name:["原型衝刺","Prototype sprint"],tag:["審視、改版、自我檢查，一次過出新版本。","Audit, rebuild and self-check, ending in a new version."],
+ {id:"sprint",name:["原型衝刺","Prototype sprint"],tag:["一次過審視同改版，再自動量度一次。","Audit and rebuild in one go, then measured automatically."],
   steps:[
-   {key:"audit",title:["搵出最大問題","Find the biggest problems"],tier:"default",needsHtml:true,ins:"Review the idea and the CURRENT PROTOTYPE if there is one. List the 3 biggest usability or quality problems (touch targets, clarity, empty states, copy, performance), one line each with the fix. If there is no prototype yet, list the 3 riskiest assumptions to build around. Max 120 words."},
-   {key:"build",title:["改版","Rebuild"],tier:"default",kind:"build",needsHtml:true,ins:"Apply the fixes from the previous step to the prototype (or build a first version from the spec if none exists). Keep everything that works."},
-   {key:"check",title:["自我檢查","Self-check"],tier:"quick",needsHtml:true,after:true,ins:"Check the NEW PROTOTYPE against this checklist and report pass or fail with one short line each: viewport meta, touch targets at least 44px, empty state, visible focus, contrast, copy tone, no network calls. Max 120 words."},
+   {key:"build",title:["審視並改版","Audit and rebuild"],tier:"default",kind:"build",needsHtml:true,ins:"Before the code block, name in at most 3 short lines the 3 biggest usability or quality problems of the CURRENT PROTOTYPE (touch targets, clarity, empty states, copy, performance), or the riskiest assumptions if there is none yet. Then fix exactly those and return the full updated document. Keep everything that works."},
+   {key:"check",title:["自動量度","Automatic measurement"],kind:"local"},
   ]},
- {id:"launch",name:["上線文案包","Launch kit"],tag:["定位、落地頁文案、社交帖文，用地道廣東話寫。","Positioning, landing copy and social posts in native HK Cantonese."],
+ {id:"launch",name:["上線文案包","Launch kit"],tag:["定位、落地頁文案、社交帖文同步寫，用地道廣東話。","Positioning, landing copy and social posts written side by side, in native HK Cantonese."],
   steps:[
-   {key:"angle",title:["定位同切入點","Positioning and angle"],tier:"default",ins:"Act as a senior Hong Kong copywriter. Define the angle in at most 4 short lines: the audience, ONE hook (a relatable local pain point or a bold benefit), the tone, and the register (colloquial Cantonese or formal written Chinese)."},
-   {key:"copy",title:["落地頁文案","Landing page copy"],tier:"default",ins:"Write ready-to-publish landing page copy: headline, 2 to 3 line body, 3 short benefit lines, CTA button text. Then 2 alternative headlines for A/B testing, one witty with wordplay and one direct benefit. Short lines for mobile readers."},
-   {key:"social",title:["社交帖文","Social posts"],tier:"default",ins:"Write 3 social posts, each at most 60 words with a low-friction call to action: one Instagram, one Threads, one WhatsApp broadcast. Label each with its channel."},
+   {key:"copy",par:true,title:["定位同落地頁文案","Angle and landing copy"],tier:"default",ins:"Act as a senior Hong Kong copywriter. First the angle in at most 3 short lines (audience, ONE hook, tone and register). Then ready-to-publish landing page copy: headline, 2 to 3 line body, 3 short benefit lines, CTA button text, and 2 alternative headlines for A/B testing (one witty, one direct). Short lines for mobile readers."},
+   {key:"social",par:true,title:["社交帖文","Social posts"],tier:"default",ins:"Act as a senior Hong Kong copywriter. Write 3 social posts, each at most 60 words with a low-friction call to action: one Instagram, one Threads, one WhatsApp broadcast. Label each with its channel."},
   ]},
 ];
 
@@ -1461,7 +1475,7 @@ function agentPrompt(def, it, note, prior, cur) {
   const plain = def.kind === "build" ? "" : '\nPlain text only: no markdown headings; short lines; use "- " for lists; **bold** is allowed.';
   const ins = def.kind === "build" ? `${def.ins}\n${designPrompt(skill, it)}` : def.ins;
   const ctx = [
-    `IDEA: ${JSON.stringify(it.spec)}`,
+    `IDEA: ${JSON.stringify(it.spec)}`, memoryBlock(it),
     it.raw ? `ORIGINAL WORDS: ${it.raw}` : "",
     note ? `FOUNDER'S EXTRA INSTRUCTIONS: ${note}` : "",
     ...prior.map((p) => `PREVIOUS STEP, ${p.title}:\n${p.text.slice(0, 2500)}`),
@@ -1483,11 +1497,16 @@ async function runAgent(agent, ideaId, note) {
   S.sheet = null; renderSheet(); S.view = "run"; render();
   runAbort = new AbortController();
   const done = [];
-  for (let i = 0; i < agent.steps.length; i++) {
+  const runStep = async (i) => {
     const def = agent.steps[i], st = S.run.steps[i];
     st.status = "running"; renderRunBody();
     try {
       const cur = it.versions.find((v) => v.n === it.currentVersion);
+      if (def.kind === "local") {                                            // measured in the page, no model call
+        const v = it.versions.at(-1), q = v?.q;
+        st.text = q ? q.auto.map((c) => `${c.status === "pass" ? "✓" : c.status === "warn" ? "!" : "✗"} ${c.label || c.id}${c.detail ? ": " + c.detail : ""}`).join("\n") : "—";
+        st.status = "done"; done.push({ title: def.title[lang()], text: st.text }); return renderRunBody();
+      }
       const res = await askDurable("a_" + ideaId, agentPrompt(def, it, note, done, cur), {
         signal: runAbort.signal, tier: def.tier || "default",
         onText: (text) => { st.text = def.kind === "build" ? text.split(/```|<!doctype|<html/i)[0] : text; renderRunBody(); },
@@ -1499,19 +1518,25 @@ async function runAgent(agent, ideaId, note) {
         const bsk = cur?.skill || it.spec.suggestedSkill;
         const g = { html, q: buildQ({ it, skill: bsk, checks: autoChecks(await measureHtml(html, it.id), staticChecks(html)), review: null, deep: false }) };
         const n = (it.versions.at(-1)?.n || 0) + 1;
-        it.versions.push({ n, html: g.html, q: g.q, skill: cur?.skill || it.spec.suggestedSkill, note: lead.slice(0, 300), createdAt: Date.now() });
+        it.versions.push({ n, html: g.html, q: g.q, skill: bsk, note: lead.slice(0, 300), createdAt: Date.now() });
         it.currentVersion = n; st.versionN = n; text = lead || "✓";
       }
       st.text = text.trim(); st.status = "done";
       done.push({ title: def.title[lang()], text: st.text });
-      if (runAbort?.signal.aborted) { S.run.status = "stopped"; break; }
     } catch (e) {
       if (runAbort?.signal.aborted) { st.status = "pending"; S.run.status = "stopped"; }
       else { st.status = "error"; st.text = modelError(e); S.run.status = "error"; }
-      break;
+      throw e;
+    } finally { renderRunBody(); }
+  };
+  try {
+    for (let i = 0; i < agent.steps.length; ) {
+      let j = i; if (agent.steps[i].par) while (j + 1 < agent.steps.length && agent.steps[j + 1].par) j++;
+      await Promise.all(Array.from({ length: j - i + 1 }, (_, k) => runStep(i + k)));   // independent steps run side by side
+      if (runAbort?.signal.aborted) { S.run.status = "stopped"; break; }
+      i = j + 1;
     }
-    renderRunBody();
-  }
+  } catch (e) { if (S.run.status === "running") S.run.status = "error"; }
   if (S.run.status === "running") S.run.status = "done";
   const ok = S.run.steps.filter((x) => x.status === "done");
   if (ok.length) {
@@ -1616,8 +1641,132 @@ function renderSheet() {
   el.innerHTML = `<div class="scrim"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(label)}" tabindex="-1">${S.sheet.kind === "skill" ? sheetSkill(S.sheet.id) : sheetAgent()}</div>`;
   el.querySelector(".sheet").focus();
 }
-const persist = () => { if (!LS.set("i2p.ideas", S.ideas)) { // quota: drop oldest versions' html but keep the latest
-  for (const i of S.ideas) i.versions.slice(0, -2).forEach((v) => (v.html = v.html ? "" : v.html)); LS.set("i2p.ideas", S.ideas); } };
+/* README: the product spec, written down after every change. It is shown in the preview, downloadable, and fed back to the model as memory. */
+function ideaReadme(it, { forModel = false } = {}) {
+  const L = lang(), z = (a, b) => (L ? b : a), sp = it.spec, bp = it.blueprint, st = it.style, out = [];
+  out.push(`# ${sp.title}`, "", `> ${sp.oneLiner}`, "", `## ${z("產品規格", "Product spec")}`, `- ${z("目標用戶", "Target user")}: ${sp.targetUser}`, `- ${z("核心互動", "Core interaction")}: ${sp.coreInteraction}`, `- ${z("類型", "Type")}: ${sl(sp.suggestedSkill)}`);
+  if (bp) {
+    if (bp.valueProp) out.push(`- ${z("價值", "Value")}: ${bp.valueProp}`);
+    if (bp.different) out.push(`- ${z("點解唔同", "Why it is different")}: ${bp.different}`);
+    if (bp.personas?.length) { out.push("", `## ${z("用戶", "People")}`); bp.personas.forEach((p) => out.push(`- **${p.name}**: ${p.situation}${p.job ? ` · ${z("要做", "Job")}: ${p.job}` : ""}${p.worry ? ` · ${z("擔心", "Worry")}: ${p.worry}` : ""}`)); }
+    out.push("", `## ${z("畫面同流程", "Screens and flow")}`); activeScreens(bp).forEach((x, i) => out.push(`${i + 1}. **${x.name}** (\`${x.id}\`): ${x.purpose} ${z("主要行動", "Primary action")}: ${x.action}`));
+    if (bp.decisions?.length) { out.push("", `## ${z("決定", "Decisions")}`); bp.decisions.forEach((d) => { const o = d.options[d.chosen ?? d.recommended]; if (o) out.push(`- ${d.question} → **${o.label}**${d.chosen === null ? ` (${z("預設建議", "default")})` : ""}`); }); }
+    const facts = (bp.facts || []).filter((f) => f.value?.trim()); if (facts.length) { out.push("", `## ${z("已確認資料", "Confirmed facts")}`); facts.forEach((f) => out.push(`- ${f.label}: ${f.value.trim()}`)); }
+    if (bp.signature) out.push("", `## ${z("招牌互動", "Signature interaction")}`, bp.signature);
+    if (bp.risks?.length) { out.push("", `## ${z("風險", "Risks")}`); bp.risks.forEach((r) => out.push(`- ${r}`)); }
+    if (bp.done?.length) { out.push("", `## ${z("點先算完成", "Definition of done")}`); bp.done.forEach((r) => out.push(`- ${r}`)); }
+  }
+  if (st) { const pr = pairingOf(st.pairing); out.push("", `## ${z("風格", "Style")}`, `- ${z("顏色", "Colours")}: paper \`${st.paper}\` · ink \`${st.ink}\` · ${st.tone1.name} \`${st.tone1.hex}\` · ${st.tone2.name} \`${st.tone2.hex}\``, `- ${z("字體", "Fonts")}: ${pr.display} + ${pr.body}`, `- ${z("圓角", "Radius")}: ${st.radius} · ${z("密度", "Density")}: ${st.density} · ${z("動態", "Motion")}: ${st.motion}`); if (st.signature) out.push(`- ${st.signature}`); }
+  if (it.research) out.push("", `## ${z("市場（未經核實嘅估算）", "Market (unverified estimates)")}`, researchDigest(it));
+  const asks = []; it.messages.forEach((m, i) => { if (m.role !== "user" || String(m.skill).startsWith("agent:")) return; const nx = it.messages.slice(i + 1).find((x) => x.role === "assistant"); asks.push(`- ${cut(m.content, 160)}${nx?.versionN ? ` → v${nx.versionN}` : ""}`); });
+  if (asks.length) out.push("", `## ${z("改動記錄", "Change log")}`, ...asks.slice(-15));
+  if (!forModel) {
+    if (it.versions.length) { out.push("", `## ${z("版本", "Versions")}`); it.versions.forEach((v) => out.push(`- v${v.n}${v.n === it.currentVersion ? ` (${z("而家用緊", "current")})` : ""} · ${new Date(v.createdAt || it.createdAt).toLocaleDateString(L ? "en-GB" : "zh-HK")}${v.q ? ` · ${z("質檢", "check")} ${v.q.score ?? v.q.autoScore ?? "–"}` : ""}${v.note ? ` · ${cut(v.note, 90)}` : ""}`)); }
+    const open = (bp?.decisions || []).filter((d) => d.chosen === null);
+    if (open.length) { out.push("", `## ${z("未決定", "Open questions")}`); open.forEach((d) => out.push(`- ${d.question}`)); }
+    out.push("", `_${z("由 Idea2Proto 自動更新", "Kept up to date by Idea2Proto")} · ${new Date(it.updatedAt || Date.now()).toLocaleString(L ? "en-GB" : "zh-HK")}_`);
+  }
+  return out.join("\n");
+}
+/** What the model remembers about this product, beyond the last few messages. */
+const memoryBlock = (it) => `PROJECT MEMORY (the README: spec, decisions and every change asked for so far. Stay consistent with it; never undo an earlier change unless asked):\n${ideaReadme(it, { forModel: true }).slice(0, 4000)}`;
+function mdHtml(md) {
+  const inl = (x) => esc(x).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/(^|\s)_([^_]+)_(?=\s|$)/g, "$1<em>$2</em>");
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const line of md.split("\n")) {
+    let m;
+    if ((m = line.match(/^(#{1,3}) (.*)/))) { close(); html += `<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`; }
+    else if ((m = line.match(/^- (.*)/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul"; } html += `<li>${inl(m[1])}</li>`; }
+    else if ((m = line.match(/^\d+\. (.*)/))) { if (list !== "ol") { close(); html += "<ol>"; list = "ol"; } html += `<li>${inl(m[1])}</li>`; }
+    else if ((m = line.match(/^> (.*)/))) { close(); html += `<blockquote>${inl(m[1])}</blockquote>`; }
+    else if (line.trim()) { close(); html += `<p>${inl(line)}</p>`; }
+    else close();
+  }
+  close(); return html;
+}
+const slug = (it) => (it.spec.title || "prototype").replace(/[^\w一-鿿-]+/g, "-").slice(0, 40);
+async function downloadReadme(it) {
+  const md = ideaReadme(it), dl = await (window.claude?.use ? window.claude.use("downloads") : null);
+  if (!dl) { try { await navigator.clipboard.writeText(md); toast(t("copied") + " (README)"); } catch { toast("—"); } return; }
+  try { await dl.save({ filename: slug(it) + "-README.md", data: md }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
+}
+const persist = () => {
+  for (const i of S.ideas) i.readme = ideaReadme(i);                          // the spec is saved with the idea, every time
+  if (!LS.set("i2p.ideas", S.ideas)) { // quota: drop old versions' html and build parts, keep the latest
+    for (const i of S.ideas) i.versions.slice(0, -2).forEach((v) => { v.html = v.html ? "" : v.html; delete v.build; }); LS.set("i2p.ideas", S.ideas); }
+  cloudSoon();
+};
+
+/* ───────── memory in your account: ideas are also saved to the viewer's private storage, so a cleared browser or another device keeps them ───────── */
+const CLOUD = { col: null, state: "off", sig: LS.get("i2p.cloudsig", {}), gone: LS.get("i2p.gone", []), q: new Set(), running: false, timer: 0 };
+const ideaSig = (i) => [i.updatedAt, i.messages.length, i.versions.length, i.currentVersion, hashStr(i.readme || ""), JSON.stringify(i.store || {}).length, i.versions.map((v) => (v.html || "").length).join(",")].join("|");
+const bytes = (x) => new TextEncoder().encode(x).length;
+function cloudBody(i) {
+  const c = JSON.parse(JSON.stringify(i)), keep = new Set([c.currentVersion, ...c.versions.slice(-2).map((v) => v.n)]);
+  c.versions.forEach((v) => { if (!keep.has(v.n)) { v.html = ""; delete v.build; } else if (v.n !== c.currentVersion) delete v.build; });
+  const store = JSON.stringify(c.store || {}); delete c.store;
+  const body = () => ({ idea: c, store, updatedAt: c.updatedAt || 0, title: String(c.spec?.title || "").slice(0, 80) });
+  const LIM = 240000; let size = bytes(JSON.stringify(body()));
+  for (const v of c.versions) { if (size < LIM) break; if (v.n === c.currentVersion) continue; v.html = ""; size = bytes(JSON.stringify(body())); }
+  if (size >= LIM) { const cv = c.versions.find((v) => v.n === c.currentVersion); if (cv) delete cv.build; size = bytes(JSON.stringify(body())); }
+  if (size >= LIM) { c.messages = c.messages.slice(-30).map((m) => ({ ...m, content: String(m.content).slice(0, 1500) })); size = bytes(JSON.stringify(body())); }
+  return size < LIM ? body() : null;
+}
+function cloudText() { return t({ off: "cloudLocal", sync: "cloudSync", on: "cloudOn", err: "cloudErr", full: "cloudFull" }[CLOUD.state]); }
+function renderCloud() { const el = document.getElementById("cloud"); if (el) el.textContent = cloudText(); }
+function cloudSoon() { if (!CLOUD.col) return; clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudQueue, 2000); }
+function cloudQueue() { if (!CLOUD.col) return; for (const i of S.ideas) if (ideaSig(i) !== CLOUD.sig[i.id]) CLOUD.q.add(i.id); cloudPump(); }
+async function cloudPump() {
+  if (CLOUD.running || !CLOUD.col) return; CLOUD.running = true;
+  try {
+    while (CLOUD.q.size) {
+      const id = CLOUD.q.values().next().value; CLOUD.q.delete(id);
+      const i = S.ideas.find((x) => x.id === id); if (!i) continue;
+      const sig = ideaSig(i), body = cloudBody(i); if (!body) continue;
+      const write = () => CLOUD.col.doc("idea-" + id).set(body);
+      try { await write(); }
+      catch (e) {
+        if (e?.code === "unavailable") { await sleep(1000 + Math.random() * 2000); await write(); }
+        else throw e;
+      }
+      CLOUD.sig[id] = sig; LS.set("i2p.cloudsig", CLOUD.sig);
+      if (CLOUD.state !== "on") { CLOUD.state = "on"; renderCloud(); }
+    }
+  } catch (e) {
+    CLOUD.state = e?.code === "quota_exceeded" ? "full" : "err"; renderCloud();
+    if (e?.code === "quota_exceeded") toast(t("cloudFull"));
+  } finally { CLOUD.running = false; }
+}
+async function cloudInit() {
+  const use = window.claude?.use; if (!use) return;
+  try {
+    const [db, user] = await Promise.all([use("db"), use("user")]); if (!db || !user) return;
+    const uid = await user.id(); if (!uid) return;
+    CLOUD.col = db.collection("data/users/" + uid); CLOUD.state = "sync"; renderCloud();
+    const snap = await Promise.race([CLOUD.col.get(), sleep(10000).then(() => { throw { code: "timeout" }; })]);
+    let changed = false;
+    for (const d of snap.docs) {
+      if (!d.id.startsWith("idea-")) continue;
+      const body = d.data(), ci = body?.idea; if (!ci?.id || !Array.isArray(ci.versions)) continue;
+      if (CLOUD.gone.includes(ci.id)) { CLOUD.col.doc(d.id).delete().catch(() => {}); continue; }
+      try { ci.store = JSON.parse(body.store || "{}"); } catch { ci.store = {}; }
+      const li = S.ideas.find((x) => x.id === ci.id);
+      if (!li) { S.ideas.push(ci); CLOUD.sig[ci.id] = ideaSig(ci); changed = true; }
+      else if ((ci.updatedAt || 0) > (li.updatedAt || 0) && !Object.values(JOBS).some((j) => j.ideaId === li.id)) {   // newer elsewhere; keep html only this device still has
+        for (const v of ci.versions) { const lv = li.versions.find((x) => x.n === v.n); if (lv && !v.html && lv.html) { v.html = lv.html; if (!v.build && lv.build) v.build = lv.build; } }
+        Object.assign(li, ci); CLOUD.sig[li.id] = ideaSig(li); changed = true;
+      }
+    }
+    LS.set("i2p.cloudsig", CLOUD.sig);
+    if (changed) { S.ideas.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)); LS.set("i2p.ideas", S.ideas); render(); }
+    CLOUD.state = "on"; renderCloud(); cloudQueue();
+  } catch (e) { CLOUD.state = CLOUD.col ? "err" : "off"; renderCloud(); }
+}
+function cloudForget(id) {
+  if (!CLOUD.gone.includes(id)) CLOUD.gone.push(id); LS.set("i2p.gone", CLOUD.gone); delete CLOUD.sig[id]; LS.set("i2p.cloudsig", CLOUD.sig);
+  CLOUD.col?.doc("idea-" + id).delete().then(() => { CLOUD.gone = CLOUD.gone.filter((x) => x !== id); LS.set("i2p.gone", CLOUD.gone); }).catch(() => {});
+}
 
 /* ───────── model access ───────── */
 let samplerP = null;
@@ -1682,8 +1831,8 @@ function buildMessages(skill, it, input, currentHtml, messages = it.messages) {
   }
   while (hist.length && hist[0].role !== "user") hist.shift();
   const sys = skill === "chat"
-    ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\nThe idea: ${specBlock(it.spec)}`
-    : designPrompt(skill, it, { exemplar: !currentHtml });
+    ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\n${memoryBlock(it)}`
+    : designPrompt(skill, it, { exemplar: !currentHtml }) + (currentHtml ? "\n\n" + memoryBlock(it) : "");
   const iter = currentHtml ? `\n\nCURRENT PROTOTYPE (modify it — keep everything not asked to change, return the full updated document):\n\`\`\`html\n${currentHtml}\n\`\`\`` : "";
   const msgs = [...hist, { role: "user", content: input + iter }];
   // System instructions ride in the first user turn (memoryless sampler).
@@ -1738,7 +1887,9 @@ async function structure(raw) {
   S.busy = true; S.status = t("structuring"); render();
   try {
     const sp = await askDurable("s" + Date.now(), `You turn a founder's raw, possibly spoken, possibly Cantonese/中英夾雜 idea into a compact product spec.
-Return ONLY JSON with keys: "title" (≤6 words, user's language), "oneLiner" (≤20 words), "coreInteraction" (the ONE thing a user does, ≤20 words), "targetUser" (≤12 words), "suggestedSkill": "prototype-html" | "game-prototype" | "design-variants".
+Return ONLY JSON with keys: "title" (≤6 words, user's language), "oneLiner" (≤20 words), "coreInteraction" (the ONE thing a user does, ≤20 words), "targetUser" (≤12 words), "suggestedSkill": "prototype-html" | "game-prototype" | "design-variants",
+"screens": ONLY for prototype-html, the 3 or 4 screens that make the core interaction work end to end, first one is home: [{"id": short lowercase English kebab-case, "name": ≤4 words in the user's language, "purpose": ≤14 words, "action": the primary action, ≤4 words}],
+"palette": {"paper": light background hex, "tone1": main accent hex, "tone2": second accent hex, "pairing": one of ${PAIRINGS.map((p) => p.id).join(" | ")}} chosen for the idea's mood (never neon, never purple gradients).
 Pick game-prototype for anything playable, design-variants when they want to explore looks/styles, else prototype-html. Fix speech-to-text errors silently. Don't invent features.
 ${REGISTER[S.register]}
 
@@ -1748,6 +1899,9 @@ ${REGISTER[S.register]}
       title: String(sp.title || raw.slice(0, 30)), oneLiner: String(sp.oneLiner || ""), coreInteraction: String(sp.coreInteraction || ""),
       targetUser: String(sp.targetUser || ""), suggestedSkill: ok.includes(sp.suggestedSkill) ? sp.suggestedSkill : "prototype-html",
     };
+    const scr = Array.isArray(sp.screens) ? sp.screens.filter((x) => x && x.name).slice(0, 4).map((x, i) => ({ id: kebab(x.id || x.name, i), name: cut(x.name, 24), purpose: cut(x.purpose, 120), action: cut(x.action, 24) })) : [];
+    if (scr.length >= 3 && S.spec.suggestedSkill === "prototype-html" && new Set(scr.map((x) => x.id)).size === scr.length) S.spec.screens = scr;
+    if (sp.palette && isHex(sp.palette.paper) && isHex(sp.palette.tone1)) S.spec.palette = { paper: sp.palette.paper, tone1: sp.palette.tone1, tone2: isHex(sp.palette.tone2) ? sp.palette.tone2 : null, pairing: String(sp.palette.pairing || "") };
     S.spec.style = { tones: [], phil: "auto" };
     if (!S.modeLock) S.mode = raw.trim().length >= 50 ? "deep" : "quick";
     if (S.skillPick && S.skillPick !== "idea-capture") S.spec.suggestedSkill = S.skillPick;
@@ -1762,6 +1916,12 @@ function createIdea(generate = true) {   // generate: true = build now, false = 
   S.ideaId = it.id; S.spec = null; S.draft = ""; S.view = generate === "deep" ? "studio" : "idea"; S.viewN = null; S.previewOpen = false;
   render();
   S.skillPick = null; S.modeLock = false;
+  if (generate !== "deep" && it.spec.screens && it.spec.suggestedSkill === "prototype-html") {   // quick path: a light blueprint from the spec, so the build is staged
+    const bp = fallbackBlueprint(it); const scr = it.spec.screens;
+    it.blueprint = Object.assign(bp, { screens: scr.map((x, i) => ({ ...x, core: i < scr.length - 1 || scr.length === 3 })), optionalScreens: [], decisions: [], source: "quick" });
+    const pl = it.spec.palette; it.style = normalizeStyle(pl ? { paper: pl.paper, tone1: { name: "", hex: pl.tone1 }, tone2: pl.tone2 ? { name: "", hex: pl.tone2 } : null, pairing: pl.pairing } : null, it);
+    loadFonts(it.style.pairing); persist();
+  }
   if (generate === "deep") runGrooming(it.id);
   else if (generate) turn({ input: t("first"), forceSkill: it.spec.suggestedSkill });
 }
@@ -1856,7 +2016,7 @@ function buildProgress(job) {
   return { d: (job.ids || []).filter((i) => parts[i]?.status === "done").length, n: (job.ids || []).length };
 }
 function noticeHtml() {
-  return Object.values(JOBS).filter((j) => j.status === "interrupted" && !ACTIVE.has(j.id) && (j.kind === "turn" || j.kind === "build") && findIdea(j.ideaId) && !(S.pending && S.pending.jobId === j.id)).map((j) => {
+  return Object.values(JOBS).filter((j) => j.status === "interrupted" && !ACTIVE.has(j.id) && (j.kind === "turn" || j.kind === "build" || j.kind === "edit") && findIdea(j.ideaId) && !(S.pending && S.pending.jobId === j.id)).map((j) => {
     const it = findIdea(j.ideaId), pr = j.kind === "build" ? t("jobProg_build").replace("{d}", buildProgress(j).d).replace("{n}", buildProgress(j).n) : t("jobProg_turn").replace("{k}", ((j.partial || "").length / 1000).toFixed(1));
     return `<div class="notice" role="status"><span><b>${t("jobBar").replace("{t}", esc(it.spec.title))}</b><br><span class="faint">${pr}</span></span><span class="nbtns"><button class="btn primary" data-act="resume-job" data-id="${j.id}">${t("jobResume")}</button><button class="btn ghost" data-act="drop-job" data-id="${j.id}">${t("jobDrop")}</button></span></div>`;
   }).join("");
@@ -1866,7 +2026,7 @@ function resumeJob(id) {
   const it = findIdea(job.ideaId); if (!it) return jobDel(id);
   if (S.pending && S.pending.jobId !== id) return toast(t("agentBusy"));
   job.status = "running"; saveJobs();
-  if (job.kind === "turn" || job.kind === "build") { S.ideaId = it.id; S.view = "idea"; openPending(job); render(); scrollEnd(); return job.kind === "build" ? runBuildJob(id) : runTurnJob(id); }
+  if (job.kind === "turn" || job.kind === "build" || job.kind === "edit") { S.ideaId = it.id; S.view = "idea"; openPending(job); render(); scrollEnd(); return job.kind === "build" ? runBuildJob(id) : job.kind === "edit" ? runEditJob(id) : runTurnJob(id); }
   S.ideaId = it.id; S.view = "studio"; render();
   return job.kind === "groom" ? runGrooming(it.id, { forced: job.forced, only: job.only }) : runResearch(it.id);
 }
@@ -1907,13 +2067,63 @@ async function turn({ input, forceSkill, regenerate, editIndex, fresh }) {
   const iterating = !fresh && skill !== "chat" && cur && cur.skill === skill && cur.html;
   const ids = skill === "prototype-html" && it.blueprint ? activeScreens(it.blueprint).map((x) => x.id) : [];
   const staged = ids.length >= 3 && (!iterating || !!regenerate);          // blueprint products are built shell-first, screen by screen
+  const edit = !staged && iterating && !!cur.build && skill === "prototype-html";   // and edited screen by screen
   const cut = it.messages.length;
   it.messages.push({ role: "user", content: input, skill });
-  const job = jobPut({ id: "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), kind: staged ? "build" : "turn", ideaId: it.id, skill, input, cut, baseN: iterating && !staged ? cur.n : null,
+  const job = jobPut({ id: "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), kind: staged ? "build" : edit ? "edit" : "turn", ideaId: it.id, skill, input, cut, baseN: iterating && !staged ? cur.n : null,
     conf: r.confidence, deepCheck: !!regenerate || !(cur && cur.skill === skill && cur.q), ids: staged ? ids : [], status: "running", attempts: 0, partial: "", startedAt: Date.now(), hiddenDuring: false });
   persist();                                                               // the user's message must survive a reload
   openPending(job); render(); scrollEnd();
-  return staged ? runBuildJob(job.id) : runTurnJob(job.id);
+  return staged ? runBuildJob(job.id) : edit ? runEditJob(job.id) : runTurnJob(job.id);
+}
+
+function editPlanPrompt(it, v, input) {
+  const act = activeScreens(it.blueprint).filter((x) => v.build.parts[x.id]);
+  return `You plan a change to a multi-screen mobile prototype. Return ONLY JSON:
+{"screens": [ids of the screens whose content must change, at most 3], "style": true only if it changes the shared look (colours, fonts, spacing, radius, dark mode, the tab bar), "whole": true only if it needs a new screen, new navigation or a rewrite of most screens, "note": one short sentence to the founder saying what will change, in their language}
+SCREENS:\n${act.map((x) => `- ${x.id}: ${x.name}. ${x.purpose}`).join("\n")}
+${memoryBlock(it)}
+CHANGE REQUEST: ${input}
+${REGISTER[S.register]}`;
+}
+async function runEditJob(id) {
+  const job = JOBS[id], it = job && findIdea(job.ideaId); if (!it) return jobDel(id);
+  if (ACTIVE.has(id)) return; ACTIVE.add(id);
+  job.status = "running"; job.attempts++; job.cancelled = false; job.hiddenDuring = document.hidden; saveJobs();
+  const pend = S.pending && S.pending.jobId === id ? S.pending : openPending(job); pend.waiting = false;
+  const base = it.versions.find((x) => x.n === job.baseN);
+  const tick = (label) => { pend.log.phase = "body"; pend.log.step = label; pend.lastProgress = Date.now(); renderPending(false); };
+  try {
+    tick(t("wlPlan"));
+    let plan = null;
+    try { plan = await ask(id, editPlanPrompt(it, base, job.input), { json: true, tier: "quick" }); }
+    catch (e) { if (e.kind === "user" || e.kind === "stalled" || e.kind === "upstream") throw e; }
+    const targets = (Array.isArray(plan?.screens) ? plan.screens : []).filter((x) => base.build.parts[x]?.status === "done").slice(0, 3);
+    if (!plan || plan.whole || (!targets.length && !plan.style)) { job.kind = "turn"; saveJobs(); ACTIVE.delete(id); return runTurnJob(id); }   // too big for a partial edit
+    const b2 = JSON.parse(JSON.stringify(base.build)), v2 = { build: b2 };
+    if (plan.style) {
+      tick(t("wlStyle"));
+      const css = (b2.shell.match(/<style[^>]*>([\s\S]*?)<\/style>/i) || [, ""])[1];
+      const res = await ask(id, `[Instructions]\nYou edit the shared CSS of a mobile prototype. Apply the change request, keep every existing class name and selector working, keep the token block. Return ONLY the complete updated CSS: no <style> tag, no code fence, no prose.\n${blueprintBlock("prototype-html", it)}\n[/Instructions]\n\nCHANGE REQUEST: ${job.input}\n\nCURRENT CSS:\n${css}`, { tier: "default", onText: () => { pend.lastProgress = Date.now(); } });
+      const out = String(res.text || "").replace(/```[a-z]*\n?/gi, "").replace(/<\/?style[^>]*>/gi, "").trim();
+      if (out.length > 200 && /[{}]/.test(out)) b2.shell = b2.shell.replace(/<style[^>]*>[\s\S]*?<\/style>/i, () => `<style>\n${out}\n</style>`);
+    }
+    const queue = [...targets], act = activeScreens(it.blueprint);
+    const worker = async () => { for (;;) { const sid = queue.shift(); if (!sid || job.cancelled) return;
+      tick(act.find((x) => x.id === sid)?.name || sid);
+      const p = b2.parts[sid];
+      const res = await ask(id, `${screenPrompt(it, v2, sid)}\n\nCHANGE REQUEST from the founder: ${job.input}\nRewrite this screen with the change applied. Keep everything else on it that works, in the same output format.\n${memoryBlock(it)}\n\nCURRENT SCREEN HTML:\n${p.html || ""}${p.js ? `\n\nCURRENT SCREEN SCRIPT:\n${p.js}` : ""}`, { tier: "default", onText: (text) => { pend.chars = text.length; pend.lastProgress = Date.now(); } });
+      const part = parseScreen(res.text); if (part) Object.assign(p, { status: "done", html: part.html, js: part.js }); } };
+    await Promise.all([worker(), worker()]);
+    const n = (it.versions.at(-1)?.n || 0) + 1, note = cut(plan.note || "", 300);
+    it.versions.push({ n, html: assemble(v2), build: b2, q: null, skill: base.skill, screens: base.screens || [], note, createdAt: Date.now() });
+    it.currentVersion = n; S.viewN = n; S.previewOpen = true;
+    it.messages.push({ role: "assistant", content: note || t("edDone"), skill: base.skill, versionN: n, feedback: 0 });
+    ACTIVE.delete(id); jobDel(id); closePending();
+    if (S.gate) runCheck(it.id, n, { deep: false, allowFix: true });
+    it.updatedAt = Date.now(); persist(); render(); scrollEnd();
+  } catch (e) { ACTIVE.delete(id); handleJobError(job, e); }
+  finally { ACTIVE.delete(id); }
 }
 
 async function runTurnJob(id) {
@@ -1952,7 +2162,7 @@ function finishTurn(job, it, full, truncated) {
     } else outSkill = "chat";
   }
   it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
-  if (kick) runCheck(it.id, kick.n, { deep: kick.deep, allowFix: true });   // not awaited: the output is already on screen
+  if (kick) runCheck(it.id, kick.n, { deep: false, allowFix: true });   // local measurement only; the expert review is one tap away   // not awaited: the output is already on screen
   it.updatedAt = Date.now(); jobDel(job.id); closePending(); persist(); render(); scrollEnd();
 }
 
@@ -1979,41 +2189,64 @@ function handleJobError(job, e) {
 /* ───────── staged build: shell first, then screens two at a time ───────── */
 const STD_ROUTER = '(function(){function show(id){document.querySelectorAll("[data-screen]").forEach(function(s){s.hidden=s.dataset.screen!==id});document.querySelectorAll("[data-go]").forEach(function(b){b.setAttribute("aria-current",b.dataset.go===id?"page":"false")});window.scrollTo(0,0)}document.addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(b){e.preventDefault();show(b.dataset.go)}});show(document.querySelector("[data-screen]").dataset.screen)})();';
 const STD_APP = 'window.App=window.App||{toast:function(m){var t=document.createElement("div");t.setAttribute("role","status");t.textContent=m;t.style.cssText="position:fixed;left:16px;right:16px;bottom:88px;padding:12px 16px;background:#1c1b18;color:#fff;border-radius:4px;font-size:14px";document.body.appendChild(t);setTimeout(function(){t.remove()},2400)},fmt:{money:function(n){return new Intl.NumberFormat("zh-HK",{style:"currency",currency:"HKD",maximumFractionDigits:0}).format(n)},date:function(d){return new Intl.DateTimeFormat("zh-HK",{month:"short",day:"numeric"}).format(new Date(d))},time:function(d){return new Intl.DateTimeFormat("zh-HK",{hour:"2-digit",minute:"2-digit"}).format(new Date(d))}},store:{get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}}};';
-function shellPrompt(it, job) {
-  const act = activeScreens(it.blueprint);
-  return `[Instructions]\n${designPrompt("prototype-html", it, { exemplar: true })}\n\nBUILD MODE: SHELL. This is step 1 of a staged build; the screens are written separately afterwards.\nOutput one sentence to the user, then ONE fenced html block containing ONLY the shared shell:\n- <head>: the exact font link and a complete <style> with the token block AND every shared component class the screens will need (buttons, rows, fields, chips, tags, sheets, toasts, skeleton, tab bar). Screens may only use classes defined here, so be generous and consistent.\n- header with the wordmark, and persistent navigation (tab bar or header links) with data-go for the top-level screens.\n- <main> containing EXACTLY these placeholders and nothing inside them except a skeleton: ${act.map((x, i) => `<section data-screen="${x.id}" data-pending${i ? " hidden" : ""} aria-label="${esc(x.name)}"><div class="skel"></div></section>`).join(" ")}\n- the router script exactly as in the reference scaffold, and a helper script defining window.App = { toast(msg), fmt: { money(n), date(d), time(d) }, store: { get(k, d), set(k, v) } } (localStorage-backed, guarded with try/catch).\nWrite NO screen content. Keep it under about 250 lines.\n[/Instructions]\n\n${job.input}`;
+/** The shared shell is written locally from the style board, instantly: no model call stands between the tap and the first screen. */
+function localShell(it, ids) {
+  const st = it.style || normalizeStyle(null, it), pr = pairingOf(st.pairing), act = activeScreens(it.blueprint), byId = Object.fromEntries(act.map((x) => [x.id, x]));
+  const dark = relLum(hexRgb(st.paper)) < 0.3, dp = dark ? st.paper : "#1b1a17", di = dark ? st.ink : "#ece9e1";
+  const lite = (h) => ensureContrast(mixHex(h, "#ffffff", 0.3), dp, 4.5);
+  const r1 = st.radius === "sharp" ? "3px" : "8px", r2 = st.radius === "sharp" ? "4px" : "16px", sp = st.density === "compact" ? 0.85 : 1;
+  const px = (n) => Math.round(n * sp) + "px", ease = st.motion === "snappy" ? "cubic-bezier(.3,.9,.3,1)" : "cubic-bezier(.2,.8,.2,1)";
+  const tabs = ids.length <= 5 ? ids : [...ids.slice(0, 4), ids.at(-1)];         // every screen has a way in (screens link the rest with data-go)
+  const name = (id) => esc(cut(byId[id]?.name || id, 10));
+  const css = `:root{--paper:${st.paper};--ink:${st.ink};--t1:${st.tone1.hex};--t2:${st.tone2.hex};--surface:color-mix(in srgb,var(--paper) 55%,#fff);--line:color-mix(in srgb,var(--paper) 80%,var(--ink));--muted:color-mix(in srgb,var(--ink) 74%,var(--paper));--soft:color-mix(in srgb,var(--t1) 12%,var(--paper));
+--s1:4px;--s2:8px;--s3:${px(12)};--s4:${px(16)};--s5:${px(24)};--s6:${px(32)};--r1:${r1};--r2:${r2};--display:"${pr.display}",Georgia,serif;--body:"${pr.body}",system-ui,sans-serif;--ease:${ease}}
+@media (prefers-color-scheme:dark){:root{--paper:${dp};--ink:${di};--t1:${lite(st.tone1.hex)};--t2:${lite(st.tone2.hex)};--surface:color-mix(in srgb,var(--paper) 90%,var(--ink))}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.5 var(--body);min-height:100dvh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+[hidden]{display:none!important}
+.wrap{max-width:520px;margin:0 auto;padding:var(--s5) max(var(--s4),env(safe-area-inset-right)) var(--s5) max(var(--s4),env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:var(--s2);padding-bottom:0}.mark{width:14px;height:14px;background:var(--t1);border-radius:2px}.wordmark{font:600 17px var(--display);letter-spacing:-.01em}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h1{font-size:38px;line-height:1.1}h2{font-size:28px;line-height:1.2}h3{font-size:19px;line-height:1.3}
+p{margin:0 0 var(--s3)}.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s2)}
+.muted{color:var(--muted);font-size:14px;margin:0}.lead{margin:var(--s3) 0 var(--s5);color:var(--muted);max-width:34ch}
+.stack>*+*{margin-top:var(--s3)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}.hstack{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);width:100%;min-height:64px;padding:var(--s3) 0;background:none;border:0;border-top:1px solid var(--line);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:background .15s var(--ease)}
+.row:last-child{border-bottom:1px solid var(--line)}.row b{font-weight:500;display:block}.row:active{background:var(--soft)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4)}
+.price,.num{font-variant-numeric:tabular-nums;font-family:var(--display);font-size:20px}
+.stat b{display:block;font:600 32px/1.1 var(--display);font-variant-numeric:tabular-nums}.stat span{font-size:13px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:48px;padding:0 var(--s5);border:0;border-radius:var(--r1);background:var(--t1);color:var(--paper);font:500 16px var(--body);text-decoration:none;cursor:pointer;transition:transform .12s var(--ease)}
+.btn:active{transform:translateY(1px)}.btn[disabled]{opacity:.45}.btn.block{width:100%}.btn.alt{background:var(--t2)}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.chip{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s4);border:1px solid var(--line);border-radius:999px;background:none;color:var(--ink);font:500 14px var(--body)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tag{display:inline-block;padding:2px 8px;border-radius:var(--r1);background:var(--soft);color:var(--ink);font-size:12px;font-weight:500}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r1);overflow:hidden}.seg button{flex:1;min-height:44px;border:0;background:none;color:var(--muted);font:500 14px var(--body)}.seg [aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.field{display:block;margin:var(--s4) 0}.field span{display:block;font-size:14px;margin-bottom:var(--s1)}
+input,select,textarea{width:100%;min-height:48px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r1);background:var(--surface);color:var(--ink);font:inherit}textarea{padding:var(--s3);min-height:96px}
+.progress{height:6px;background:var(--line);border-radius:999px;overflow:hidden}.progress i{display:block;height:100%;background:var(--t1)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--soft);display:inline-grid;place-items:center;font-weight:600}
+.empty{padding:var(--s6) var(--s4);text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r2)}
+.error{padding:var(--s3) var(--s4);border-left:3px solid var(--t2);background:var(--surface)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--ink);padding:var(--s5) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));animation:up .2s var(--ease)}
+@keyframes up{from{transform:translateY(100%)}}
+:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.skel{height:64px;margin-bottom:var(--s2);background:var(--line);border-radius:var(--r1);animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{50%{opacity:.5}}
+[data-screen]:not([hidden]){animation:in .18s var(--ease)}@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--paper);border-top:1px solid var(--ink);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;min-height:56px;padding:0;background:none;border:0;color:var(--muted);font:500 12px var(--body)}.tabs [aria-current="page"]{color:var(--t1)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}`;
+  return `<!doctype html>\n<html lang="${S.register === "en" ? "en" : "zh-HK"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${esc(it.spec.title)}</title>\n${fontLink(st.pairing)}\n<style>\n${css}\n</style></head><body>
+<header class="wrap top"><span class="mark" aria-hidden="true"></span><b class="wordmark">${esc(it.spec.title)}</b></header>
+<main class="wrap">${ids.map((id, i) => `<section data-screen="${id}" data-pending${i ? " hidden" : ""} aria-label="${esc(byId[id]?.name || id)}"><div class="skel"></div><div class="skel"></div><div class="skel"></div></section>`).join("")}</main>
+<nav class="tabs" aria-label="Main">${tabs.map((id) => `<button data-go="${id}">${name(id)}</button>`).join("")}</nav>
+<script>${STD_APP}<\/script><script>${STD_ROUTER}<\/script></body></html>`;
 }
 function screenPrompt(it, v, id) {
   const act = activeScreens(it.blueprint), me = act.find((x) => x.id === id);
   const css = (v.build.shell.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || []).map((x) => x.replace(/<\/?style[^>]*>/gi, "")).join("\n").slice(0, 9000);
   return `[Instructions]\n${craftBlock("prototype-html", { exemplar: false })}\n${blueprintBlock("prototype-html", it)}\n${briefBlock(it)}\n${REGISTER[S.register]}\n\nBUILD MODE: SCREEN "${id}" (${me?.name}). Purpose: ${me?.purpose}. Primary action: ${me?.action}.\nThe shared shell is already built. Use ONLY the classes in SHELL CSS below and the window.App helpers. Put any screen-specific rules in a <style> whose selectors all start with [data-screen="${id}"].\nOutput EXACTLY: (1) the INNER HTML of <section data-screen="${id}"> (no section tag, no html/head/body, no prose), then (2) at most ONE <script> containing a single IIFE that starts with const root=document.querySelector('[data-screen="${id}"]').\nRules: prefix every id you invent with "${id}-"; never touch other screens; navigate only with data-go="<screen id>" (screens: ${act.map((x) => x.id).join(", ")}); no globals; persist with App.store using the key prefix "${id}:"; real, specific content (6-10 items where this is a list); include this screen's empty, loading and error states; own the signature interaction only if it belongs here.\n[/Instructions]\n\nSHELL CSS (read-only):\n\`\`\`css\n${css}\n\`\`\``;
-}
-/** Make any shell usable: right placeholders, a router, helpers, viewport and language. A forgiving step, so one sloppy shell never wastes the build. */
-function repairShell(html, ids, it) {
-  if (!html || html.length < 400) return null;
-  const doc = new DOMParser().parseFromString(html, "text/html"); if (!doc.body) return null;
-  const act = activeScreens(it.blueprint), main = doc.querySelector("main") || doc.body;
-  doc.querySelectorAll("[data-screen]").forEach((sec) => { if (!ids.includes(sec.getAttribute("data-screen"))) sec.remove(); });
-  ids.forEach((id, i) => {
-    let sec = doc.querySelector(`[data-screen="${id}"]`);
-    if (!sec) { sec = doc.createElement("section"); sec.setAttribute("data-screen", id); main.appendChild(sec); }
-    sec.setAttribute("data-pending", ""); sec.setAttribute("aria-label", act.find((x) => x.id === id)?.name || id);
-    if (i) sec.hidden = true; else sec.removeAttribute("hidden");
-    sec.innerHTML = '<div class="skel"></div>';
-  });
-  const code = Array.from(doc.querySelectorAll("script")).map((x) => x.textContent).join("\n");
-  if (!doc.querySelector("[data-go]")) {
-    const nav = doc.createElement("nav"); nav.setAttribute("aria-label", "Main"); nav.style.cssText = "position:fixed;left:0;right:0;bottom:0;display:flex;background:inherit;border-top:1px solid currentColor";
-    nav.innerHTML = act.slice(0, 5).map((x) => `<button data-go="${x.id}" style="flex:1;min-height:56px;background:none;border:0;color:inherit;font:inherit">${esc(x.name)}</button>`).join("");
-    doc.body.appendChild(nav);
-  }
-  const add = (txt) => { const sc = doc.createElement("script"); sc.textContent = txt; doc.body.appendChild(sc); };
-  if (!/App\s*=|window\.App/.test(code)) add(STD_APP);
-  if (!/data-screen/.test(code) || !/\[data-go\]|data-go/.test(code)) add(STD_ROUTER);
-  if (!doc.querySelector('meta[name="viewport"]')) { const m = doc.createElement("meta"); m.name = "viewport"; m.content = "width=device-width,initial-scale=1,viewport-fit=cover"; doc.head.appendChild(m); }
-  if (!doc.documentElement.getAttribute("lang")) doc.documentElement.setAttribute("lang", S.register === "en" ? "en" : "zh-HK");
-  if (!(doc.title || "").trim()) doc.title = it.spec.title;
-  return "<!doctype html>\n" + doc.documentElement.outerHTML;
 }
 function parseScreen(text) {
   let x = String(text || "").replace(/```[a-z]*\n?/gi, "").trim();
@@ -2053,12 +2286,9 @@ async function runBuildJob(id) {
   try {
     let v = job.versionN != null ? it.versions.find((x) => x.n === job.versionN) : null;
     if (!v) {
-      const res = await ask(id, shellPrompt(it, job), { onText: (text) => { pend.chars = text.length; pend.lastProgress = Date.now(); } });
-      const { note, html } = extract(res.text);
-      const shell = repairShell(html, job.ids, it);
-      if (!shell) { job.kind = "turn"; job.ids = []; job.attempts = 0; job.partial = ""; saveJobs(); ACTIVE.delete(id); await runTurnJob(id); return; }   // an unusable shell falls back to one single call
+      const shell = localShell(it, job.ids), note = "";                      // instant: the first screen starts streaming straight away
       const n = (it.versions.at(-1)?.n || 0) + 1;
-      v = { n, html: shell, q: null, skill: "prototype-html", screens: job.ids, note: (note || "").slice(0, 300), createdAt: Date.now(),
+      v = { n, html: shell, q: null, skill: "prototype-html", screens: job.ids, note: "", createdAt: Date.now(),
         build: { shell, parts: Object.fromEntries(job.ids.map((x) => [x, { status: "pending", tries: 0 }])) } };
       it.versions.push(v); it.currentVersion = n; S.viewN = n; S.previewOpen = true; job.versionN = n; saveJobs();
       it.messages.push({ role: "assistant", content: note || t("bpShellNote"), skill: "prototype-html", versionN: n, feedback: 0 });
@@ -2098,7 +2328,7 @@ function finalizeBuild(job, it, v, { stopped = false } = {}) {
   for (const id of job.ids) if (parts[id].status !== "done") parts[id].status = "failed";
   v.failed = job.ids.filter((id) => parts[id].status === "failed"); v.html = assemble(v);
   ACTIVE.delete(job.id); jobDel(job.id);                                    // the build is over before the check agent looks at it
-  if (!stopped && S.gate) runCheck(it.id, v.n, { deep: job.retry ? false : job.deepCheck, allowFix: true });
+  if (!stopped && S.gate) runCheck(it.id, v.n, { deep: false, allowFix: true });
   it.updatedAt = Date.now(); jobDel(job.id); closePending(); persist(); render(); scrollEnd();
 }
 function retryScreens(n) {
@@ -2159,11 +2389,37 @@ async function downloadHtml(v, it) {
     try { await navigator.clipboard.writeText(resolveAssets(v.html, it.id)); toast(t("copied") + " (HTML)"); } catch { toast("—"); }
     return;
   }
-  try { await dl.save({ filename: name, data: resolveAssets(v.html, it.id) }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
+  const readme = "<!--\n" + ideaReadme(it).replace(/--/g, "- -") + "\n-->\n";   // the spec travels with the file
+  try { await dl.save({ filename: name, data: readme + resolveAssets(v.html, it.id) }); } catch (e) { if (e?.code !== "declined") toast(e?.message || "Download failed"); }
 }
 
 /* ───────── rendering ───────── */
 const $app = document.getElementById("app");
+/* The preview is its own panel, outside the chat: chat redraws never touch it, and the prototype only reloads when its content changes. */
+const PV = { key: "", tab: "proto" };
+const hashStr = (x) => { let h = 5381; for (let i = 0; i < x.length; i++) h = (h * 33 + x.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ":" + x.length; };
+function renderPreview() {
+  const pv = document.getElementById("pv"), it = idea();
+  const n = it ? S.viewN ?? it.currentVersion : null, v = it?.versions.find((x) => x.n === n);
+  const open = S.view === "idea" && S.previewOpen && !!v;
+  pv.hidden = !open; document.body.classList.toggle("pvdock", open);
+  if (!open) return;
+  document.getElementById("pv-bar").innerHTML = `<button class="ib" data-act="close" aria-label="${t("pvHide")}" title="${t("pvHide")}">${svg("x")}</button>
+    <span class="pvtabs" role="group" aria-label="${t("pvView")}"><button data-act="pv-tab" data-tab="proto" aria-pressed="${PV.tab === "proto"}">${t("pvProto")}</button><button data-act="pv-tab" data-tab="spec" aria-pressed="${PV.tab === "spec"}">README</button></span>
+    <span class="t"></span><label class="sr" for="ver">${t("version")}</label><select id="ver">${verOptions(it, n)}</select>
+    ${n !== it.currentVersion ? `<button class="btn" data-act="revert" data-n="${n}">${t("revert")}</button>` : ""}
+    ${pbarChkHtml(it, n)}<button class="ib" data-act="reaudit" data-n="${n}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${n}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button>`;
+  document.getElementById("pv-notes").innerHTML = noticeHtml() + failedRowHtml(v);
+  const stage = document.getElementById("pv-stage"), spec = document.getElementById("pv-spec");
+  stage.hidden = PV.tab !== "proto"; spec.hidden = PV.tab !== "spec";
+  if (PV.tab === "spec") spec.innerHTML = `<div class="specacts"><button class="btn" data-act="dl-readme">${svg("save")} ${t("pvDlReadme")}</button><span class="faint" style="font-size:13px">${t("pvSpecNote")}</span></div>${mdHtml(ideaReadme(it))}`;
+  const key = it.id + ":" + n + ":" + (buildingJob(it.id, n) ? "live" : hashStr(v.html || ""));
+  if (key !== PV.key || !document.getElementById("pframe")) {
+    PV.key = key;
+    stage.innerHTML = v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${n}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`;
+    const fr = document.getElementById("pframe"); if (fr) fr.srcdoc = wrap(resolveAssets(v.html, it.id), it.store);
+  }
+}
 let lastView = null;
 const prose = (s) => esc(s).split(/\n{2,}/).map((p) => `<p>${p.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>")}</p>`).join("");
 function scrollEnd() { requestAnimationFrame(() => { const s = document.getElementById("scroll"); if (s) s.scrollTop = s.scrollHeight; }); }
@@ -2241,7 +2497,8 @@ function worklogHtml(p) {
       rows.push([x.status === "done" ? "done" : x.status === "running" ? "running" : x.status === "failed" ? "error" : "pending", act.find((a) => a.id === id)?.name || id,
         x.status === "running" ? ((x.chars || 0) / 1000).toFixed(1) + "k" : x.status === "failed" ? t("wlFailed") : x.status === "pending" ? t("wlWaiting") : ""]);
     }
-  } else rows.push([g.phase === "done" ? "done" : "running", t("wlGen"), t(ph) + (p.chars ? " · " + (p.chars / 1000).toFixed(1) + "k" : "")]);
+  } else if (job?.kind === "edit") rows.push(["running", g.step || t("wlPlan"), p.chars ? (p.chars / 1000).toFixed(1) + "k" : ""]);
+  else rows.push([g.phase === "done" ? "done" : "running", t("wlGen"), t(ph) + (p.chars ? " · " + (p.chars / 1000).toFixed(1) + "k" : "")]);
   rows.push(["pending", t("wlHandoff"), ""]);
   const quiet = Date.now() - (p.lastProgress || p.t0);
   return `<section class="worklog-wrap"><div class="chkhead"><b>${t("wlTitle")}</b><span class="faint" role="status">${t("elapsed").replace("{s}", el)}</span></div>
@@ -2272,13 +2529,6 @@ function viewIdea() {
   const lastA = it.messages.map((m) => m.role).lastIndexOf("assistant");
   const viewN = S.viewN ?? it.currentVersion;
   const v = it.versions.find((x) => x.n === viewN);
-  const preview = S.previewOpen && v ? `<aside class="preview" aria-label="Prototype preview">
-      <div class="pbar"><button class="ib" data-act="close" aria-label="Close">${svg("x")}</button><span class="t">${esc(it.spec.title)}</span>
-        <label class="sr" for="ver">${t("version")}</label><select id="ver">${verOptions(it, viewN)}</select>
-        ${viewN !== it.currentVersion ? `<button class="btn" data-act="revert" data-n="${viewN}">${t("revert")}</button>` : ""}
-        ${pbarChkHtml(it, viewN)}<button class="ib" data-act="reaudit" data-n="${viewN}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
-      ${noticeHtml()}${failedRowHtml(v)}
-      <div class="stage">${v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${viewN}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`}</div></aside>` : "";
   const modelLabel = `${sl(S.pending?.skill || it.messages.at(-1)?.skill || it.spec.suggestedSkill)} · ${S.register === "en" ? "EN" : S.register === "yue" ? "廣東話" : "中英"}`;
   return `<div class="ws"><div class="chat">
     <div class="scroll" id="scroll"><div class="col">
@@ -2291,7 +2541,7 @@ function viewIdea() {
       <div class="crow"><span class="model">${esc(modelLabel)}</span>
         <button type="button" class="ib sm" id="mic" aria-label="Voice" aria-pressed="${S.listening}" ${S.pending ? "disabled" : ""} style="${S.listening ? "color:var(--danger)" : ""}">${svg(S.listening ? "stop" : "mic")}</button>
         ${S.pending ? `<button type="button" class="sbtn" data-act="stop" aria-label="Stop">${svg("stop")}</button>` : `<button type="submit" class="sbtn" aria-label="Send" ${S.draft.trim() ? "" : "disabled"}>${svg("send")}</button>`}
-      </div></form></div></div>${preview}</div>`;
+      </div></form></div></div></div>`;
 }
 
 function viewJournal() {
@@ -2302,7 +2552,7 @@ function viewJournal() {
   const groups = [[t("today"), []], [t("yesterday"), []], [t("week"), []], [t("older"), []]];
   list.forEach((i) => groups[i.updatedAt >= +d0 ? 0 : i.updatedAt >= d0 - day ? 1 : i.updatedAt >= d0 - 7 * day ? 2 : 3][1].push(i));
   const fmt = new Intl.DateTimeFormat(lang() ? "en-HK" : "zh-HK", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  return `<div class="journal"><h1>${t("journal")}</h1>
+  return `<div class="journal"><h1>${t("journal")}</h1><p class="cloudline faint" id="cloud" role="status">${cloudText()}</p>
     <label class="sr" for="jq">${t("search")}</label><input class="input" id="jq" type="search" placeholder="${t("search")}" value="${esc(S.q)}">
     <div class="filters" role="group" aria-label="Filter">${["", "prototype-html", "game-prototype", "design-variants"].map((f) => `<button class="chip" data-filter="${f}" aria-pressed="${S.filter === f}">${f ? skillIcon(f) + " " + sl(f) : t("all")}</button>`).join("")}</div>
     ${list.length ? groups.filter((g) => g[1].length).map(([label, items]) => `<h2 class="group">${label}</h2>` + items.map((i) => `<button class="entry" data-open-idea="${i.id}"><b>${esc(i.spec.title)}</b><span class="sub">${esc(i.spec.oneLiner)}</span>
@@ -2334,8 +2584,7 @@ function render() {
   $app.innerHTML = top + `<main class="main" style="${inIdea ? "padding:0;overflow:hidden;display:flex;flex-direction:column" : ""}">${body}</main>` + nav;
   if (keepScroll) $app.querySelector(".main").scrollTop = keepScroll;
   if (inIdea) { const ws = $app.querySelector(".ws"); if (ws) ws.style.flex = "1"; const sc = $app.querySelector(".chat"); sc.querySelectorAll(".col,.composer-wrap").forEach((e) => { e.style.paddingLeft = "max(16px, env(safe-area-inset-left,0px))"; e.style.paddingRight = "max(16px, env(safe-area-inset-right,0px))"; }); }
-  const fr = document.getElementById("pframe");
-  if (fr && it) { const v = it.versions.find((x) => x.n === (S.viewN ?? it.currentVersion)); fr.srcdoc = wrap(resolveAssets(v.html, it.id), it.store); }
+  renderPreview();
   const ta = document.getElementById("draft"); if (ta) autosize(ta);
   if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch {} } }
 }
@@ -2433,6 +2682,8 @@ const onClick = async (e) => {
     }
     case "open": S.viewN = +b.dataset.n; S.previewOpen = true; return render();
     case "close": S.previewOpen = false; return render();
+    case "pv-tab": PV.tab = b.dataset.tab; return renderPreview();
+    case "dl-readme": return downloadReadme(it);
     case "toggle-preview": S.previewOpen = !S.previewOpen; S.viewN = null; return render();
     case "revert": it.currentVersion = +b.dataset.n; it.updatedAt = Date.now(); persist(); toast(`${t("version")} ${b.dataset.n} ✓`); return render();
     case "dl": return downloadHtml(it.versions.find((v) => v.n === +b.dataset.n), it);
@@ -2449,10 +2700,11 @@ const onClick = async (e) => {
     case "retry-screens": return retryScreens(+b.dataset.n);
     case "del":
       if (!S.confirmDel) { S.confirmDel = true; toast(t("confirmDel")); return render(); }
-      S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); delete S.assets[S.ideaId]; LS.set("i2p.assets", S.assets); persist(); S.confirmDel = false; S.view = "journal"; return render();
+      cloudForget(S.ideaId); S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); delete S.assets[S.ideaId]; LS.set("i2p.assets", S.assets); persist(); S.confirmDel = false; S.view = "journal"; return render();
   }
 };
 $app.addEventListener("click", onClick);
+document.getElementById("pv").addEventListener("click", onClick);
 document.getElementById("sheet").addEventListener("click", onClick);
 document.getElementById("assetfile").addEventListener("change", async (e) => {
   const f = e.target.files?.[0]; e.target.value = "";
@@ -2476,7 +2728,7 @@ $app.addEventListener("input", (e) => {
   }
   if (el.id === "jq") { S.q = el.value; render(); }
 });
-$app.addEventListener("change", (e) => { if (e.target.id === "ver") { S.viewN = +e.target.value; render(); } });
+document.addEventListener("change", (e) => { if (e.target.id === "ver") { S.viewN = +e.target.value; render(); } });
 $app.addEventListener("keydown", (e) => {
   if (e.target.id === "draft" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form?.requestSubmit(); }
 });
@@ -2490,5 +2742,6 @@ document.addEventListener("toggle", (e) => { if (e.target.id === "mr") S.mrOpen 
 document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (S.sheet) { S.sheet = null; renderSheet(); } else if (S.previewOpen) { S.previewOpen = false; render(); } });
 
 render();
+cloudInit();
 })();
 </script>
