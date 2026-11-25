@@ -391,6 +391,13 @@ summary.label{min-height:44px;display:flex;align-items:center}
 .verdict{margin-top:20px;padding:16px;background:var(--accent-soft);border-radius:var(--r-lg);font:400 14px/1.5 var(--sans)}
 .verdict h3{margin:0 0 6px;font:800 20px/1.2 var(--head);letter-spacing:0;color:var(--fg)}
 .verdict ul{margin:8px 0 0;padding-left:20px}
+
+/* durable jobs */
+.notice{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:8px 0;padding:12px;border:1px solid var(--fg);border-radius:var(--r-md);background:var(--accent-soft);font:400 14px/1.4 var(--sans)}
+.nbtns{display:flex;gap:8px;flex-shrink:0}
+.wl-hint{margin:12px 0 0;font:400 13px/1.4 var(--sans)}
+.mark.err{background:var(--danger);color:var(--on-accent)}
+.partfail{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border-left:3px solid var(--danger);background:var(--surface-2);font:400 14px/1.5 var(--sans)}
 </style>
 
 <div class="app" id="app"></div>
@@ -518,6 +525,14 @@ const T = {
   sz_small:["細","Small"], sz_medium:["中","Medium"], sz_large:["大","Large"], wt_low:["願付低","Pays little"], wt_medium:["願付中","Pays some"], wt_high:["願付高","Pays well"],
   v_go:["做","Go"], v_pivot:["改方向","Pivot"], v_stop:["唔做","Stop"], sev_high:["高","High"], sev_medium:["中","Medium"], sev_low:["低","Low"],
   k_incumbent:["現有大玩家","Incumbent"], k_app:["App","App"], k_service:["服務","Service"], k_workaround:["土辦法","Workaround"],
+  wlShell:["搭骨架：導航、色彩、元件","Building the shell: navigation, colour, components"], wlWaiting:["等緊","Waiting"], wlFailed:["未成功","Failed"],
+  wlResumed:["已接返中斷咗嘅生成（第 {n} 次）","Resumed after an interruption (attempt {n})"], wlAwake:["螢幕會保持開住","Keeping the screen awake"],
+  wlLockHint:["鎖屏會中斷生成，但返嚟會自動接返，進度唔會冇。","Locking the screen interrupts generation, but it resumes when you return and progress is kept."],
+  wlWaitReturn:["等你返嚟就會自動接返","Waiting for you to come back; it will resume automatically"], wlStuck:["好似卡咗？","Looks stuck?"], wlKick:["重新接返","Resume now"],
+  wlBuildChip:["生成緊 {d}/{n}","Building {d}/{n}"], bpShellNote:["骨架搭好，畫面逐個填入緊。","The shell is up; screens are filling in."],
+  jobBar:["未完成：{t}","Unfinished: {t}"], jobProg_turn:["已寫 {k}k，進度已儲存","{k}k written, progress saved"], jobProg_build:["{d}/{n} 個畫面完成，進度已儲存","{d} of {n} screens done, progress saved"], jobProg_other:["進度已儲存","Progress saved"],
+  jobResume:["接返","Resume"], jobDrop:["放棄","Discard"], jobInterrupted:["連線中斷咗，進度已儲存，撳「接返」繼續。","The connection dropped. Progress is saved; tap Resume to continue."],
+  bpScreenFailed:["呢個畫面未生成成功，可以重新生成。","This screen did not generate. You can retry it."], bpFailedN:["{n} 個畫面未生成成功","{n} screens did not generate"], bpRetry:["重新生成呢啲畫面","Retry these screens"],
   mrOpenIdea:["研究一個 idea","Research an idea"], mrNoIdea:["先整理一個 idea，再喺 Idea Studio 入面做研究。","Shape an idea first, then run the research in Idea Studio."],
   wlTitle:["做緊嘢","Working"], wlBrief:["讀取 spec 同設計方向","Reading the spec and design direction"], wlIter:["讀取目前版本同你嘅修改","Reading the current version and your change"],
   wlSkills:["套用技能","Applying skills"], wlGen:["生成原型","Writing the prototype"], wlHandoff:["交出原型，之後喺背景質檢","Hand over the prototype, then check in the background"],
@@ -837,15 +852,16 @@ async function expertReview(it, skill, html, checks, signal) {
   const ux = PACKS.find((p) => p.id === "ux-audit")?.body || "";
   const hd = PACKS.some((p) => p.id === "head-designer" && p.applies.includes(skill)) && packOn("head-designer");
   const prompt = `[Instructions]\n${ux}\nHEAD DESIGNER is ${hd ? "ON" : "OFF"}.\n${REGISTER[S.register]}\n[/Instructions]\n\nSKILL TYPE: ${skill}\n${briefBlock(it)}\n${specBlock(it.spec)}\n\nAUTOMATED MEASUREMENTS (390x844 render):\n${meas}\n\nHTML:\n\`\`\`html\n${html.slice(0, 16000)}\n\`\`\``;
-  try { return normalizeReview(await sample.json(prompt, { signal, cache: false, modelTier: "default" })); }
+  try { return normalizeReview(await ask("c_" + it.id, prompt, { json: true, tier: "default", signal })); }
   catch (e) { if (signal?.aborted) throw e; return null; }
 }
-async function polish(it, skill, html, checks, review, signal) {
+async function polish(it, skill, html, checks, review, signal, v = {}) {
   const sample = await sampler();
   const auto = checks.filter((c) => c.status !== "pass").map((c) => `- ${c.id}: ${c.status}${c.detail ? " (" + c.detail + ")" : ""}`);
   const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- [${i.sev}/${i.area}] ${i.problem} => ${i.fix}`);
   const prompt = `[Instructions]\n${designPrompt(skill, it)}\n[/Instructions]\n\nAUDIT FINDINGS. Fix every item below, keep everything that already works, and return the full updated document in the same output format.\nAUTOMATED:\n${auto.join("\n") || "- none"}\nEXPERT:\n${exp.join("\n") || "- none"}\n\nCURRENT PROTOTYPE:\n\`\`\`html\n${html}\n\`\`\``;
-  const res = await sample(prompt, { signal, cache: false, modelTier: "complex" });
+  if (v.build) return polishChunked(it, v, checks, review, signal);
+  const res = await ask("c_" + it.id, prompt, { tier: "complex", signal });
   return extract(res.text || "").html;
 }
 const fallbackTips = (it, skill) => (skill !== "game-prototype" && !(S.assets[it.id] || []).length ? [{ kind: "asset", slot: "logo", title: t("fbAssetTitle"), why: t("fbAssetWhy"), options: [], done: null }] : []);
@@ -878,13 +894,15 @@ function refreshChat(ideaId) {
   const sel = document.getElementById("ver"); if (it && sel) sel.innerHTML = verOptions(it, S.viewN ?? it.currentVersion);
 }
 function pbarChkHtml(it, n) {
+  const bj = buildingJob(it.id, n);
+  if (bj) { const pr = buildProgress(bj); return `<span id="pbar-chk" class="chkpill" role="status"><i class="pd"></i>${t("wlBuildChip").replace("{d}", pr.d).replace("{n}", pr.n)}</span>`; }
   const c = CHK[chkKey(it.id, n)], done = c ? Object.values(c.steps).filter((x) => x === "done" || x === "skip").length : 0;
   return `<span id="pbar-chk" class="chkpill" role="status" ${c ? "" : "hidden"}>${c ? `<i class="pd"></i>${t("chkAgent")} ${done}/4` : ""}</span>`;
 }
 
 /** Measure, review, and (if needed) prepare a fixed version. The fix is a NEW version; the one on screen never changes under the viewer. */
 async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
-  const it = findIdea(ideaId), v = it?.versions.find((x) => x.n === n); if (!v) return;
+  const it = findIdea(ideaId), v = it?.versions.find((x) => x.n === n); if (!v || buildingJob(ideaId, n)) return;
   const key = chkKey(ideaId, n); if (CHK[key]) return;
   const ctl = new AbortController(), signal = ctl.signal;
   const c = (CHK[key] = { t0: Date.now(), ctl, steps: { measure: "running", review: deep ? "pending" : "skip", fix: "pending", recheck: "pending" }, info: {} });
@@ -901,7 +919,8 @@ async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
     if (!needFix) { step("fix", "skip"); step("recheck", "skip"); }
     else {
       step("fix", "running", { count: checks.filter((x) => x.status !== "pass").length + (review?.issues || []).filter((i) => i.sev !== "low").length });
-      const h2 = await polish(it, v.skill, v.html, checks, review, signal);
+      const pr = await polish(it, v.skill, v.html, checks, review, signal, v);
+      const h2 = typeof pr === "string" ? pr : pr?.html, b2 = typeof pr === "string" ? null : pr?.build;
       if (!h2) { step("fix", "done", { rejected: true }); step("recheck", "skip"); }
       else {
         step("fix", "done"); step("recheck", "running");
@@ -911,7 +930,7 @@ async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
         const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
         if (better) {
           const nn = (it.versions.at(-1)?.n || 0) + 1;
-          it.versions.push({ n: nn, html: h2, screens: v.screens || [], q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
+          it.versions.push({ n: nn, html: h2, build: b2 || undefined, screens: v.screens || [], q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
           v.q.fixedBy = nn;
           it.messages.push({ role: "assistant", content: t("chkFixMsg"), skill: v.skill, versionN: nn, feedback: 0 });
           step("recheck", "done", { from: v.q.score ?? v.q.autoScore, to: it.versions.at(-1).q.score ?? it.versions.at(-1).q.autoScore, nn });
@@ -946,7 +965,7 @@ function checkRunHtml(it, n, c) {
     <div class="qact" style="margin-top:10px"><button class="btn ghost" data-act="stop-check" data-n="${n}">${t("chkStop")}</button></div></section>`;
 }
 function qualityHtml(it, n) {
-  const v = it.versions.find((x) => x.n === n); if (!v) return "";
+  const v = it.versions.find((x) => x.n === n); if (!v || buildingJob(it.id, n)) return "";
   const live = CHK[chkKey(it.id, n)], latest = n === it.currentVersion;
   let inner;
   if (live) inner = checkRunHtml(it, n, live);
@@ -955,13 +974,14 @@ function qualityHtml(it, n) {
   else return "";
   return `<div id="qc-${n}">${inner}</div>`;
 }
+const failedRowHtml = (v) => (v.failed?.length ? `<div class="partfail"><span>${t("bpFailedN").replace("{n}", v.failed.length)}</span><button class="btn" data-act="retry-screens" data-n="${v.n}">${t("bpRetry")}</button></div>` : "");
 function qualityCard(it, v) {
   const n = v.n, q = v.q, latest = n === it.currentVersion, sc = q.score ?? q.autoScore, tone = sc >= 85 ? "good" : sc >= 70 ? "ok" : "low";
   const mark = (x) => (x === "pass" ? "✓" : x === "warn" ? "!" : "✕");
   const chk = q.auto.map((c) => `<li class="chk" data-s="${c.status}" title="${esc(c.detail || "")}"><i>${mark(c.status)}</i>${t("chk_" + c.id)}</li>`).join("");
   const iss = q.issues.slice(0, 4).map((i) => `<li class="iss" data-sev="${i.sev}"><b>${esc(i.problem)}</b><span class="muted">${esc(i.fix)}</span></li>`).join("");
   const fixedNote = q.fixedBy && q.fixedBy !== it.currentVersion ? `<div class="fixed-note"><span>${t("qFixedBy").replace("{n}", q.fixedBy)}</span><button class="btn primary" data-act="use-version" data-n="${q.fixedBy}">${t("chkUse").replace("{n}", q.fixedBy)}</button></div>` : "";
-  return `<details class="quality" ${latest ? "open" : ""}><summary><span class="qscore" data-tone="${tone}">${sc}</span><span class="qt">${t("qTitle")}</span>${q.fixedFrom ? `<span class="tag">${t("qFixedFrom").replace("{n}", q.fixedFrom)}</span>` : ""}${q.deep ? "" : `<span class="faint">${t("qLight")}</span>`}</summary>
+  return `${failedRowHtml(v)}<details class="quality" ${latest ? "open" : ""}><summary><span class="qscore" data-tone="${tone}">${sc}</span><span class="qt">${t("qTitle")}</span>${q.fixedFrom ? `<span class="tag">${t("qFixedFrom").replace("{n}", q.fixedFrom)}</span>` : ""}${q.deep ? "" : `<span class="faint">${t("qLight")}</span>`}</summary>
     <ul class="chks">${chk}</ul>
     ${q.strengths.length ? `<p class="label">${t("qStrengths")}</p><ul class="plain">${q.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${iss ? `<p class="label">${q.fixedBy || q.fixedFrom ? t("qFixedList") : t("qReview")}</p><ul class="issues">${iss}</ul>` : ""}
@@ -1186,6 +1206,7 @@ function blueprintBlock(skill, it) {
 async function runGrooming(ideaId, { forced = null, only = null } = {}) {
   const it = findIdea(ideaId); if (!it || GROOM[ideaId]) return;
   const sample = await sampler();
+  const jid = "g_" + ideaId; jobPut({ id: jid, kind: "groom", ideaId, forced, only, status: "running", attempts: 1, startedAt: Date.now(), hiddenDuring: document.hidden }); ACTIVE.add(jid);
   const g = (GROOM[ideaId] = { t0: Date.now(), ctl: new AbortController(), steps: { blueprint: only === "style" ? "skip" : "running", style: "running" } });
   const here = () => S.view === "studio" && S.ideaId === ideaId;
   g.timer = setInterval(() => { if (here()) refreshStudioLog(); }, 1000);
@@ -1193,20 +1214,20 @@ async function runGrooming(ideaId, { forced = null, only = null } = {}) {
   const jobs = [];
   if (only !== "style") jobs.push((async () => {
     let bp = null;
-    try { if (sample?.json) bp = normalizeBlueprint(await sample.json(groomPrompt(it, forced), { signal: g.ctl.signal, cache: false, modelTier: "default" }), it, forced); } catch (e) {}
+    try { if (sample?.json) bp = normalizeBlueprint(await askDurable(jid, groomPrompt(it, forced), { json: true, tier: "default", signal: g.ctl.signal }), it, forced); } catch (e) {}
     if (!bp) bp = fallbackBlueprint(it, forced);
     g.steps.blueprint = bp.source === "fallback" ? "fallback" : "done";
     it.blueprint = bp; it.updatedAt = Date.now(); persist(); if (here()) render();
   })());
   jobs.push((async () => {
     let raw = null;
-    try { if (sample?.json) raw = await sample.json(stylePrompt(it), { signal: g.ctl.signal, cache: false, modelTier: "quick" }); } catch (e) {}
+    try { if (sample?.json) raw = await askDurable(jid, stylePrompt(it), { json: true, tier: "quick", signal: g.ctl.signal }); } catch (e) {}
     it.style = normalizeStyle(raw && typeof raw === "object" ? raw : null, it);
     g.steps.style = it.style.source === "fallback" ? "fallback" : "done";
     loadFonts(it.style.pairing); persist(); if (here()) render();
   })());
   await Promise.all(jobs);
-  clearInterval(g.timer); delete GROOM[ideaId];
+  clearInterval(g.timer); delete GROOM[ideaId]; ACTIVE.delete(jid); jobDel(jid);
   if (!sample) toast(t("noModel"));
   if (here()) render();
 }
@@ -1260,11 +1281,12 @@ async function runResearch(ideaId) {
   const it = findIdea(ideaId); if (!it || RESEARCH[ideaId]) return;
   const sample = await sampler(); if (!sample?.json) return toast(t("noModel"));
   const g = (RESEARCH[ideaId] = { t0: Date.now(), ctl: new AbortController() });
+  const jid = "r_" + ideaId; jobPut({ id: jid, kind: "research", ideaId, status: "running", attempts: 1, startedAt: Date.now(), hiddenDuring: document.hidden }); ACTIVE.add(jid);
   const here = () => S.view === "studio" && S.ideaId === ideaId;
   S.mrOpen = true; g.timer = setInterval(() => { if (here()) refreshResearchLog(); }, 1000); if (here()) render();
   let data = null;
-  try { data = normalizeResearch(await sample.json(researchPrompt(it), { signal: g.ctl.signal, cache: false, modelTier: "default" })); } catch (e) {}
-  clearInterval(g.timer); delete RESEARCH[ideaId];
+  try { data = normalizeResearch(await askDurable(jid, researchPrompt(it), { json: true, tier: "default", signal: g.ctl.signal })); } catch (e) {}
+  clearInterval(g.timer); delete RESEARCH[ideaId]; ACTIVE.delete(jid); jobDel(jid);
   if (data) { it.research = { ...data, at: Date.now(), basedOn: researchKey(it) }; it.updatedAt = Date.now(); persist(); } else if (!g.ctl.signal.aborted) toast(t("mrError"));
   if (here()) render();
 }
@@ -1466,9 +1488,9 @@ async function runAgent(agent, ideaId, note) {
     st.status = "running"; renderRunBody();
     try {
       const cur = it.versions.find((v) => v.n === it.currentVersion);
-      const res = await sample(agentPrompt(def, it, note, done, cur), {
-        signal: runAbort.signal, cache: false, modelTier: def.tier || "default",
-        onText: ({ text }) => { st.text = def.kind === "build" ? text.split(/```|<!doctype|<html/i)[0] : text; renderRunBody(); },
+      const res = await askDurable("a_" + ideaId, agentPrompt(def, it, note, done, cur), {
+        signal: runAbort.signal, tier: def.tier || "default",
+        onText: (text) => { st.text = def.kind === "build" ? text.split(/```|<!doctype|<html/i)[0] : text; renderRunBody(); },
       });
       let text = res.text || st.text;
       if (def.kind === "build") {
@@ -1649,11 +1671,11 @@ const SKILL_PROMPT = {
 };
 const specBlock = (sp) => `<spec>${JSON.stringify(sp)}</spec>`;
 
-function buildMessages(skill, it, input, currentHtml) {
+function buildMessages(skill, it, input, currentHtml, messages = it.messages) {
   const hist = [];
   let budget = 12000;
-  for (let i = it.messages.length - 1; i >= 0 && hist.length < 12; i--) {
-    const m = it.messages[i];
+  for (let i = messages.length - 1; i >= 0 && hist.length < 12; i--) {
+    const m = messages[i];
     const c = m.versionN ? `${m.content}\n[produced prototype v${m.versionN}]` : m.content;
     if ((budget -= c.length) < 0) break;
     hist.unshift({ role: m.role, content: c });
@@ -1689,8 +1711,9 @@ const SHIM = `<script>(function(){var seed=__SEED__;function mk(init,sync){var d
 function ok(s){try{window[s].setItem('__t','1');window[s].removeItem('__t');return true}catch(e){return false}}
 if(!ok('localStorage'))try{Object.defineProperty(window,'localStorage',{configurable:true,value:mk(seed,function(d){parent.postMessage({ch:'i2p-store',d:d},'*')})})}catch(e){}
 if(!ok('sessionStorage'))try{Object.defineProperty(window,'sessionStorage',{configurable:true,value:mk({})})}catch(e){}})();<\/script>`;
+const FILL = `<script>window.addEventListener("message",function(e){var d=e.data;if(!d||d.ch!=="i2p-fill")return;var s=document.querySelector('[data-screen="'+d.id+'"]');if(!s)return;s.innerHTML=d.html;s.removeAttribute("data-pending");if(d.js){var n=document.createElement("script");n.textContent=d.js;document.body.appendChild(n)}});<\/script>`;
 function wrap(html, seed) {
-  const head = SHIM.replace("__SEED__", JSON.stringify(seed || {}).replace(/</g, "\\u003c"));
+  const head = SHIM.replace("__SEED__", JSON.stringify(seed || {}).replace(/</g, "\\u003c")) + FILL;
   return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => m + head) : head + html;
 }
 window.addEventListener("message", (e) => {
@@ -1714,12 +1737,12 @@ async function structure(raw) {
   if (!sample) return toast(t("noModel"));
   S.busy = true; S.status = t("structuring"); render();
   try {
-    const sp = await sample.json(`You turn a founder's raw, possibly spoken, possibly Cantonese/中英夾雜 idea into a compact product spec.
+    const sp = await askDurable("s" + Date.now(), `You turn a founder's raw, possibly spoken, possibly Cantonese/中英夾雜 idea into a compact product spec.
 Return ONLY JSON with keys: "title" (≤6 words, user's language), "oneLiner" (≤20 words), "coreInteraction" (the ONE thing a user does, ≤20 words), "targetUser" (≤12 words), "suggestedSkill": "prototype-html" | "game-prototype" | "design-variants".
 Pick game-prototype for anything playable, design-variants when they want to explore looks/styles, else prototype-html. Fix speech-to-text errors silently. Don't invent features.
 ${REGISTER[S.register]}
 
-<raw>${raw}</raw>`, { modelTier: "quick" });
+<raw>${raw}</raw>`, { json: true, tier: "quick" });
     const ok = ["prototype-html", "game-prototype", "design-variants"];
     S.spec = {
       title: String(sp.title || raw.slice(0, 30)), oneLiner: String(sp.oneLiner || ""), coreInteraction: String(sp.coreInteraction || ""),
@@ -1743,11 +1766,134 @@ function createIdea(generate = true) {   // generate: true = build now, false = 
   else if (generate) turn({ input: t("first"), forceSkill: it.spec.suggestedSkill });
 }
 
-let abort = null;
+/* ───────── durable jobs: survive a locked screen, a dropped connection and a reload ───────── */
+// Every in-flight generation is written down (input, partial output, per-screen progress) so nothing is lost when the
+// phone locks. Same page: it resumes by itself when you return, at most twice, and only when YOUR device was hidden
+// (a plain service error is left for you to retry, as the platform asks). After a reload: one tap on "Resume".
+const TUNE = Object.assign({ awayStream: 6000, graceStream: 10000, awayJson: 15000, graceJson: 25000, stuck: 75000 }, LS.get("i2p.tune", {}));
+const JOBS = LS.get("i2p.jobs", {});               // id -> job (persisted)
+const LIVE = {}, ACTIVE = new Set(); let askSeq = 0, saveTimer = 0;   // LIVE: calls in flight; ACTIVE: jobs whose runner is executing
+const H = { hiddenAt: 0 };
+const saveJobs = () => LS.set("i2p.jobs", JOBS);
+const jobPut = (j) => { JOBS[j.id] = j; saveJobs(); return j; };
+const jobDel = (id) => { delete JOBS[id]; saveJobs(); };
+const jobSaveSoon = () => { if (!saveTimer) saveTimer = setTimeout(() => { saveTimer = 0; saveJobs(); }, 1500); };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+for (const j of Object.values(JOBS)) { j.status = "interrupted"; j.hiddenDuring = false; if (!findIdea(j.ideaId)) delete JOBS[j.id]; }   // a fresh page has nothing running, and never calls the model on its own: one tap resumes
+
+/** Keep the screen on while anything is generating; browsers release the lock when hidden, so re-take it on return. */
+const awake = {
+  n: 0, lock: null, ok: false,
+  on() { this.n++; return this.get(); },
+  off() { this.n = Math.max(0, this.n - 1); if (!this.n) this.release(); },
+  async get() {
+    if (this.lock || !this.n || document.hidden || !navigator.wakeLock) return;
+    try { const l = await navigator.wakeLock.request("screen"); this.lock = l; this.ok = true; l.addEventListener?.("release", () => { this.lock = null; this.ok = false; }); } catch (e) { this.ok = false; }
+  },
+  release() { try { this.lock?.release(); } catch (e) {} this.lock = null; this.ok = false; },
+};
+
+/** One model call with durability. Resolves like sample(); rejects with {kind: user | stalled | upstream | fatal, text} so callers know WHY it ended. */
+async function ask(jobId, input, { tier = "default", json = false, onText, signal } = {}) {
+  const sample = await sampler();
+  if (!sample || (json && !sample.json)) throw { kind: "fatal", code: "not_granted", text: "" };
+  const ctl = new AbortController(), key = "h" + ++askSeq;
+  const h = (LIVE[key] = { jobId, ctl, lastProgress: Date.now(), streams: !!onText, stalled: false, user: false });
+  if (signal) { if (signal.aborted) h.user = true, ctl.abort(); else signal.addEventListener("abort", () => { h.user = true; ctl.abort(); }); }
+  awake.on(); let acc = "";
+  try {
+    const opts = { signal: ctl.signal, cache: false, modelTier: tier, ...(onText ? { onText: ({ text }) => { acc = text; h.lastProgress = Date.now(); onText(text); } } : {}) };
+    return json ? await sample.json(input, opts) : await sample(input, opts);
+  } catch (e) {
+    const text = e?.text || acc || "";
+    if (h.stalled) throw { kind: "stalled", text };
+    if (h.user || (e?.code === "cancelled" && !h.stalled)) throw { kind: "user", text };
+    if (!e?.code || e.code === "upstream_error") throw { kind: "upstream", text, code: e?.code };
+    throw { kind: "fatal", code: e.code, message: e.message, text };
+  } finally { delete LIVE[key]; awake.off(); }
+}
+/** Short calls (Studio, research): after a lock, wait for the viewer to return and retry in place instead of silently falling back to a template. */
+async function askDurable(jobId, input, opts, maxTries = 3) {
+  for (let i = 1; ; i++) {
+    try { return await ask(jobId, input, opts); }
+    catch (e) {
+      if (!(e.kind === "stalled" || (e.kind === "upstream" && JOBS[jobId]?.hiddenDuring)) || i >= maxTries) throw e;
+      if (JOBS[jobId]) { JOBS[jobId].attempts = i + 1; saveJobs(); }
+      while (document.hidden) await sleep(400);
+      await sleep(600);
+    }
+  }
+}
+function cancelJob(id) {
+  const job = JOBS[id]; if (!job) return; job.cancelled = true;
+  for (const h of Object.values(LIVE)) if (h.jobId === id) { h.user = true; h.ctl.abort(); }
+}
+// A call that never answers after the phone woke up is declared stalled, so the job can continue from what it has.
+setInterval(() => {
+  const now = Date.now();
+  for (const h of Object.values(LIVE)) {
+    if (!h.returnedAt || h.stalled || h.user) continue;
+    const since = now - h.returnedAt;
+    if (h.streams ? h.away >= TUNE.awayStream && since >= TUNE.graceStream && h.lastProgress < h.returnedAt : h.away >= TUNE.awayJson && since >= TUNE.graceJson) { h.stalled = true; h.ctl.abort(); }
+  }
+}, 1000);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    H.hiddenAt = Date.now();
+    for (const id of ACTIVE) if (JOBS[id]) JOBS[id].hiddenDuring = true;
+    saveJobs(); persist();
+  } else {
+    const away = Date.now() - H.hiddenAt; awake.get();
+    for (const h of Object.values(LIVE)) { h.returnedAt = Date.now(); h.away = away; }
+    setTimeout(() => { for (const j of Object.values(JOBS)) if (j.status === "interrupted" && j.hiddenDuring && j.attempts < 3 && !ACTIVE.has(j.id) && (j.kind === "turn" || j.kind === "build")) resumeJob(j.id); }, 600);
+  }
+});
+window.addEventListener("pagehide", () => { saveJobs(); persist(); });
+
+function buildingJob(ideaId, n) { return Object.values(JOBS).find((j) => j.kind === "build" && j.ideaId === ideaId && j.versionN === n && ACTIVE.has(j.id)); }
+function buildProgress(job) {
+  const it = findIdea(job.ideaId), v = it?.versions.find((x) => x.n === job.versionN), parts = v?.build?.parts || {};
+  return { d: (job.ids || []).filter((i) => parts[i]?.status === "done").length, n: (job.ids || []).length };
+}
+function noticeHtml() {
+  return Object.values(JOBS).filter((j) => j.status === "interrupted" && !ACTIVE.has(j.id) && (j.kind === "turn" || j.kind === "build") && findIdea(j.ideaId) && !(S.pending && S.pending.jobId === j.id)).map((j) => {
+    const it = findIdea(j.ideaId), pr = j.kind === "build" ? t("jobProg_build").replace("{d}", buildProgress(j).d).replace("{n}", buildProgress(j).n) : t("jobProg_turn").replace("{k}", ((j.partial || "").length / 1000).toFixed(1));
+    return `<div class="notice" role="status"><span><b>${t("jobBar").replace("{t}", esc(it.spec.title))}</b><br><span class="faint">${pr}</span></span><span class="nbtns"><button class="btn primary" data-act="resume-job" data-id="${j.id}">${t("jobResume")}</button><button class="btn ghost" data-act="drop-job" data-id="${j.id}">${t("jobDrop")}</button></span></div>`;
+  }).join("");
+}
+function resumeJob(id) {
+  const job = JOBS[id]; if (!job || ACTIVE.has(id)) return;
+  const it = findIdea(job.ideaId); if (!it) return jobDel(id);
+  if (S.pending && S.pending.jobId !== id) return toast(t("agentBusy"));
+  job.status = "running"; saveJobs();
+  if (job.kind === "turn" || job.kind === "build") { S.ideaId = it.id; S.view = "idea"; openPending(job); render(); scrollEnd(); return job.kind === "build" ? runBuildJob(id) : runTurnJob(id); }
+  S.ideaId = it.id; S.view = "studio"; render();
+  return job.kind === "groom" ? runGrooming(it.id, { forced: job.forced, only: job.only }) : runResearch(it.id);
+}
+
+/* ───────── turns ───────── */
+const CONTINUE = "Your previous reply was cut off because the connection dropped. Continue EXACTLY from the last character you wrote. Output ONLY the remaining characters: no code fence, nothing already written repeated, no commentary. Finish the document.";
+/** Join an interrupted reply and its continuation, dropping any text the model repeated at the seam. */
+function stitch(prefix, cont) { const max = Math.min(240, prefix.length, cont.length); for (let k = max; k >= 12; k--) if (prefix.endsWith(cont.slice(0, k))) return prefix + cont.slice(k); return prefix + cont; }
+const phaseOf = (text) => (/<\/html>/i.test(text) ? "done" : /<script\b/i.test(text) ? "script" : /<body\b/i.test(text) ? "body" : /<style\b/i.test(text) ? "style" : "wait");
+function trackProgress(p, text) {
+  const f = text.search(/```|<!doctype|<html/i);
+  p.text = f >= 0 ? text.slice(0, f) : text; p.chars = f >= 0 ? text.length - f : 0; p.lastProgress = Date.now();
+  if (p.log) p.log.phase = phaseOf(text);
+}
+function openPending(job) {
+  const it = findIdea(job.ideaId);
+  S.pending = { jobId: job.id, skill: job.skill, text: "", chars: 0, confidence: job.conf, t0: job.startedAt, lastProgress: Date.now(), waiting: false,
+    log: job.skill !== "chat" ? { phase: "wait", iterating: job.baseN != null, brief: briefLine(it, job.skill), skills: skillsLine(job.skill) } : null };
+  if (job.partial) trackProgress(S.pending, job.partial);
+  clearInterval(pendTimer); pendTimer = setInterval(() => renderPending(false), 1000);
+  return S.pending;
+}
+function closePending() { clearInterval(pendTimer); S.pending = null; }
+
 async function turn({ input, forceSkill, regenerate, editIndex, fresh }) {
   const it = idea(); if (!it || S.pending) return;
-  const sample = await sampler();
-  if (!sample) return toast(t("noModel"));
+  if (!(await sampler())) return toast(t("noModel"));
   if (regenerate) {
     const i = it.messages.map((m) => m.role).lastIndexOf("user");
     if (i < 0) return;
@@ -1759,46 +1905,220 @@ async function turn({ input, forceSkill, regenerate, editIndex, fresh }) {
   const r = forceSkill ? { skill: forceSkill, confidence: 1 } : route(input, cur?.skill);
   const skill = r.skill;
   const iterating = !fresh && skill !== "chat" && cur && cur.skill === skill && cur.html;
-  const msgs = buildMessages(skill, it, input, iterating ? cur.html : null);
+  const ids = skill === "prototype-html" && it.blueprint ? activeScreens(it.blueprint).map((x) => x.id) : [];
+  const staged = ids.length >= 3 && (!iterating || !!regenerate);          // blueprint products are built shell-first, screen by screen
+  const cut = it.messages.length;
   it.messages.push({ role: "user", content: input, skill });
-  S.pending = { skill, text: "", chars: 0, confidence: r.confidence, t0: Date.now(), log: skill !== "chat" ? { phase: "wait", iterating: !!iterating, brief: briefLine(it, skill), skills: skillsLine(skill) } : null };
-  render(); scrollEnd();
-  clearInterval(pendTimer); pendTimer = setInterval(() => renderPending(false), 1000);
+  const job = jobPut({ id: "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), kind: staged ? "build" : "turn", ideaId: it.id, skill, input, cut, baseN: iterating && !staged ? cur.n : null,
+    conf: r.confidence, deepCheck: !!regenerate || !(cur && cur.skill === skill && cur.q), ids: staged ? ids : [], status: "running", attempts: 0, partial: "", startedAt: Date.now(), hiddenDuring: false });
+  persist();                                                               // the user's message must survive a reload
+  openPending(job); render(); scrollEnd();
+  return staged ? runBuildJob(job.id) : runTurnJob(job.id);
+}
 
-  abort = new AbortController();
-  let full = "";
+async function runTurnJob(id) {
+  const job = JOBS[id], it = job && findIdea(job.ideaId); if (!it) return jobDel(id);
+  if (ACTIVE.has(id)) return; ACTIVE.add(id);
+  job.status = "running"; job.attempts++; job.cancelled = false; job.hiddenDuring = document.hidden; saveJobs();
+  const pend = S.pending && S.pending.jobId === id ? S.pending : openPending(job);
+  pend.waiting = false;
+  const base = job.baseN != null ? it.versions.find((v) => v.n === job.baseN) : null;
+  const msgs0 = buildMessages(job.skill, it, job.input, base?.html || null, it.messages.slice(0, job.cut));
+  const resumeFrom = job.skill !== "chat" && job.partial && job.partial.length > 1500 && /<!doctype|<html|```html/i.test(job.partial) ? job.partial : "";
+  const msgs = resumeFrom ? [...msgs0, { role: "assistant", content: resumeFrom }, { role: "user", content: CONTINUE }] : msgs0;
+  if (!resumeFrom) job.partial = "";
+  let acc = resumeFrom;
   try {
-    const res = await sample(msgs, {
-      signal: abort.signal, cache: false, modelTier: skill === "chat" ? "quick" : "default",
-      onText: ({ text }) => {
-        full = text;
-        const f = text.search(/```|<!doctype|<html/i);
-        S.pending.text = f >= 0 ? text.slice(0, f) : text;
-        S.pending.chars = f >= 0 ? text.length - f : 0;
-        if (S.pending.log) S.pending.log.phase = /<\/html>/i.test(text) ? "done" : /<script\b/i.test(text) ? "script" : /<body\b/i.test(text) ? "body" : /<style\b/i.test(text) ? "style" : "wait";
-        renderPending(true);
-      },
-    });
-    full = res.text || full;
-    let content = full.trim(), versionN = null, outSkill = skill, kick = null;
-    if (skill !== "chat") {
-      const { note, html } = extract(full);
-      if (html) {
-        versionN = (it.versions.at(-1)?.n || 0) + 1;
-        it.versions.push({ n: versionN, html, q: null, skill, screens: it.blueprint && skill === "prototype-html" ? activeScreens(it.blueprint).map((x) => x.id) : [], note: note.slice(0, 300), createdAt: Date.now() });
-        if (S.gate) kick = { n: versionN, deep: !!regenerate || !(cur && cur.skill === skill && cur.q) };
-        it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
-        content = note || "✓";
-        if (res.truncated) toast(lang() ? "Output was cut short; it may be incomplete. Try “regenerate”." : "輸出被截短，可能唔完整。可以試下重新生成。");
-      } else outSkill = "chat";
-    }
-    it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
-    if (kick) runCheck(it.id, kick.n, { deep: kick.deep, allowFix: true });   // not awaited: the output is already on screen
-  } catch (e) {
-    if (!abort?.signal.aborted && e?.name !== "AbortError" && e?.code !== "aborted") toast(modelError(e));
-    if (full.trim()) it.messages.push({ role: "assistant", content: full.trim(), skill: "chat", feedback: 0 });
+    const res = await ask(id, msgs, { tier: job.skill === "chat" ? "quick" : "default", onText: (text) => {
+      acc = resumeFrom ? stitch(resumeFrom, text) : text; job.partial = acc; jobSaveSoon();
+      if (S.pending?.jobId === id) { trackProgress(S.pending, acc); renderPending(true); }
+    } });
+    finishTurn(job, it, resumeFrom ? stitch(resumeFrom, res.text) : res.text, res.truncated);
+  } catch (e) { job.partial = acc || job.partial || ""; ACTIVE.delete(id); handleJobError(job, e); }   // inactive first, so the redraw can offer "Resume"
+  finally { ACTIVE.delete(id); }
+}
+
+function finishTurn(job, it, full, truncated) {
+  const skill = job.skill; let content = full.trim(), versionN = null, outSkill = skill, kick = null;
+  if (skill !== "chat") {
+    const { note, html } = extract(full);
+    if (html) {
+      versionN = (it.versions.at(-1)?.n || 0) + 1;
+      it.versions.push({ n: versionN, html, q: null, skill, screens: job.ids || [], note: note.slice(0, 300), createdAt: Date.now() });
+      if (S.gate) kick = { n: versionN, deep: job.deepCheck };
+      it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
+      content = note || "✓";
+      if (truncated) toast(lang() ? "Output was cut short; it may be incomplete. Try “regenerate”." : "輸出被截短，可能唔完整。可以試下重新生成。");
+    } else outSkill = "chat";
   }
-  it.updatedAt = Date.now(); clearInterval(pendTimer); S.pending = null; abort = null; persist(); render(); scrollEnd();
+  it.messages.push({ role: "assistant", content, skill: outSkill, versionN, feedback: 0 });
+  if (kick) runCheck(it.id, kick.n, { deep: kick.deep, allowFix: true });   // not awaited: the output is already on screen
+  it.updatedAt = Date.now(); jobDel(job.id); closePending(); persist(); render(); scrollEnd();
+}
+
+function handleJobError(job, e) {
+  const it = findIdea(job.ideaId);
+  if (!it) { jobDel(job.id); closePending(); return; }
+  if (e?.kind === "user" || job.cancelled) {                               // Stop was pressed
+    if (job.kind === "build" && job.versionN != null) return finalizeBuild(job, it, it.versions.find((x) => x.n === job.versionN), { stopped: true });
+    if (job.skill === "chat" && (job.partial || "").trim()) it.messages.push({ role: "assistant", content: job.partial.trim(), skill: "chat", feedback: 0 });
+    jobDel(job.id); closePending(); it.updatedAt = Date.now(); persist(); return render();
+  }
+  if (e?.kind === "stalled" || e?.kind === "upstream") {
+    job.status = "interrupted"; saveJobs();
+    if (job.hiddenDuring && job.attempts < 3) {                            // the device was hidden: continue on our own
+      if (S.pending?.jobId === job.id) { S.pending.waiting = document.hidden; renderPending(false); }
+      if (!document.hidden) setTimeout(() => { if (JOBS[job.id]?.status === "interrupted") resumeJob(job.id); }, 700);
+      return;                                                              // (hidden: the visibilitychange handler resumes it on return)
+    }
+    closePending(); persist(); toast(t("jobInterrupted")); return render();
+  }
+  jobDel(job.id); closePending(); toast(modelError(e?.message ? e : { code: e?.code, message: e?.message })); persist(); render();
+}
+
+/* ───────── staged build: shell first, then screens two at a time ───────── */
+const STD_ROUTER = '(function(){function show(id){document.querySelectorAll("[data-screen]").forEach(function(s){s.hidden=s.dataset.screen!==id});document.querySelectorAll("[data-go]").forEach(function(b){b.setAttribute("aria-current",b.dataset.go===id?"page":"false")});window.scrollTo(0,0)}document.addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(b){e.preventDefault();show(b.dataset.go)}});show(document.querySelector("[data-screen]").dataset.screen)})();';
+const STD_APP = 'window.App=window.App||{toast:function(m){var t=document.createElement("div");t.setAttribute("role","status");t.textContent=m;t.style.cssText="position:fixed;left:16px;right:16px;bottom:88px;padding:12px 16px;background:#1c1b18;color:#fff;border-radius:4px;font-size:14px";document.body.appendChild(t);setTimeout(function(){t.remove()},2400)},fmt:{money:function(n){return new Intl.NumberFormat("zh-HK",{style:"currency",currency:"HKD",maximumFractionDigits:0}).format(n)},date:function(d){return new Intl.DateTimeFormat("zh-HK",{month:"short",day:"numeric"}).format(new Date(d))},time:function(d){return new Intl.DateTimeFormat("zh-HK",{hour:"2-digit",minute:"2-digit"}).format(new Date(d))}},store:{get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}}};';
+function shellPrompt(it, job) {
+  const act = activeScreens(it.blueprint);
+  return `[Instructions]\n${designPrompt("prototype-html", it, { exemplar: true })}\n\nBUILD MODE: SHELL. This is step 1 of a staged build; the screens are written separately afterwards.\nOutput one sentence to the user, then ONE fenced html block containing ONLY the shared shell:\n- <head>: the exact font link and a complete <style> with the token block AND every shared component class the screens will need (buttons, rows, fields, chips, tags, sheets, toasts, skeleton, tab bar). Screens may only use classes defined here, so be generous and consistent.\n- header with the wordmark, and persistent navigation (tab bar or header links) with data-go for the top-level screens.\n- <main> containing EXACTLY these placeholders and nothing inside them except a skeleton: ${act.map((x, i) => `<section data-screen="${x.id}" data-pending${i ? " hidden" : ""} aria-label="${esc(x.name)}"><div class="skel"></div></section>`).join(" ")}\n- the router script exactly as in the reference scaffold, and a helper script defining window.App = { toast(msg), fmt: { money(n), date(d), time(d) }, store: { get(k, d), set(k, v) } } (localStorage-backed, guarded with try/catch).\nWrite NO screen content. Keep it under about 250 lines.\n[/Instructions]\n\n${job.input}`;
+}
+function screenPrompt(it, v, id) {
+  const act = activeScreens(it.blueprint), me = act.find((x) => x.id === id);
+  const css = (v.build.shell.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || []).map((x) => x.replace(/<\/?style[^>]*>/gi, "")).join("\n").slice(0, 9000);
+  return `[Instructions]\n${craftBlock("prototype-html", { exemplar: false })}\n${blueprintBlock("prototype-html", it)}\n${briefBlock(it)}\n${REGISTER[S.register]}\n\nBUILD MODE: SCREEN "${id}" (${me?.name}). Purpose: ${me?.purpose}. Primary action: ${me?.action}.\nThe shared shell is already built. Use ONLY the classes in SHELL CSS below and the window.App helpers. Put any screen-specific rules in a <style> whose selectors all start with [data-screen="${id}"].\nOutput EXACTLY: (1) the INNER HTML of <section data-screen="${id}"> (no section tag, no html/head/body, no prose), then (2) at most ONE <script> containing a single IIFE that starts with const root=document.querySelector('[data-screen="${id}"]').\nRules: prefix every id you invent with "${id}-"; never touch other screens; navigate only with data-go="<screen id>" (screens: ${act.map((x) => x.id).join(", ")}); no globals; persist with App.store using the key prefix "${id}:"; real, specific content (6-10 items where this is a list); include this screen's empty, loading and error states; own the signature interaction only if it belongs here.\n[/Instructions]\n\nSHELL CSS (read-only):\n\`\`\`css\n${css}\n\`\`\``;
+}
+/** Make any shell usable: right placeholders, a router, helpers, viewport and language. A forgiving step, so one sloppy shell never wastes the build. */
+function repairShell(html, ids, it) {
+  if (!html || html.length < 400) return null;
+  const doc = new DOMParser().parseFromString(html, "text/html"); if (!doc.body) return null;
+  const act = activeScreens(it.blueprint), main = doc.querySelector("main") || doc.body;
+  doc.querySelectorAll("[data-screen]").forEach((sec) => { if (!ids.includes(sec.getAttribute("data-screen"))) sec.remove(); });
+  ids.forEach((id, i) => {
+    let sec = doc.querySelector(`[data-screen="${id}"]`);
+    if (!sec) { sec = doc.createElement("section"); sec.setAttribute("data-screen", id); main.appendChild(sec); }
+    sec.setAttribute("data-pending", ""); sec.setAttribute("aria-label", act.find((x) => x.id === id)?.name || id);
+    if (i) sec.hidden = true; else sec.removeAttribute("hidden");
+    sec.innerHTML = '<div class="skel"></div>';
+  });
+  const code = Array.from(doc.querySelectorAll("script")).map((x) => x.textContent).join("\n");
+  if (!doc.querySelector("[data-go]")) {
+    const nav = doc.createElement("nav"); nav.setAttribute("aria-label", "Main"); nav.style.cssText = "position:fixed;left:0;right:0;bottom:0;display:flex;background:inherit;border-top:1px solid currentColor";
+    nav.innerHTML = act.slice(0, 5).map((x) => `<button data-go="${x.id}" style="flex:1;min-height:56px;background:none;border:0;color:inherit;font:inherit">${esc(x.name)}</button>`).join("");
+    doc.body.appendChild(nav);
+  }
+  const add = (txt) => { const sc = doc.createElement("script"); sc.textContent = txt; doc.body.appendChild(sc); };
+  if (!/App\s*=|window\.App/.test(code)) add(STD_APP);
+  if (!/data-screen/.test(code) || !/\[data-go\]|data-go/.test(code)) add(STD_ROUTER);
+  if (!doc.querySelector('meta[name="viewport"]')) { const m = doc.createElement("meta"); m.name = "viewport"; m.content = "width=device-width,initial-scale=1,viewport-fit=cover"; doc.head.appendChild(m); }
+  if (!doc.documentElement.getAttribute("lang")) doc.documentElement.setAttribute("lang", S.register === "en" ? "en" : "zh-HK");
+  if (!(doc.title || "").trim()) doc.title = it.spec.title;
+  return "<!doctype html>\n" + doc.documentElement.outerHTML;
+}
+function parseScreen(text) {
+  let x = String(text || "").replace(/```[a-z]*\n?/gi, "").trim();
+  const js = []; x = x.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (_, c) => { if (c.trim()) js.push(c.trim()); return ""; });
+  x = x.replace(/<\/?(?:!doctype|html|head|body)[^>]*>/gi, "").replace(/^\s*<section[^>]*data-screen[^>]*>/i, "").replace(/<\/section>\s*$/i, "").trim();
+  const first = x.indexOf("<"); if (first > 0 && first < 200) x = x.slice(first);
+  const visible = x.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, "").trim();
+  return visible.length >= 24 && x.includes("<") ? { html: x, js: js.join("\n") } : null;
+}
+/** The version is the checkpoint: it is always renderable, and parts that are done are never redone. */
+function assemble(v) {
+  const doc = new DOMParser().parseFromString(v.build.shell, "text/html"), scripts = [];
+  for (const [id, p] of Object.entries(v.build.parts)) {
+    const sec = doc.querySelector(`[data-screen="${id}"]`); if (!sec) continue;
+    if (p.status === "done") { sec.innerHTML = p.html; sec.removeAttribute("data-pending"); if (p.js) scripts.push(`/* ${id} */\n(function(){try{\n${p.js}\n}catch(e){console.error(${JSON.stringify(id)},e)}})();`); }
+    else if (p.status === "failed") { sec.removeAttribute("data-pending"); sec.innerHTML = `<p style="padding:16px;opacity:.8">${esc(t("bpScreenFailed"))}</p>`; }
+  }
+  if (scripts.length) { const sc = doc.createElement("script"); sc.textContent = scripts.join("\n"); doc.body.appendChild(sc); }
+  return "<!doctype html>\n" + doc.documentElement.outerHTML;
+}
+function injectScreen(v, id) {
+  const fr = document.getElementById("pframe"); if (!fr || !S.ideaId || (S.viewN ?? findIdea(S.ideaId)?.currentVersion) !== v.n) return;
+  const p = v.build.parts[id];
+  fr.contentWindow?.postMessage({ ch: "i2p-fill", id, html: p.html, js: p.js ? `(function(){try{${p.js}}catch(e){console.error(e)}})();` : "" }, "*");
+}
+function uiBuild(ideaId, n) {
+  if (!inIdeaView(ideaId)) return;
+  renderPending(false);
+  const it = findIdea(ideaId), pb = document.getElementById("pbar-chk"); if (it && pb) pb.outerHTML = pbarChkHtml(it, S.viewN ?? it.currentVersion);
+}
+async function runBuildJob(id) {
+  const job = JOBS[id], it = job && findIdea(job.ideaId); if (!it) return jobDel(id);
+  if (ACTIVE.has(id)) return; ACTIVE.add(id);
+  job.status = "running"; job.attempts++; job.cancelled = false; job.hiddenDuring = document.hidden; saveJobs();
+  if (!S.pending || S.pending.jobId !== id) openPending(job);
+  const pend = S.pending; pend.waiting = false;
+  try {
+    let v = job.versionN != null ? it.versions.find((x) => x.n === job.versionN) : null;
+    if (!v) {
+      const res = await ask(id, shellPrompt(it, job), { onText: (text) => { pend.chars = text.length; pend.lastProgress = Date.now(); } });
+      const { note, html } = extract(res.text);
+      const shell = repairShell(html, job.ids, it);
+      if (!shell) { job.kind = "turn"; job.ids = []; job.attempts = 0; job.partial = ""; saveJobs(); ACTIVE.delete(id); await runTurnJob(id); return; }   // an unusable shell falls back to one single call
+      const n = (it.versions.at(-1)?.n || 0) + 1;
+      v = { n, html: shell, q: null, skill: "prototype-html", screens: job.ids, note: (note || "").slice(0, 300), createdAt: Date.now(),
+        build: { shell, parts: Object.fromEntries(job.ids.map((x) => [x, { status: "pending", tries: 0 }])) } };
+      it.versions.push(v); it.currentVersion = n; S.viewN = n; S.previewOpen = true; job.versionN = n; saveJobs();
+      it.messages.push({ role: "assistant", content: note || t("bpShellNote"), skill: "prototype-html", versionN: n, feedback: 0 });
+      persist(); render(); scrollEnd();                                       // the skeleton product is on screen now
+    }
+    await buildScreens(job, it, v);
+    finalizeBuild(job, it, v);
+  } catch (e) { ACTIVE.delete(id); handleJobError(job, e); }
+  finally { ACTIVE.delete(id); }
+}
+async function buildScreens(job, it, v) {
+  const parts = v.build.parts;
+  for (const id of job.ids) { const p = parts[id]; if (p.status === "running") p.status = "pending"; if (job.retry && p.status === "failed") { p.status = "pending"; p.tries = 0; } }
+  const queue = job.ids.filter((x) => parts[x].status === "pending"), ctx = { stop: null };
+  const worker = async () => { for (;;) { if (ctx.stop || job.cancelled) return; const sid = queue.shift(); if (!sid) return; await buildOneScreen(job, it, v, sid, ctx); } };
+  await Promise.all([worker(), worker()]);                                    // the platform runs a couple of calls at once
+  if (ctx.stop) throw ctx.stop;
+}
+async function buildOneScreen(job, it, v, id, ctx) {
+  const p = v.build.parts[id];
+  for (;;) {
+    p.status = "running"; p.chars = 0; p.tries++; uiBuild(it.id, v.n);
+    try {
+      const res = await ask(job.id, screenPrompt(it, v, id), { onText: (text) => { p.chars = text.length; if (S.pending) S.pending.lastProgress = Date.now(); } });
+      const part = parseScreen(res.text); if (!part) throw { kind: "bad" };
+      Object.assign(p, { status: "done", html: part.html, js: part.js }); v.html = assemble(v); persist(); injectScreen(v, id); uiBuild(it.id, v.n); return;
+    } catch (e) {
+      if (e.kind === "user" || e.kind === "stalled" || e.kind === "upstream") { p.status = "pending"; ctx.stop = ctx.stop || e; uiBuild(it.id, v.n); return; }
+      const limited = e.code === "rate_limited";
+      if ((e.kind === "bad" || limited || e.code === "empty_completion") && p.tries < (limited ? 3 : 2)) { if (limited) await sleep(2500); continue; }
+      p.status = "failed"; v.html = assemble(v); persist(); uiBuild(it.id, v.n); return;
+    }
+  }
+}
+function finalizeBuild(job, it, v, { stopped = false } = {}) {
+  const parts = v.build.parts;
+  for (const id of job.ids) if (parts[id].status !== "done") parts[id].status = "failed";
+  v.failed = job.ids.filter((id) => parts[id].status === "failed"); v.html = assemble(v);
+  ACTIVE.delete(job.id); jobDel(job.id);                                    // the build is over before the check agent looks at it
+  if (!stopped && S.gate) runCheck(it.id, v.n, { deep: job.retry ? false : job.deepCheck, allowFix: true });
+  it.updatedAt = Date.now(); jobDel(job.id); closePending(); persist(); render(); scrollEnd();
+}
+function retryScreens(n) {
+  const it = idea(), v = it?.versions.find((x) => x.n === n); if (!v?.build || S.pending) return;
+  const job = jobPut({ id: "j" + Date.now().toString(36), kind: "build", ideaId: it.id, skill: "prototype-html", input: t("bpRebuild"), cut: it.messages.length, versionN: n, ids: v.screens, retry: true,
+    conf: 1, deepCheck: false, status: "running", attempts: 0, partial: "", startedAt: Date.now(), hiddenDuring: false });
+  openPending(job); render(); scrollEnd(); return runBuildJob(job.id);
+}
+/** Check-agent fix for a staged build: rebuild only the screens the automated findings point at, never the whole document. */
+async function polishChunked(it, v, checks, review, signal) {
+  const hit = new Set(); for (const c of checks) for (const d of String(c.detail || "").split("; ")) { const m = d.match(/^([a-z0-9-]+): /); if (m && v.build.parts[m[1]]) hit.add(m[1]); }
+  const ids = [...hit].slice(0, 3); if (!ids.length) return null;
+  const b2 = JSON.parse(JSON.stringify(v.build)), notes = checks.filter((c) => c.status !== "pass").map((c) => `- ${c.id}: ${c.detail}`).join("\n");
+  const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- ${i.problem} => ${i.fix}`).join("\n");
+  await Promise.all(ids.map(async (id) => {
+    const fake = { build: b2 };
+    const res = await ask("c_" + it.id, `${screenPrompt(it, fake, id)}\n\nAUDIT FINDINGS for this screen. Rewrite the screen and fix every one; keep what works.\n${notes}\n${exp}\n\nCURRENT SCREEN HTML:\n${b2.parts[id].html || ""}`, { tier: "default", signal });
+    const part = parseScreen(res.text); if (part) Object.assign(b2.parts[id], { status: "done", html: part.html, js: part.js });
+  }));
+  return { html: assemble({ build: b2 }), build: b2 };
 }
 
 /* dictation */
@@ -1909,17 +2229,27 @@ function msgHtml(m, i, it, lastA) {
 }
 
 function worklogHtml(p) {
-  const g = p.log, el = Math.round((Date.now() - p.t0) / 1000);
+  const g = p.log, el = Math.round((Date.now() - p.t0) / 1000), job = JOBS[p.jobId];
   const ph = { wait: "phWait", style: "phStyle", body: "phBody", script: "phScript", done: "phDone" }[g.phase];
-  const mk = (x, i) => (x === "done" ? `<span class="mark done">${svg("check")}</span>` : x === "running" ? `<span class="mark run"><i class="pd"></i></span>` : `<span class="mark">${i + 1}</span>`);
-  const rows = [
-    ["done", g.iterating ? t("wlIter") : t("wlBrief"), esc(g.brief)],
-    ["done", t("wlSkills"), esc(g.skills)],
-    [g.phase === "done" ? "done" : "running", t("wlGen"), t(ph) + (p.chars ? " · " + (p.chars / 1000).toFixed(1) + "k" : "")],
-    ["pending", t("wlHandoff"), ""],
-  ];
+  const mk = (x, i) => (x === "done" ? `<span class="mark done">${svg("check")}</span>` : x === "running" ? `<span class="mark run"><i class="pd"></i></span>` : x === "error" ? `<span class="mark err">${svg("x")}</span>` : `<span class="mark">${i + 1}</span>`);
+  const rows = [["done", g.iterating ? t("wlIter") : t("wlBrief"), esc(g.brief)], ["done", t("wlSkills"), esc(g.skills)]];
+  if (job?.kind === "build") {
+    const it = findIdea(job.ideaId), v = it?.versions.find((x) => x.n === job.versionN), parts = v?.build?.parts || {}, act = it?.blueprint ? activeScreens(it.blueprint) : [];
+    rows.push([job.versionN != null ? "done" : "running", t("wlShell"), job.versionN != null ? "" : p.chars ? (p.chars / 1000).toFixed(1) + "k" : ""]);
+    for (const id of job.ids) {
+      const x = parts[id] || { status: "pending" };
+      rows.push([x.status === "done" ? "done" : x.status === "running" ? "running" : x.status === "failed" ? "error" : "pending", act.find((a) => a.id === id)?.name || id,
+        x.status === "running" ? ((x.chars || 0) / 1000).toFixed(1) + "k" : x.status === "failed" ? t("wlFailed") : x.status === "pending" ? t("wlWaiting") : ""]);
+    }
+  } else rows.push([g.phase === "done" ? "done" : "running", t("wlGen"), t(ph) + (p.chars ? " · " + (p.chars / 1000).toFixed(1) + "k" : "")]);
+  rows.push(["pending", t("wlHandoff"), ""]);
+  const quiet = Date.now() - (p.lastProgress || p.t0);
   return `<section class="worklog-wrap"><div class="chkhead"><b>${t("wlTitle")}</b><span class="faint" role="status">${t("elapsed").replace("{s}", el)}</span></div>
-    <ol class="worklog">${rows.map(([st, label, out], i) => `<li data-s="${st}">${mk(st, i)}<span class="cl-body"><span class="cl-t">${label}</span>${out ? `<span class="cl-o">${out}</span>` : ""}</span></li>`).join("")}</ol></section>`;
+    <ol class="worklog">${rows.map(([st, label, out], i) => `<li data-s="${st}">${mk(st, i)}<span class="cl-body"><span class="cl-t">${label}</span>${out ? `<span class="cl-o">${out}</span>` : ""}</span></li>`).join("")}</ol>
+    ${job && job.attempts > 1 ? `<p class="wl-hint muted" role="status">${t("wlResumed").replace("{n}", job.attempts - 1)}</p>` : ""}
+    ${p.waiting ? `<p class="wl-hint muted" role="status">${t("wlWaitReturn")}</p>` : ""}
+    <p class="wl-hint faint">${awake.ok ? t("wlAwake") : t("wlLockHint")}</p>
+    ${quiet > TUNE.stuck && !p.waiting ? `<div class="qact" style="margin-top:8px"><span class="faint wl-hint" style="margin:0">${t("wlStuck")}</span><button class="btn" data-act="kick-job" data-id="${p.jobId}">${t("wlKick")}</button></div>` : ""}</section>`;
 }
 function briefLine(it, skill) {
   const st = it.spec.style || {}, tn = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean).map((x) => (lang() ? x.en : x.zh));
@@ -1947,6 +2277,7 @@ function viewIdea() {
         <label class="sr" for="ver">${t("version")}</label><select id="ver">${verOptions(it, viewN)}</select>
         ${viewN !== it.currentVersion ? `<button class="btn" data-act="revert" data-n="${viewN}">${t("revert")}</button>` : ""}
         ${pbarChkHtml(it, viewN)}<button class="ib" data-act="reaudit" data-n="${viewN}" aria-label="${t("reaudit")}" title="${t("reaudit")}">${svg("shield")}</button><button class="ib" data-act="dl" data-n="${viewN}" aria-label="${t("saveFile")}" title="${t("saveFile")}">${svg("save")}</button></div>
+      ${noticeHtml()}${failedRowHtml(v)}
       <div class="stage">${v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${viewN}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`}</div></aside>` : "";
   const modelLabel = `${sl(S.pending?.skill || it.messages.at(-1)?.skill || it.spec.suggestedSkill)} · ${S.register === "en" ? "EN" : S.register === "yue" ? "廣東話" : "中英"}`;
   return `<div class="ws"><div class="chat">
@@ -1993,7 +2324,7 @@ function render() {
     : S.view === "run" && S.run
     ? `<div class="top"><button class="ib" data-nav="agents" aria-label="${t("navAgents")}">${svg("back")}</button><span class="brand" style="font-size:16px">${AGENTS.find((a) => a.id === S.run.agentId).name[lang()]}</span>${S.run.status === "running" ? `<button class="btn" data-act="stop-run">${t("stopRun")}</button>` : ""}</div>`
     : `<div class="top"><span class="brand">Idea2Proto<b>.</b></span>${regSeg()}</div>`;
-  const body = ({ capture: viewCapture, skills: viewSkills, agents: viewAgents, run: viewRun, journal: viewJournal, idea: viewIdea, studio: viewStudio })[S.view]();
+  const body = noticeHtml() + ({ capture: viewCapture, skills: viewSkills, agents: viewAgents, run: viewRun, journal: viewJournal, idea: viewIdea, studio: viewStudio })[S.view]();
   const cur = S.view === "run" ? "agents" : S.view;
   const navBtn = (v, icon, label) => `<button data-nav="${v}" aria-current="${cur === v ? "page" : "false"}">${svg(icon)}${label}</button>`;
   const nav = focus ? "" : `<nav class="nav" aria-label="Main">${navBtn("capture", "plus", t("newIdea"))}${navBtn("skills", "grid", t("navSkills"))}${navBtn("agents", "bot", t("navAgents"))}${navBtn("journal", "book", t("journal"))}</nav>`;
@@ -2111,7 +2442,11 @@ const onClick = async (e) => {
     case "edit": S.editing = i; render(); return document.getElementById("edit")?.focus();
     case "edit-cancel": S.editing = null; return render();
     case "edit-save": { const v = document.getElementById("edit").value.trim(); if (!v) return; S.editing = null; return turn({ input: v, editIndex: +b.dataset.i }); }
-    case "stop": abort?.abort(); return;
+    case "stop": cancelJob(S.pending?.jobId); return;
+    case "resume-job": return resumeJob(b.dataset.id);
+    case "drop-job": { const j = JOBS[b.dataset.id]; if (j?.kind === "build" && j.versionN != null) { const x = findIdea(j.ideaId); if (x) finalizeBuild(j, x, x.versions.find((q) => q.n === j.versionN), { stopped: true }); } jobDel(b.dataset.id); return render(); }
+    case "kick-job": { const j = JOBS[b.dataset.id]; if (j) { j.hiddenDuring = true; for (const h of Object.values(LIVE)) if (h.jobId === j.id) { h.stalled = true; h.ctl.abort(); } } return; }
+    case "retry-screens": return retryScreens(+b.dataset.n);
     case "del":
       if (!S.confirmDel) { S.confirmDel = true; toast(t("confirmDel")); return render(); }
       S.ideas = S.ideas.filter((x) => x.id !== S.ideaId); delete S.assets[S.ideaId]; LS.set("i2p.assets", S.assets); persist(); S.confirmDel = false; S.view = "journal"; return render();

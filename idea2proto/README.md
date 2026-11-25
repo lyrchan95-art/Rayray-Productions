@@ -91,3 +91,13 @@ Bad or missing model output falls back to a usable template, so the Studio never
 ## Market research assistant
 
 `skills/market-research.md` is a workflow skill with its own section in Idea Studio (and a call to action in the Skills tab). It has **no web access**, so it is built around that limit: markets are sized by method with labelled assumptions rather than invented numbers, competitors are named only when certain (otherwise shown as a category), every price is a range with a basis and confidence, URLs are stripped from model output, and each claim comes with a "how to verify" step. Output is a structured brief: segments, alternatives (including WhatsApp groups and spreadsheets), price anchors, demand signals with copyable search queries, Hong Kong factors, ranked risks, a go/pivot/stop verdict and three moves for the week. A failed run shows an error and stores nothing. The findings feed re-grooming and the build prompt, always labelled as unverified estimates, and the section warns when the idea has changed since the research was run.
+
+## Durable jobs and staged builds (screen lock, slow output)
+
+Every model call in the live artifact runs as a **job** saved to storage with its partial output.
+
+- **Screen locks / tab hidden:** the stall watchdog notices a stream that stopped while the viewer's own device was hidden, and asks the model to *continue* from the saved text (the seam overlap is stitched out) instead of restarting. Auto-resume happens only for that case, at most 3 attempts. A Screen Wake Lock is requested while building when the browser allows it.
+- **Service errors / cold reloads:** no silent retries. A Resume bar appears (also inside the full-screen phone preview) and one tap continues from what is saved; Discard drops the job.
+- **Staged build** (3+ screens): a shell first (placeholders only), then screens two at a time, each its own call. The version is the checkpoint, so a resume redoes only unfinished screens; a screen that fails twice gets an honest placeholder and a "retry these screens" row. Check-agent fixes rebuild only the offending screen.
+- **Tuning:** thresholds live in `localStorage["i2p.tune"]` (`awayStream`, `graceStream`, `awayJson`, `graceJson`, `stuck`, in ms).
+- **Not covered:** iterations on an existing prototype are still one call (resumable, not staged); agent-run progress is not persisted across reloads; the Next.js app does not have these features.
