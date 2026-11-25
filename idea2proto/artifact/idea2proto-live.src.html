@@ -374,6 +374,23 @@ summary.label{min-height:44px;display:flex;align-items:center}
 .assetrow > span{display:flex;flex-direction:column;gap:2px;min-width:0}
 .skel-block .sk{height:56px;margin:12px 0;background:var(--surface-3);border-radius:var(--r-md);animation:blink 1.2s infinite}
 .studio .specbar .faint{font-family:var(--sans);font-size:13px}
+
+/* market research */
+.mr{margin:20px 0 0;border-top:2px solid var(--fg)}
+.mr > summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:8px 0;cursor:pointer;list-style:none;font:600 12px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.mr > summary::-webkit-details-marker{display:none}
+.mr > summary .faint{font-weight:500;letter-spacing:0;text-transform:none;font-size:13px}
+.error[hidden]{display:none}
+.mr-note{margin:4px 0 12px;padding:8px 12px;border-left:3px solid var(--danger);background:var(--surface-2);font:400 13px/1.5 var(--sans);color:var(--muted)}
+.mr h3{margin:20px 0 4px;font:600 13px/1.4 var(--sans);letter-spacing:.04em;color:var(--muted)}
+.mrow{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid var(--border);font:400 14px/1.5 var(--sans)}
+.mrow > div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag.neutral{background:var(--surface-3);color:var(--fg)}
+.qrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.qrow code{font:13px/1.4 var(--mono);background:var(--surface-2);padding:2px 6px;border-radius:var(--r-sm);overflow-wrap:anywhere}
+.verdict{margin-top:20px;padding:16px;background:var(--accent-soft);border-radius:var(--r-lg);font:400 14px/1.5 var(--sans)}
+.verdict h3{margin:0 0 6px;font:800 20px/1.2 var(--head);letter-spacing:0;color:var(--fg)}
+.verdict ul{margin:8px 0 0;padding-left:20px}
 </style>
 
 <div class="app" id="app"></div>
@@ -488,6 +505,20 @@ const T = {
   bpRebuild:["藍圖改咗，按新藍圖重新砌。","The blueprint changed; rebuild from it."], stOpenDefault:["{n} 個未揀會用建議","{n} open will use the recommendation"],
   stOpen:["產品藍圖","Blueprint"], stToWork:["工作區","Workspace"], assetSaved:["已加入素材","Asset added"], studioNew:["用 Idea Studio 整理新 idea","Shape a new idea in Idea Studio"],
   stFonts:["字體","Typefaces"], stShape:["形狀同節奏","Shape and rhythm"],
+  mrTitle:["市場研究助手","Market research assistant"], mrIdle:["未運行","Not run yet"], mrDone:["已完成","Done"], mrRunning:["研究緊","Researching"],
+  mrNote:["呢份研究只靠模型嘅知識同推理，冇連網搜尋。數字當估算，對手名要核實，請按「點樣核實」再查。","This research uses the model's knowledge and reasoning only, with no web search. Treat numbers as estimates, confirm competitor names, and use \"How to verify\" before you rely on it."],
+  mrRun:["運行市場研究","Run market research"], mrRerun:["重新研究","Re-run research"], mrStep:["分析客群、對手、定價同風險","Analysing segments, alternatives, pricing and risks"],
+  mrError:["研究失敗，再試一次啦。","The research failed. Try again."], mrStale:["個 idea 改咗，研究可能過時。","The idea changed since this research, so it may be out of date."],
+  mrFeeds:["之後重新整理藍圖同砌產品，都會用呢份研究。","Re-shaping the blueprint and building will use this research."],
+  mrMarket:["市場","Market"], mrSizing:["點樣估算","How to size it"], mrAssume:["假設","Assumptions"], mrTrend:["趨勢","Trend"], mrSegments:["客群","Segments"],
+  mrAlts:["對手同替代方案","Alternatives"], mrWin:["你可以贏喺","Where you can win"], mrLikely:["類別，唔係具名產品","category, not a named product"], mrPricing:["定價錨點（估算）","Price anchors (estimates)"],
+  mrDemand:["需求訊號","Demand signals"], mrHk:["香港特有因素","Hong Kong factors"], mrRisks:["風險","Risks"], mrVerdict:["判斷","Verdict"], mrNext:["本週三步","Three moves this week"],
+  mrVerify:["點樣核實","How to verify"], mrCopyQ:["複製搜尋字","Copy query"], mrReach:["接觸方法","How to reach"], mrWhere:["去邊度睇","Where to look"],
+  c_low:["把握低","Low confidence"], c_medium:["把握中","Medium confidence"], c_high:["把握高","High confidence"],
+  sz_small:["細","Small"], sz_medium:["中","Medium"], sz_large:["大","Large"], wt_low:["願付低","Pays little"], wt_medium:["願付中","Pays some"], wt_high:["願付高","Pays well"],
+  v_go:["做","Go"], v_pivot:["改方向","Pivot"], v_stop:["唔做","Stop"], sev_high:["高","High"], sev_medium:["中","Medium"], sev_low:["低","Low"],
+  k_incumbent:["現有大玩家","Incumbent"], k_app:["App","App"], k_service:["服務","Service"], k_workaround:["土辦法","Workaround"],
+  mrOpenIdea:["研究一個 idea","Research an idea"], mrNoIdea:["先整理一個 idea，再喺 Idea Studio 入面做研究。","Shape an idea first, then run the research in Idea Studio."],
   wlTitle:["做緊嘢","Working"], wlBrief:["讀取 spec 同設計方向","Reading the spec and design direction"], wlIter:["讀取目前版本同你嘅修改","Reading the current version and your change"],
   wlSkills:["套用技能","Applying skills"], wlGen:["生成原型","Writing the prototype"], wlHandoff:["交出原型，之後喺背景質檢","Hand over the prototype, then check in the background"],
   phWait:["諗緊點砌","Planning the build"], phStyle:["寫緊樣式（顏色、字體、版面）","Writing styles: colour, type, layout"], phBody:["砌緊版面同內容","Building layout and content"],
@@ -513,7 +544,7 @@ const S = {
   view: "capture", register: LS.get("i2p.register", "yue"), ideas: LS.get("i2p.ideas", []),
   ideaId: null, draft: "", spec: null, busy: false, status: "", pending: null, previewOpen: false, viewN: null,
   editing: null, q: "", filter: "", listening: false, partial: "", confirmDel: false,
-  skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [], mode: "quick", modeLock: false, flash: [], archPending: null,
+  skillPick: null, sheet: null, run: null, runLog: LS.get("i2p.runs", []), sug: [], mode: "quick", modeLock: false, flash: [], archPending: null, mrOpen: false,
   craft: LS.get("i2p.craft", {}), gate: LS.get("i2p.gate", true), assets: LS.get("i2p.assets", {}), assetSlot: "photo",
 };
 const lang = () => (S.register === "en" ? 1 : 0);
@@ -1114,7 +1145,7 @@ function readiness(bp, it) {
 }
 const packBody = (id) => PACKS.find((p) => p.id === id)?.body || "";
 function groomPrompt(it, forced) {
-  return `[Instructions]\n${packBody("idea-grooming")}\n${REGISTER[S.register]}\n[/Instructions]\n\nIDEA SPEC: ${JSON.stringify(it.spec)}\nORIGINAL WORDS: ${it.raw || it.spec.oneLiner}${forced ? `\nARCHETYPE (decided by the user, keep it): ${forced}` : ""}${S.register === "en" ? "" : "\nWrite every text field in Hong Kong Cantonese (Traditional Chinese)."}`;
+  return `[Instructions]\n${packBody("idea-grooming")}\n${REGISTER[S.register]}\n[/Instructions]\n\nIDEA SPEC: ${JSON.stringify(it.spec)}\nORIGINAL WORDS: ${it.raw || it.spec.oneLiner}${forced ? `\nARCHETYPE (decided by the user, keep it): ${forced}` : ""}${it.research ? "\n\n" + researchDigest(it) : ""}${S.register === "en" ? "" : "\nWrite every text field in Hong Kong Cantonese (Traditional Chinese)."}`;
 }
 function stylePrompt(it) {
   const st = it.spec.style || {}, picked = (st.tones || []).map((id) => TONES.find((x) => x.id === id)).filter(Boolean), ph = PHIL.find((p) => p.id === st.phil);
@@ -1124,7 +1155,7 @@ function stylePrompt(it) {
     + (ph && ph.id !== "auto" ? `\nREFERENCE PHILOSOPHY: ${ph.en}` : "");
 }
 function blueprintBlock(skill, it) {
-  const bp = it.blueprint, st = it.style; if (!bp && !st) return "";
+  const bp = it.blueprint, st = it.style; if (!bp && !st) return it.research ? `MARKET CONTEXT (unverified estimates): ${researchDigest(it)}` : "";
   const out = [];
   if (bp) {
     out.push("BLUEPRINT (groomed with the founder; build exactly this):", `- archetype: ${bp.archetype}. Build pattern: ${ARCH_PATTERN[bp.archetype]}`, `- value: ${bp.valueProp}`);
@@ -1135,6 +1166,7 @@ function blueprintBlock(skill, it) {
     activeScreens(bp).forEach((x) => out.push(`  - ${x.id}: ${x.name}. ${x.purpose} Primary action: ${x.action}`));
     bp.decisions.forEach((d) => { const o = d.options[d.chosen ?? d.recommended]; out.push(`- decided: ${d.question} => ${o.label}${o.effect.note ? " (" + o.effect.note + ")" : ""}${d.chosen === null ? " [default]" : ""}`); });
     bp.facts.forEach((f) => out.push(`- fact, ${f.label}: ${f.value.trim() ? f.value.trim() + " (confirmed by the founder)" : f.sample + " (sample: mark it subtly as a sample)"}`));
+    if (it.research) { const r = it.research, pr = r.pricing[0]; out.push(`- market (unverified estimates): ${r.verdict.why} Alternatives to beat: ${r.alternatives.slice(0, 3).map((a) => a.name + " (" + a.gap + ")").join("; ")}.${pr ? ` Price anchor: ${pr.point} ${pr.range}.` : ""}`); }
     if (bp.signature) out.push(`- signature interaction: ${bp.signature}`);
     if (bp.tone.length) out.push(`- voice: ${bp.tone.join(", ")}`);
     bp.risks.forEach((r) => out.push(`- handle this risk visibly: ${r}`));
@@ -1187,6 +1219,86 @@ function buildFromBlueprint() {
 }
 function setPath(obj, path, v) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[/^\d+$/.test(k[i]) ? +k[i] : k[i]]; o[k.at(-1)] = v; }
 
+/* ───────── market research assistant ───────── */
+const RESEARCH = {};                              // ideaId -> live run; never persisted
+const noUrl = (x) => String(x ?? "").replace(/https?:\/\/\S+|www\.\S+/gi, "").replace(/\s+/g, " ").trim();
+const rc = (x, n) => noUrl(x).slice(0, n);
+const oneOf = (v, list, d) => (list.includes(v) ? v : d);
+function normalizeResearch(j) {
+  if (!j || typeof j !== "object" || !j.summary) return null;
+  const arr = (v, n) => (Array.isArray(v) ? v : []).slice(0, n);
+  const r = {
+    summary: rc(j.summary, 420),
+    market: { frame: rc(j.market?.frame, 240), method: rc(j.market?.sizing?.method, 300), trend: rc(j.market?.trend, 240),
+      assumptions: arr(j.market?.sizing?.assumptions, 3).map((a) => ({ text: rc(a?.text, 160), confidence: oneOf(a?.confidence, ["low", "medium", "high"], "low") })).filter((a) => a.text) },
+    segments: arr(j.segments, 3).map((x) => ({ name: rc(x?.name, 50), size: oneOf(x?.size, ["small", "medium", "large"], "medium"), pain: rc(x?.pain, 180), willingness: oneOf(x?.willingness, ["low", "medium", "high"], "medium"), reach: rc(x?.reach, 160) })).filter((x) => x.name),
+    alternatives: arr(j.alternatives, 5).map((x) => ({ name: rc(x?.name, 60), kind: oneOf(x?.kind, ["incumbent", "app", "service", "workaround"], "app"), likely: x?.likely !== false, strength: rc(x?.strength, 160), gap: rc(x?.gap, 180) })).filter((x) => x.name),
+    pricing: arr(j.pricing, 4).map((x) => ({ point: rc(x?.point, 90), range: rc(x?.range, 60), confidence: oneOf(x?.confidence, ["low", "medium", "high"], "low"), basis: oneOf(x?.basis, ["common knowledge", "inference", "assumption"], "assumption") })).filter((x) => x.point),
+    demand: arr(j.demand, 4).map((x) => ({ signal: rc(x?.signal, 140), where: rc(x?.where, 100), query: rc(x?.query, 100) })).filter((x) => x.signal),
+    hk: arr(j.hk, 4).map((x) => ({ topic: rc(x?.topic, 24), note: rc(x?.note, 200) })).filter((x) => x.note),
+    risks: arr(j.risks, 3).map((x) => ({ risk: rc(x?.risk, 140), severity: oneOf(x?.severity, ["high", "medium", "low"], "medium"), mitigation: rc(x?.mitigation, 160) })).filter((x) => x.risk),
+    verdict: { call: oneOf(j.verdict?.call, ["go", "pivot", "stop"], "pivot"), why: rc(j.verdict?.why, 240), next: arr(j.verdict?.next, 3).map((x) => rc(x, 160)).filter(Boolean) },
+    verify: arr(j.verify, 5).map((x) => ({ claim: rc(x?.claim, 140), how: rc(x?.how, 200), source: rc(x?.source, 80) })).filter((x) => x.claim),
+  };
+  return r.segments.length && r.alternatives.length ? r : null;
+}
+const HKT = { regulation: ["規管", "Regulation"], channel: ["渠道", "Channels"], culture: ["文化", "Culture"], logistics: ["物流", "Logistics"], payments: ["付款", "Payments"] };
+const researchKey = (it) => `${it.blueprint?.valueProp || it.spec.oneLiner}|${it.blueprint?.archetype || ""}`;
+function researchPrompt(it) {
+  const bp = it.blueprint;
+  return `[Instructions]\n${packBody("market-research")}\n${REGISTER[S.register]}\n[/Instructions]\n\nIDEA SPEC: ${JSON.stringify(it.spec)}\nORIGINAL WORDS: ${it.raw || it.spec.oneLiner}`
+    + (bp ? `\nARCHETYPE: ${bp.archetype}\nVALUE: ${bp.valueProp}\nDIFFERENT: ${bp.different}\nPEOPLE: ${bp.personas.map((p) => p.name + ", " + p.situation).join(" | ")}` : "")
+    + (S.register === "en" ? "" : "\nWrite every text field in Hong Kong Cantonese (Traditional Chinese).");
+}
+/** What flows back into grooming and builds: short, and always flagged unverified. */
+function researchDigest(it) {
+  const r = it.research; if (!r) return "";
+  const alt = r.alternatives.slice(0, 3).map((a) => `${a.name}${a.likely ? " (category)" : ""}: gap ${a.gap}`).join("; "), pr = r.pricing[0];
+  return `MARKET RESEARCH (model knowledge only, unverified; use it to sharpen differentiation and decisions, keep prices as samples): ${r.summary} Alternatives: ${alt}. ${pr ? `Price anchor: ${pr.point} ${pr.range} (${pr.basis}).` : ""} Verdict: ${r.verdict.call}, ${r.verdict.why}`;
+}
+async function runResearch(ideaId) {
+  const it = findIdea(ideaId); if (!it || RESEARCH[ideaId]) return;
+  const sample = await sampler(); if (!sample?.json) return toast(t("noModel"));
+  const g = (RESEARCH[ideaId] = { t0: Date.now(), ctl: new AbortController() });
+  const here = () => S.view === "studio" && S.ideaId === ideaId;
+  S.mrOpen = true; g.timer = setInterval(() => { if (here()) refreshResearchLog(); }, 1000); if (here()) render();
+  let data = null;
+  try { data = normalizeResearch(await sample.json(researchPrompt(it), { signal: g.ctl.signal, cache: false, modelTier: "default" })); } catch (e) {}
+  clearInterval(g.timer); delete RESEARCH[ideaId];
+  if (data) { it.research = { ...data, at: Date.now(), basedOn: researchKey(it) }; it.updatedAt = Date.now(); persist(); } else if (!g.ctl.signal.aborted) toast(t("mrError"));
+  if (here()) render();
+}
+function researchLogHtml(g) {
+  const el = Math.round((Date.now() - g.t0) / 1000);
+  return `<section class="worklog-wrap" id="mr-log"><div class="chkhead"><b>${t("mrRunning")}</b><span class="faint" role="status">${t("elapsed").replace("{s}", el)}</span></div>
+    <ol class="worklog"><li data-s="running"><span class="mark run"><i class="pd"></i></span><span class="cl-body"><span class="cl-t">${t("mrStep")}</span></span></li></ol></section>`;
+}
+function refreshResearchLog() { const it = idea(), g = it && RESEARCH[it.id], el = document.getElementById("mr-log"); if (g && el) el.outerHTML = researchLogHtml(g); }
+function researchHtml(it) {
+  const r = it.research, g = RESEARCH[it.id], stale = r && r.basedOn !== researchKey(it);
+  const conf = (c) => `<span class="tag${c === "high" ? "" : c === "medium" ? " neutral" : " t2"}">${t("c_" + c)}</span>`;
+  const state = g ? t("mrRunning") : r ? `${t("mrDone")} · ${t("v_" + r.verdict.call)}` : t("mrIdle");
+  const run = `<button class="btn${r ? "" : " primary"}" data-act="research-run" ${g ? "disabled" : ""}>${svg("search")} ${r ? t("mrRerun") : t("mrRun")}</button>`;
+  let body = `<p class="mr-note" role="note">${t("mrNote")}</p>`;
+  if (g) body += researchLogHtml(g);
+  if (r) {
+    body += `<p class="error" id="mr-stale" role="status" style="font-size:13px" ${stale ? "" : "hidden"}>${t("mrStale")}</p><p style="margin:0 0 4px">${esc(r.summary)}</p>
+    <h3>${t("mrMarket")}</h3><div class="mrow"><span>${esc(r.market.frame)}</span>${r.market.method ? `<span class="muted"><b>${t("mrSizing")}：</b>${esc(r.market.method)}</span>` : ""}${r.market.trend ? `<span class="muted"><b>${t("mrTrend")}：</b>${esc(r.market.trend)}</span>` : ""}</div>
+    ${r.market.assumptions.map((a) => `<div class="mrow"><div>${conf(a.confidence)}<span>${esc(a.text)}</span></div></div>`).join("")}
+    <h3>${t("mrSegments")}</h3>${r.segments.map((x) => `<div class="mrow"><div><b>${esc(x.name)}</b><span class="tag neutral">${t("sz_" + x.size)}</span><span class="tag neutral">${t("wt_" + x.willingness)}</span></div><span>${esc(x.pain)}</span><span class="muted">${t("mrReach")}：${esc(x.reach)}</span></div>`).join("")}
+    <h3>${t("mrAlts")}</h3>${r.alternatives.map((x) => `<div class="mrow"><div><b>${esc(x.name)}</b><span class="tag neutral">${t("k_" + x.kind)}</span>${x.likely ? `<span class="tag t2">${t("mrLikely")}</span>` : ""}</div><span class="muted">${esc(x.strength)}</span><span><b>${t("mrWin")}：</b>${esc(x.gap)}</span></div>`).join("")}
+    <h3>${t("mrPricing")}</h3>${r.pricing.map((x) => `<div class="mrow"><div><b>${esc(x.range)}</b>${conf(x.confidence)}</div><span>${esc(x.point)}</span></div>`).join("")}
+    <h3>${t("mrDemand")}</h3>${r.demand.map((x) => `<div class="mrow"><span>${esc(x.signal)}</span><span class="muted">${t("mrWhere")}：${esc(x.where)}</span>${x.query ? `<div class="qrow"><code>${esc(x.query)}</code><button class="ib sm" data-act="copy-text" data-text="${esc(x.query)}" aria-label="${t("mrCopyQ")}">${svg("copy")}</button></div>` : ""}</div>`).join("")}
+    <h3>${t("mrHk")}</h3>${r.hk.map((x) => `<div class="mrow"><div><b>${esc(HKT[x.topic]?.[lang()] ?? x.topic)}</b></div><span>${esc(x.note)}</span></div>`).join("")}
+    <h3>${t("mrRisks")}</h3>${r.risks.map((x) => `<div class="mrow"><div><b>${esc(x.risk)}</b><span class="tag${x.severity === "high" ? " t2" : " neutral"}">${t("sev_" + x.severity)}</span></div><span class="muted">${esc(x.mitigation)}</span></div>`).join("")}
+    <div class="verdict"><h3>${t("mrVerdict")}：${t("v_" + r.verdict.call)}</h3><span>${esc(r.verdict.why)}</span>${r.verdict.next.length ? `<p class="label" style="margin:12px 0 0">${t("mrNext")}</p><ul>${r.verdict.next.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}</div>
+    <h3>${t("mrVerify")}</h3>${r.verify.map((x) => `<div class="mrow"><b>${esc(x.claim)}</b><span>${esc(x.how)}</span><span class="faint">${esc(x.source)}</span></div>`).join("")}
+    <p class="faint" style="font-size:13px;margin:12px 0 0">${t("mrFeeds")}</p>`;
+  }
+  body += `<div style="margin-top:12px">${run}</div>`;
+  return `<details class="mr" id="mr" ${S.mrOpen || g ? "open" : ""}><summary><span>${t("mrTitle")}</span><span class="faint">${state}</span></summary>${body}</details>`;
+}
+
 /* ───────── Idea Studio view ───────── */
 function studioLogHtml(g) {
   const el = Math.round((Date.now() - g.t0) / 1000);
@@ -1220,7 +1332,7 @@ function viewStudio() {
   const it = idea(); if (!it) { S.view = "journal"; return viewJournal(); }
   const L = lang(), bp = it.blueprint, g = GROOM[it.id];
   const head = `<p class="eyebrow">${t("stEyebrow")}</p><h1>${esc(it.spec.title)}</h1><p class="muted" style="margin:0">${esc(it.spec.oneLiner)}</p>`;
-  if (!bp) return `<div class="lib studio">${head}${g ? studioLogHtml(g) : `<button class="btn primary lg block" data-act="groom" style="margin-top:20px">${t("stStart")}</button>`}<div class="skel-block" aria-hidden="true">${'<div class="sk"></div>'.repeat(5)}</div></div>`;
+  if (!bp) return `<div class="lib studio">${head}${researchHtml(it)}${g ? studioLogHtml(g) : `<button class="btn primary lg block" data-act="groom" style="margin-top:20px">${t("stStart")}</button>`}<div class="skel-block" aria-hidden="true">${'<div class="sk"></div>'.repeat(5)}</div></div>`;
   const act = activeScreens(bp), rd = readiness(bp, it), flash = new Set(S.flash || []);
   const resolved = bp.decisions.filter((d) => d.chosen !== null).length;
   const as = S.assets[it.id] || [];
@@ -1229,6 +1341,7 @@ function viewStudio() {
     <span class="subhead">${t("stArch")}</span><div class="chips" role="group" aria-label="${t("stArch")}">${ARCHETYPES.map((a) => `<button class="chip" data-arch="${a.id}" aria-pressed="${bp.archetype === a.id}">${L ? a.en : a.zh}</button>`).join("")}</div>
     ${S.archPending ? `<p class="error" role="status" style="font-size:13px">${t("stArchConfirm")}</p>` : ""}
 
+    ${researchHtml(it)}
     <h2 class="group">${t("stSharpen")}</h2>
     <div class="field" style="margin-top:12px"><label class="label" for="bp-v">${t("stValue")}</label><textarea class="ta" id="bp-v" rows="2" data-bp="valueProp">${esc(bp.valueProp)}</textarea></div>
     <div class="field"><label class="label" for="bp-d">${t("stDiff")}</label><textarea class="ta" id="bp-d" rows="2" data-bp="different">${esc(bp.different)}</textarea></div>
@@ -1449,6 +1562,7 @@ function sheetPack(p) {
     <dl class="kv"><dt>${t("appliesTo")}</dt><dd>${p.applies.map((x) => sl(x)).join(" · ")}</dd><dt>${t("source")}</dt><dd>${esc(p.source)}</dd></dl>
     ${toggleable(p) ? `<div class="setrow"><span id="pk-l">${wf ? t("gateOn") : t("packOn")}</span><button class="switch" role="switch" aria-checked="${on}" aria-labelledby="pk-l" data-pack-toggle="${p.id}"></button></div>` : ""}
     ${p.id === "idea-grooming" ? `<button class="btn primary block" data-act="studio-new" style="margin-top:12px">${t("studioNew")}</button>` : ""}
+    ${p.id === "market-research" ? `<button class="btn primary block" data-act="research-open" style="margin-top:12px">${svg("search")} ${t("mrOpenIdea")}</button>` : ""}
     ${p.id === "ux-audit" ? `<button class="btn block" data-act="audit-current" style="margin-top:4px">${svg("shield")} ${t("auditCurrent")}</button>` : ""}
     <details style="margin-top:14px"><summary class="label" style="cursor:pointer">${t("promptSrc")}</summary><pre class="src">${esc(p.body)}</pre></details>
     <button class="btn ghost block" data-act="sheet-close" style="margin-top:10px">${t("close")}</button>`;
@@ -1963,6 +2077,13 @@ const onClick = async (e) => {
     }
     case "asset-remove": { const l = S.assets[S.ideaId] || []; const k = l.findIndex((a) => a.id === b.dataset.id); if (k >= 0) l.splice(k, 1); LS.set("i2p.assets", S.assets); return render(); }
     case "groom": return runGrooming(S.ideaId);
+    case "research-run": return runResearch(S.ideaId);
+    case "research-open": {
+      S.sheet = null; renderSheet();
+      const x = idea() || S.ideas[0]; if (!x) { toast(t("mrNoIdea")); S.view = "capture"; S.mode = "deep"; S.modeLock = true; return render(); }
+      S.ideaId = x.id; S.view = "studio"; S.mrOpen = true; return render();
+    }
+    case "copy-text": try { await navigator.clipboard.writeText(b.dataset.text); toast(t("copied")); } catch {} return;
     case "reroll-style": return runGrooming(S.ideaId, { only: "style" });
     case "build-bp": return buildFromBlueprint();
     case "open-studio": S.view = "studio"; S.previewOpen = false; S.archPending = null; return render();
@@ -2014,6 +2135,7 @@ $app.addEventListener("input", (e) => {
   if (el.dataset.bp) {
     const it = idea(); if (!it?.blueprint) return;
     setPath(it.blueprint, el.dataset.bp, el.value); it.updatedAt = Date.now(); persist();
+    const st = document.getElementById("mr-stale"); if (st && it.research) st.hidden = it.research.basedOn === researchKey(it);
     const rd = readiness(it.blueprint, it), a = document.getElementById("rd"), l = document.getElementById("rd-line");
     if (a) a.innerHTML = rdHtml(rd); if (l) l.textContent = rdLine(rd);
   }
@@ -2029,6 +2151,7 @@ $app.addEventListener("submit", (e) => {
   if (e.target.id === "capform") structure(v);
   if (e.target.id === "cform") { S.draft = ""; turn({ input: v }); }
 });
+document.addEventListener("toggle", (e) => { if (e.target.id === "mr") S.mrOpen = e.target.open; }, true);
 document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (S.sheet) { S.sheet = null; renderSheet(); } else if (S.previewOpen) { S.previewOpen = false; render(); } });
 
 render();
