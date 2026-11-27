@@ -558,6 +558,7 @@ const T = {
   chkFixMsg:["質檢搞掂，修正版已經準備好。","The check is done and a fixed version is ready."], chkFixReady:["修正版 v{n} 準備好","Fixed version v{n} is ready"],
   chkUse:["切換到 v{n}","Switch to v{n}"], chkUnchecked:["未質檢","Not checked yet"], chkRun:["運行質檢","Run check"], chkStop:["停止質檢","Stop check"],
   qFixedFrom:["已自動修正（由 v{n}）","Auto-fixed from v{n}"],
+  wlNextSkill:["下次修改用：{s}","next revision: {s}"], wlFirst:["第一個畫面用咗 {s} 秒","first screen in {s}s"],
   pvHide:["收埋預覽","Hide preview"], pvView:["睇邊樣","View"], pvProto:["原型","Prototype"], pvDlReadme:["下載 README.md","Download README.md"],
   pvSpecNote:["每次改動都會自動更新，AI 亦會靠佢記住成個產品。","Updates itself after every change, and the AI reads it as its memory of the product."],
   cloudLocal:["只係存喺呢部機。","Saved on this device only."], cloudSync:["同步緊你嘅帳戶…","Syncing with your account…"], cloudOn:["已經存入你嘅帳戶，換機或者清咗瀏覽器都唔會唔見。","Saved to your account, so a new device or a cleared browser keeps your ideas."],
@@ -643,9 +644,20 @@ const PHIL = [
 const SLOT = { logo: ["logo", "logo"], photo: ["相片", "photo"], product: ["產品相", "product photo"], hero: ["主視覺", "hero image"] };
 const slotName = (k) => (SLOT[k] || SLOT.photo)[lang()];
 
+/* One design skill per generation keeps prompts short and fast. The first build uses the first skill in the order;
+   each revision applies the next one, so a product is refined by one discipline at a time. Switches in the Skills tab still apply. */
+const SKILL_ORDER = {
+  "prototype-html": ["premium-craft", "head-designer", "cantonese-copywriter", "frontend-designer", "fable-discipline"],
+  "game-prototype": ["world-weaving", "cantonese-copywriter", "frontend-designer", "fable-discipline"],
+  "design-variants": ["head-designer", "frontend-designer", "cantonese-copywriter", "fable-discipline"],
+};
+const roundSkills = (skill) => (SKILL_ORDER[skill] || []).filter((id) => PACKS.some((p) => p.id === id && p.kind === "craft" && p.applies.includes(skill)) && packOn(id) && !(id === "cantonese-copywriter" && S.register === "en"));
+/** The skill for the next version of this idea: round n of the order, counted over this idea's versions of that kind. */
+function skillForRound(skill, it, ahead = 0) { const list = roundSkills(skill); if (!list.length) return null; const n = it ? it.versions.filter((v) => v.skill === skill).length : 0; return list[(n + ahead) % list.length]; }
 function craftBlock(skill, opts = {}) {
-  return PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en"))
-    .map((p) => (p.id === "premium-craft" && !opts.exemplar ? p.body.split("REFERENCE SCAFFOLD")[0].trim() : p.body)).join("\n\n");
+  const id = opts.pack !== undefined ? opts.pack : skillForRound(skill, opts.it);
+  const p = id && PACKS.find((x) => x.id === id); if (!p) return "";
+  return p.id === "premium-craft" && !opts.exemplar ? p.body.split("REFERENCE SCAFFOLD")[0].trim() : p.body;
 }
 function briefBlock(it) {
   const st = it.spec.style || {};
@@ -657,7 +669,7 @@ function briefBlock(it) {
     + (as.length ? `\nASSETS uploaded by the user (reference as src="asset:ID" or url(asset:ID); never invent other image URLs):\n${as.map((a) => `- ${a.id} (${a.slot}): ${a.name}`).join("\n")}` : "");
 }
 function designPrompt(skill, it, opts = {}) {
-  return [SKILL_PROMPT[skill], craftBlock(skill, opts), blueprintBlock(skill, it), briefBlock(it), RULES, REGISTER[S.register], specBlock(it.spec)].filter(Boolean).join("\n\n");
+  return [SKILL_PROMPT[skill], craftBlock(skill, { ...opts, it }), blueprintBlock(skill, it), briefBlock(it), RULES, REGISTER[S.register], specBlock(it.spec)].filter(Boolean).join("\n\n");
 }
 
 /* ───────── assets: uploaded images are referenced as asset:ID tokens, never pasted into prompts ───────── */
@@ -877,7 +889,7 @@ async function polish(it, skill, html, checks, review, signal, v = {}) {
   const sample = await sampler();
   const auto = checks.filter((c) => c.status !== "pass").map((c) => `- ${c.id}: ${c.status}${c.detail ? " (" + c.detail + ")" : ""}`);
   const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- [${i.sev}/${i.area}] ${i.problem} => ${i.fix}`);
-  const prompt = `[Instructions]\n${designPrompt(skill, it)}\n[/Instructions]\n\nAUDIT FINDINGS. Fix every item below, keep everything that already works, and return the full updated document in the same output format.\nAUTOMATED:\n${auto.join("\n") || "- none"}\nEXPERT:\n${exp.join("\n") || "- none"}\n\nCURRENT PROTOTYPE:\n\`\`\`html\n${html}\n\`\`\``;
+  const prompt = `[Instructions]\n${designPrompt(skill, it, { pack: v.pack ?? null })}\n[/Instructions]\n\nAUDIT FINDINGS. Fix every item below, keep everything that already works, and return the full updated document in the same output format.\nAUTOMATED:\n${auto.join("\n") || "- none"}\nEXPERT:\n${exp.join("\n") || "- none"}\n\nCURRENT PROTOTYPE:\n\`\`\`html\n${html}\n\`\`\``;
   if (v.build) return polishChunked(it, v, checks, review, signal);
   const res = await ask("c_" + it.id, prompt, { tier: "default", signal });
   return extract(res.text || "").html;
@@ -948,7 +960,7 @@ async function runCheck(ideaId, n, { deep, allowFix = true } = {}) {
         const better = autoScore(c2) > autoScore(checks) || (autoScore(c2) === autoScore(checks) && r2 && review && r2.score > review.score);
         if (better) {
           const nn = (it.versions.at(-1)?.n || 0) + 1;
-          it.versions.push({ n: nn, html: h2, build: b2 || undefined, screens: v.screens || [], q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
+          it.versions.push({ n: nn, html: h2, build: b2 || undefined, pack: v.pack ?? null, screens: v.screens || [], q: buildQ({ it, skill: v.skill, checks: c2, review: r2 || review, deep, fixedFrom: n }), skill: v.skill, note: "", createdAt: Date.now() });
           v.q.fixedBy = nn;
           it.messages.push({ role: "assistant", content: t("chkFixMsg"), skill: v.skill, versionN: nn, feedback: 0 });
           step("recheck", "done", { from: v.q.score ?? v.q.autoScore, to: it.versions.at(-1).q.score ?? it.versions.at(-1).q.autoScore, nn });
@@ -1225,7 +1237,8 @@ async function runGrooming(ideaId, { forced = null, only = null } = {}) {
   const it = findIdea(ideaId); if (!it || GROOM[ideaId]) return;
   const sample = await sampler();
   const jid = "g_" + ideaId; jobPut({ id: jid, kind: "groom", ideaId, forced, only, status: "running", attempts: 1, startedAt: Date.now(), hiddenDuring: document.hidden }); ACTIVE.add(jid);
-  const g = (GROOM[ideaId] = { t0: Date.now(), ctl: new AbortController(), steps: { blueprint: only === "style" ? "skip" : "running", style: "running" } });
+  const g = (GROOM[ideaId] = { t0: Date.now(), ctl: new AbortController(), steps: { blueprint: only === "style" ? "skip" : "running", style: "running" }, msg: "" });
+  g.stopTick = planTicker((m) => { g.msg = m; const el = document.getElementById("plan-msg"); if (el) el.textContent = m; });
   const here = () => S.view === "studio" && S.ideaId === ideaId;
   g.timer = setInterval(() => { if (here()) refreshStudioLog(); }, 1000);
   if (here()) render();
@@ -1245,7 +1258,7 @@ async function runGrooming(ideaId, { forced = null, only = null } = {}) {
     loadFonts(it.style.pairing); persist(); if (here()) render();
   })());
   await Promise.all(jobs);
-  clearInterval(g.timer); delete GROOM[ideaId]; ACTIVE.delete(jid); jobDel(jid);
+  clearInterval(g.timer); g.stopTick(); delete GROOM[ideaId]; ACTIVE.delete(jid); jobDel(jid);
   if (!sample) toast(t("noModel"));
   if (here()) render();
 }
@@ -1345,7 +1358,7 @@ function studioLogHtml(g) {
   const rows = [["blueprint", t("stStepBp")], ["style", t("stStepStyle")]].filter(([k]) => g.steps[k] !== "skip");
   const mk = (x, i) => (x === "done" ? `<span class="mark done">${svg("check")}</span>` : x === "fallback" ? `<span class="mark">!</span>` : x === "running" ? `<span class="mark run"><i class="pd"></i></span>` : `<span class="mark">${i + 1}</span>`);
   return `<section class="worklog-wrap" id="studio-log"><div class="chkhead"><b>${t("stWorking")}</b><span class="faint" role="status">${t("elapsed").replace("{s}", el)}</span></div>
-    <ol class="worklog">${rows.map(([k, label], i) => `<li data-s="${g.steps[k] === "fallback" ? "done" : g.steps[k]}">${mk(g.steps[k], i)}<span class="cl-body"><span class="cl-t">${label}</span>${g.steps[k] === "fallback" ? `<span class="cl-o">${t("stFallback")}</span>` : ""}</span></li>`).join("")}</ol></section>`;
+    <ol class="worklog">${rows.map(([k, label], i) => `<li data-s="${g.steps[k] === "fallback" ? "done" : g.steps[k]}">${mk(g.steps[k], i)}<span class="cl-body"><span class="cl-t">${label}</span>${g.steps[k] === "fallback" ? `<span class="cl-o">${t("stFallback")}</span>` : ""}</span></li>`).join("")}</ol><p class="wl-hint muted" id="plan-msg" role="status">${esc(g.msg || "")}</p></section>`;
 }
 function refreshStudioLog() { const it = idea(), g = it && GROOM[it.id], el = document.getElementById("studio-log"); if (g && el) el.outerHTML = studioLogHtml(g); }
 const rdHtml = (rd) => `<div class="rd-top"><b>${t("stReady")}</b><span class="rd-n">${rd.score}%</span></div><div class="rdm" role="progressbar" aria-valuenow="${rd.score}" aria-valuemin="0" aria-valuemax="100" aria-label="${t("stReady")}"><span style="width:${rd.score}%"></span></div>${rd.miss.length ? `<p class="faint" style="margin:8px 0 0;font-size:13px">${rd.miss.join(" · ")}</p>` : ""}`;
@@ -1820,7 +1833,7 @@ const SKILL_PROMPT = {
 };
 const specBlock = (sp) => `<spec>${JSON.stringify(sp)}</spec>`;
 
-function buildMessages(skill, it, input, currentHtml, messages = it.messages) {
+function buildMessages(skill, it, input, currentHtml, messages = it.messages, pack) {
   const hist = [];
   let budget = 12000;
   for (let i = messages.length - 1; i >= 0 && hist.length < 12; i--) {
@@ -1832,7 +1845,7 @@ function buildMessages(skill, it, input, currentHtml, messages = it.messages) {
   while (hist.length && hist[0].role !== "user") hist.shift();
   const sys = skill === "chat"
     ? `You are a sharp, warm product thinking partner for indie founders in Hong Kong. Be concise and concrete; short paragraphs; give opinions when asked. If they seem to want something built, suggest they say so.\n${REGISTER[S.register]}\n${memoryBlock(it)}`
-    : designPrompt(skill, it, { exemplar: !currentHtml }) + (currentHtml ? "\n\n" + memoryBlock(it) : "");
+    : designPrompt(skill, it, { exemplar: !currentHtml, ...(pack !== undefined ? { pack } : {}) }) + (currentHtml ? "\n\n" + memoryBlock(it) : "");
   const iter = currentHtml ? `\n\nCURRENT PROTOTYPE (modify it — keep everything not asked to change, return the full updated document):\n\`\`\`html\n${currentHtml}\n\`\`\`` : "";
   const msgs = [...hist, { role: "user", content: input + iter }];
   // System instructions ride in the first user turn (memoryless sampler).
@@ -1860,13 +1873,19 @@ const SHIM = `<script>(function(){var seed=__SEED__;function mk(init,sync){var d
 function ok(s){try{window[s].setItem('__t','1');window[s].removeItem('__t');return true}catch(e){return false}}
 if(!ok('localStorage'))try{Object.defineProperty(window,'localStorage',{configurable:true,value:mk(seed,function(d){parent.postMessage({ch:'i2p-store',d:d},'*')})})}catch(e){}
 if(!ok('sessionStorage'))try{Object.defineProperty(window,'sessionStorage',{configurable:true,value:mk({})})}catch(e){}})();<\/script>`;
-const FILL = `<script>window.addEventListener("message",function(e){var d=e.data;if(!d||d.ch!=="i2p-fill")return;var s=document.querySelector('[data-screen="'+d.id+'"]');if(!s)return;s.innerHTML=d.html;s.removeAttribute("data-pending");if(d.js){var n=document.createElement("script");n.textContent=d.js;document.body.appendChild(n)}});<\/script>`;
+const FILL = `<script>window.addEventListener("message",function(e){var d=e.data;if(!d||d.ch!=="i2p-fill")return;var s=document.querySelector('[data-screen="'+d.id+'"]');if(!s)return;s.innerHTML=d.html;s.removeAttribute("data-pending");if(d.js){var n=document.createElement("script");n.textContent=d.js;document.body.appendChild(n)}});parent.postMessage({ch:"i2p-ready"},"*");<\/script>`;
 function wrap(html, seed) {
   const head = SHIM.replace("__SEED__", JSON.stringify(seed || {}).replace(/</g, "\\u003c")) + FILL;
   return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => m + head) : head + html;
 }
+/* Screens drawn into the preview wait until its document can hear them, so nothing streamed early is lost. */
+function postFill(msg) {
+  const fr = document.getElementById("pframe"); if (!fr) return;
+  if (PV.ready) fr.contentWindow?.postMessage(msg, "*"); else PV.queue[msg.id] = msg;
+}
 window.addEventListener("message", (e) => {
   const fr = document.getElementById("pframe");
+  if (fr && e.source === fr.contentWindow && e.data?.ch === "i2p-ready") { PV.ready = true; const q = PV.queue; PV.queue = {}; Object.values(q).forEach((m) => fr.contentWindow.postMessage(m, "*")); return; }
   if (!fr || e.source !== fr.contentWindow || e.data?.ch !== "i2p-store") return;
   const it = idea(); if (!it) return;
   it.store = e.data.d; persist();
@@ -1881,10 +1900,19 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 2800);
 }
 
+const PLAN_MSGS = [["讀緊你嘅點子…", "Reading your idea…"], ["諗緊邊個最需要佢…", "Working out who needs it most…"], ["揀緊 3 至 4 個關鍵畫面…", "Picking the 3 to 4 key screens…"],
+  ["配緊顏色同字體…", "Choosing colours and type…"], ["執緊規格，就快得…", "Tidying the spec, nearly there…"], ["仲諗緊，複雜啲嘅點子要耐少少…", "Still thinking: bigger ideas take a little longer…"]];
+/** A planning step never sits silent: a new line every 5 seconds, with the time so far. */
+function planTicker(onMsg) {
+  const t0 = Date.now(); let i = 0;
+  const say = () => onMsg(`${PLAN_MSGS[Math.min(i, PLAN_MSGS.length - 1)][lang()]} · ${t("elapsed").replace("{s}", Math.round((Date.now() - t0) / 1000))}`, i++);
+  say(); const h = setInterval(say, 5000); return () => clearInterval(h);
+}
 async function structure(raw) {
   const sample = await sampler();
   if (!sample) return toast(t("noModel"));
   S.busy = true; S.status = t("structuring"); render();
+  const stopTick = planTicker((m) => { S.status = m; renderHint(); });
   try {
     const sp = await askDurable("s" + Date.now(), `You turn a founder's raw, possibly spoken, possibly Cantonese/中英夾雜 idea into a compact product spec.
 Return ONLY JSON with keys: "title" (≤6 words, user's language), "oneLiner" (≤20 words), "coreInteraction" (the ONE thing a user does, ≤20 words), "targetUser" (≤12 words), "suggestedSkill": "prototype-html" | "game-prototype" | "design-variants",
@@ -1906,7 +1934,7 @@ ${REGISTER[S.register]}
     if (!S.modeLock) S.mode = raw.trim().length >= 50 ? "deep" : "quick";
     if (S.skillPick && S.skillPick !== "idea-capture") S.spec.suggestedSkill = S.skillPick;
   } catch (e) { toast(modelError(e)); }
-  S.busy = false; S.status = ""; render();
+  stopTick(); S.busy = false; S.status = ""; render();
 }
 
 function createIdea(generate = true) {   // generate: true = build now, false = save only, "deep" = open Idea Studio
@@ -2044,7 +2072,7 @@ function trackProgress(p, text) {
 function openPending(job) {
   const it = findIdea(job.ideaId);
   S.pending = { jobId: job.id, skill: job.skill, text: "", chars: 0, confidence: job.conf, t0: job.startedAt, lastProgress: Date.now(), waiting: false,
-    log: job.skill !== "chat" ? { phase: "wait", iterating: job.baseN != null, brief: briefLine(it, job.skill), skills: skillsLine(job.skill) } : null };
+    log: job.skill !== "chat" ? { phase: "wait", iterating: job.baseN != null, brief: briefLine(it, job.skill), skills: skillsLine(job.skill, job.pack, it ? skillForRound(job.skill, it, 1) : null) } : null };
   if (job.partial) trackProgress(S.pending, job.partial);
   clearInterval(pendTimer); pendTimer = setInterval(() => renderPending(false), 1000);
   return S.pending;
@@ -2070,7 +2098,7 @@ async function turn({ input, forceSkill, regenerate, editIndex, fresh }) {
   const edit = !staged && iterating && !!cur.build && skill === "prototype-html";   // and edited screen by screen
   const cut = it.messages.length;
   it.messages.push({ role: "user", content: input, skill });
-  const job = jobPut({ id: "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), kind: staged ? "build" : edit ? "edit" : "turn", ideaId: it.id, skill, input, cut, baseN: iterating && !staged ? cur.n : null,
+  const job = jobPut({ id: "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), kind: staged ? "build" : edit ? "edit" : "turn", ideaId: it.id, skill, input, cut, pack: skill === "chat" ? null : skillForRound(skill, it), baseN: iterating && !staged ? cur.n : null,
     conf: r.confidence, deepCheck: !!regenerate || !(cur && cur.skill === skill && cur.q), ids: staged ? ids : [], status: "running", attempts: 0, partial: "", startedAt: Date.now(), hiddenDuring: false });
   persist();                                                               // the user's message must survive a reload
   openPending(job); render(); scrollEnd();
@@ -2094,13 +2122,14 @@ async function runEditJob(id) {
   const base = it.versions.find((x) => x.n === job.baseN);
   const tick = (label) => { pend.log.phase = "body"; pend.log.step = label; pend.lastProgress = Date.now(); renderPending(false); };
   try {
-    tick(t("wlPlan"));
+    const stopTick = planTicker((m) => tick(m));
     let plan = null;
     try { plan = await ask(id, editPlanPrompt(it, base, job.input), { json: true, tier: "quick" }); }
-    catch (e) { if (e.kind === "user" || e.kind === "stalled" || e.kind === "upstream") throw e; }
+    catch (e) { if (e.kind === "user" || e.kind === "stalled" || e.kind === "upstream") { stopTick(); throw e; } }
+    stopTick();
     const targets = (Array.isArray(plan?.screens) ? plan.screens : []).filter((x) => base.build.parts[x]?.status === "done").slice(0, 3);
     if (!plan || plan.whole || (!targets.length && !plan.style)) { job.kind = "turn"; saveJobs(); ACTIVE.delete(id); return runTurnJob(id); }   // too big for a partial edit
-    const b2 = JSON.parse(JSON.stringify(base.build)), v2 = { build: b2 };
+    const b2 = JSON.parse(JSON.stringify(base.build)), v2 = { build: b2, pack: job.pack ?? null }; delete b2.first;
     if (plan.style) {
       tick(t("wlStyle"));
       const css = (b2.shell.match(/<style[^>]*>([\s\S]*?)<\/style>/i) || [, ""])[1];
@@ -2116,7 +2145,7 @@ async function runEditJob(id) {
       const part = parseScreen(res.text); if (part) Object.assign(p, { status: "done", html: part.html, js: part.js }); } };
     await Promise.all([worker(), worker()]);
     const n = (it.versions.at(-1)?.n || 0) + 1, note = cut(plan.note || "", 300);
-    it.versions.push({ n, html: assemble(v2), build: b2, q: null, skill: base.skill, screens: base.screens || [], note, createdAt: Date.now() });
+    it.versions.push({ n, html: assemble(v2), build: b2, q: null, skill: base.skill, pack: job.pack ?? null, screens: base.screens || [], note, createdAt: Date.now() });
     it.currentVersion = n; S.viewN = n; S.previewOpen = true;
     it.messages.push({ role: "assistant", content: note || t("edDone"), skill: base.skill, versionN: n, feedback: 0 });
     ACTIVE.delete(id); jobDel(id); closePending();
@@ -2133,7 +2162,7 @@ async function runTurnJob(id) {
   const pend = S.pending && S.pending.jobId === id ? S.pending : openPending(job);
   pend.waiting = false;
   const base = job.baseN != null ? it.versions.find((v) => v.n === job.baseN) : null;
-  const msgs0 = buildMessages(job.skill, it, job.input, base?.html || null, it.messages.slice(0, job.cut));
+  const msgs0 = buildMessages(job.skill, it, job.input, base?.html || null, it.messages.slice(0, job.cut), job.pack);
   const resumeFrom = job.skill !== "chat" && job.partial && job.partial.length > 1500 && /<!doctype|<html|```html/i.test(job.partial) ? job.partial : "";
   const msgs = resumeFrom ? [...msgs0, { role: "assistant", content: resumeFrom }, { role: "user", content: CONTINUE }] : msgs0;
   if (!resumeFrom) job.partial = "";
@@ -2154,7 +2183,7 @@ function finishTurn(job, it, full, truncated) {
     const { note, html } = extract(full);
     if (html) {
       versionN = (it.versions.at(-1)?.n || 0) + 1;
-      it.versions.push({ n: versionN, html, q: null, skill, screens: job.ids || [], note: note.slice(0, 300), createdAt: Date.now() });
+      it.versions.push({ n: versionN, html, q: null, skill, pack: job.pack ?? null, screens: job.ids || [], note: note.slice(0, 300), createdAt: Date.now() });
       if (S.gate) kick = { n: versionN, deep: job.deepCheck };
       it.currentVersion = versionN; S.viewN = versionN; S.previewOpen = true;
       content = note || "✓";
@@ -2246,7 +2275,8 @@ input,select,textarea{width:100%;min-height:48px;padding:0 var(--s3);border:1px 
 function screenPrompt(it, v, id) {
   const act = activeScreens(it.blueprint), me = act.find((x) => x.id === id);
   const css = (v.build.shell.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || []).map((x) => x.replace(/<\/?style[^>]*>/gi, "")).join("\n").slice(0, 9000);
-  return `[Instructions]\n${craftBlock("prototype-html", { exemplar: false })}\n${blueprintBlock("prototype-html", it)}\n${briefBlock(it)}\n${REGISTER[S.register]}\n\nBUILD MODE: SCREEN "${id}" (${me?.name}). Purpose: ${me?.purpose}. Primary action: ${me?.action}.\nThe shared shell is already built. Use ONLY the classes in SHELL CSS below and the window.App helpers. Put any screen-specific rules in a <style> whose selectors all start with [data-screen="${id}"].\nOutput EXACTLY: (1) the INNER HTML of <section data-screen="${id}"> (no section tag, no html/head/body, no prose), then (2) at most ONE <script> containing a single IIFE that starts with const root=document.querySelector('[data-screen="${id}"]').\nRules: prefix every id you invent with "${id}-"; never touch other screens; navigate only with data-go="<screen id>" (screens: ${act.map((x) => x.id).join(", ")}); no globals; persist with App.store using the key prefix "${id}:"; real, specific content (6-10 items where this is a list); include this screen's empty, loading and error states; own the signature interaction only if it belongs here.\n[/Instructions]\n\nSHELL CSS (read-only):\n\`\`\`css\n${css}\n\`\`\``;
+  const first = v.build.first === id;
+  return `[Instructions]\n${craftBlock("prototype-html", { exemplar: false, pack: v.pack ?? null })}\n${blueprintBlock("prototype-html", it)}\n${briefBlock(it)}\n${REGISTER[S.register]}\n\nBUILD MODE: SCREEN "${id}" (${me?.name}). Purpose: ${me?.purpose}. Primary action: ${me?.action}.\nThe shared shell is already built. Use ONLY the classes in SHELL CSS below and the window.App helpers. Put any screen-specific rules in a <style> whose selectors all start with [data-screen="${id}"].\nOutput EXACTLY: (1) the INNER HTML of <section data-screen="${id}"> (no section tag, no html/head/body, no prose), then (2) at most ONE <script> containing a single IIFE that starts with const root=document.querySelector('[data-screen="${id}"]').\nRules: prefix every id you invent with "${id}-"; never touch other screens; navigate only with data-go="<screen id>" (screens: ${act.map((x) => x.id).join(", ")}); no globals; persist with App.store using the key prefix "${id}:"; real, specific content (6-10 items where this is a list); include this screen's empty, loading and error states; own the signature interaction only if it belongs here.${first ? "\nFIRST SCREEN: the founder is watching it appear. Keep it focused: under about 80 lines, at most 6 list items, one clear primary action." : ""}\n[/Instructions]\n\nSHELL CSS (read-only):\n\`\`\`css\n${css}\n\`\`\``;
 }
 function parseScreen(text) {
   let x = String(text || "").replace(/```[a-z]*\n?/gi, "").trim();
@@ -2267,10 +2297,26 @@ function assemble(v) {
   if (scripts.length) { const sc = doc.createElement("script"); sc.textContent = scripts.join("\n"); doc.body.appendChild(sc); }
   return "<!doctype html>\n" + doc.documentElement.outerHTML;
 }
+/** The renderable part of a screen that is still streaming: whole tags only, no script until it is complete. */
+function partialScreen(text) {
+  let x = String(text || "").replace(/```[a-z]*\n?/gi, "");
+  const sc = x.search(/<script\b/i); if (sc >= 0) x = x.slice(0, sc);
+  const st = x.lastIndexOf("<style"); if (st >= 0 && x.indexOf("</style>", st) < 0) x = x.slice(0, st);
+  const lt = x.lastIndexOf("<"); if (lt > x.lastIndexOf(">")) x = x.slice(0, lt);
+  const first = x.indexOf("<"); if (first > 0) x = x.slice(first);
+  return x.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, "").trim().length >= 12 ? x : "";
+}
+const liveAt = {};
+function injectPartial(v, id, text) {
+  const k = v.n + ":" + id, now = Date.now(); if (now - (liveAt[k] || 0) < 900) return; liveAt[k] = now;
+  const html = partialScreen(text), fr = document.getElementById("pframe");
+  if (!html || !fr || !S.ideaId || (S.viewN ?? findIdea(S.ideaId)?.currentVersion) !== v.n) return;
+  postFill({ ch: "i2p-fill", id, html, js: "" });
+}
 function injectScreen(v, id) {
   const fr = document.getElementById("pframe"); if (!fr || !S.ideaId || (S.viewN ?? findIdea(S.ideaId)?.currentVersion) !== v.n) return;
   const p = v.build.parts[id];
-  fr.contentWindow?.postMessage({ ch: "i2p-fill", id, html: p.html, js: p.js ? `(function(){try{${p.js}}catch(e){console.error(e)}})();` : "" }, "*");
+  postFill({ ch: "i2p-fill", id, html: p.html, js: p.js ? `(function(){try{${p.js}}catch(e){console.error(e)}})();` : "" });
 }
 function uiBuild(ideaId, n) {
   if (!inIdeaView(ideaId)) return;
@@ -2288,8 +2334,8 @@ async function runBuildJob(id) {
     if (!v) {
       const shell = localShell(it, job.ids), note = "";                      // instant: the first screen starts streaming straight away
       const n = (it.versions.at(-1)?.n || 0) + 1;
-      v = { n, html: shell, q: null, skill: "prototype-html", screens: job.ids, note: "", createdAt: Date.now(),
-        build: { shell, parts: Object.fromEntries(job.ids.map((x) => [x, { status: "pending", tries: 0 }])) } };
+      v = { n, html: shell, q: null, skill: "prototype-html", pack: job.pack ?? skillForRound("prototype-html", it), screens: job.ids, note: "", createdAt: Date.now(), startedAt: job.startedAt,
+        build: { shell, first: job.ids[0], parts: Object.fromEntries(job.ids.map((x) => [x, { status: "pending", tries: 0 }])) } };
       it.versions.push(v); it.currentVersion = n; S.viewN = n; S.previewOpen = true; job.versionN = n; saveJobs();
       it.messages.push({ role: "assistant", content: note || t("bpShellNote"), skill: "prototype-html", versionN: n, feedback: 0 });
       persist(); render(); scrollEnd();                                       // the skeleton product is on screen now
@@ -2312,9 +2358,11 @@ async function buildOneScreen(job, it, v, id, ctx) {
   for (;;) {
     p.status = "running"; p.chars = 0; p.tries++; uiBuild(it.id, v.n);
     try {
-      const res = await ask(job.id, screenPrompt(it, v, id), { onText: (text) => { p.chars = text.length; if (S.pending) S.pending.lastProgress = Date.now(); } });
+      const res = await ask(job.id, screenPrompt(it, v, id), { onText: (text) => { p.chars = text.length; if (S.pending) S.pending.lastProgress = Date.now(); injectPartial(v, id, text); } });
       const part = parseScreen(res.text); if (!part) throw { kind: "bad" };
-      Object.assign(p, { status: "done", html: part.html, js: part.js }); v.html = assemble(v); persist(); injectScreen(v, id); uiBuild(it.id, v.n); return;
+      Object.assign(p, { status: "done", html: part.html, js: part.js });
+      if (!v.firstMs && v.startedAt) v.firstMs = Date.now() - v.startedAt;      // time to the first finished screen, shown in the log
+      v.html = assemble(v); persist(); injectScreen(v, id); uiBuild(it.id, v.n); return;
     } catch (e) {
       if (e.kind === "user" || e.kind === "stalled" || e.kind === "upstream") { p.status = "pending"; ctx.stop = ctx.stop || e; uiBuild(it.id, v.n); return; }
       const limited = e.code === "rate_limited";
@@ -2344,7 +2392,7 @@ async function polishChunked(it, v, checks, review, signal) {
   const b2 = JSON.parse(JSON.stringify(v.build)), notes = checks.filter((c) => c.status !== "pass").map((c) => `- ${c.id}: ${c.detail}`).join("\n");
   const exp = (review?.issues || []).filter((i) => i.sev !== "low").map((i) => `- ${i.problem} => ${i.fix}`).join("\n");
   await Promise.all(ids.map(async (id) => {
-    const fake = { build: b2 };
+    const fake = { build: b2, pack: v.pack ?? null }; delete b2.first;
     const res = await ask("c_" + it.id, `${screenPrompt(it, fake, id)}\n\nAUDIT FINDINGS for this screen. Rewrite the screen and fix every one; keep what works.\n${notes}\n${exp}\n\nCURRENT SCREEN HTML:\n${b2.parts[id].html || ""}`, { tier: "default", signal });
     const part = parseScreen(res.text); if (part) Object.assign(b2.parts[id], { status: "done", html: part.html, js: part.js });
   }));
@@ -2396,7 +2444,7 @@ async function downloadHtml(v, it) {
 /* ───────── rendering ───────── */
 const $app = document.getElementById("app");
 /* The preview is its own panel, outside the chat: chat redraws never touch it, and the prototype only reloads when its content changes. */
-const PV = { key: "", tab: "proto" };
+const PV = { key: "", tab: "proto", ready: false, queue: {} };
 const hashStr = (x) => { let h = 5381; for (let i = 0; i < x.length; i++) h = (h * 33 + x.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ":" + x.length; };
 function renderPreview() {
   const pv = document.getElementById("pv"), it = idea();
@@ -2415,7 +2463,7 @@ function renderPreview() {
   if (PV.tab === "spec") spec.innerHTML = `<div class="specacts"><button class="btn" data-act="dl-readme">${svg("save")} ${t("pvDlReadme")}</button><span class="faint" style="font-size:13px">${t("pvSpecNote")}</span></div>${mdHtml(ideaReadme(it))}`;
   const key = it.id + ":" + n + ":" + (buildingJob(it.id, n) ? "live" : hashStr(v.html || ""));
   if (key !== PV.key || !document.getElementById("pframe")) {
-    PV.key = key;
+    PV.key = key; PV.ready = false; PV.queue = {};
     stage.innerHTML = v.html ? `<iframe id="pframe" title="${esc(it.spec.title)} v${n}" sandbox="allow-scripts"></iframe>` : `<p class="muted" style="margin:auto">—</p>`;
     const fr = document.getElementById("pframe"); if (fr) fr.srcdoc = wrap(resolveAssets(v.html, it.id), it.store);
   }
@@ -2491,7 +2539,7 @@ function worklogHtml(p) {
   const rows = [["done", g.iterating ? t("wlIter") : t("wlBrief"), esc(g.brief)], ["done", t("wlSkills"), esc(g.skills)]];
   if (job?.kind === "build") {
     const it = findIdea(job.ideaId), v = it?.versions.find((x) => x.n === job.versionN), parts = v?.build?.parts || {}, act = it?.blueprint ? activeScreens(it.blueprint) : [];
-    rows.push([job.versionN != null ? "done" : "running", t("wlShell"), job.versionN != null ? "" : p.chars ? (p.chars / 1000).toFixed(1) + "k" : ""]);
+    rows.push([job.versionN != null ? "done" : "running", t("wlShell"), v?.firstMs ? t("wlFirst").replace("{s}", Math.round(v.firstMs / 1000)) : ""]);
     for (const id of job.ids) {
       const x = parts[id] || { status: "pending" };
       rows.push([x.status === "done" ? "done" : x.status === "running" ? "running" : x.status === "failed" ? "error" : "pending", act.find((a) => a.id === id)?.name || id,
@@ -2514,7 +2562,7 @@ function briefLine(it, skill) {
   const bits = [it.spec.title, tn.length ? tn.join(" + ") : null, skill !== "game-prototype" ? (lang() ? ph.en : ph.zh) : null].filter(Boolean);
   return bits.join(" · ");
 }
-const skillsLine = (skill) => PACKS.filter((p) => p.kind === "craft" && p.applies.includes(skill) && packOn(p.id) && !(p.id === "cantonese-copywriter" && S.register === "en")).map(packName).join(" · ") || t("noSkills");
+const skillsLine = (skill, pack, next) => (pack ? packName(PACKS.find((p) => p.id === pack)) + (next && next !== pack ? " · " + t("wlNextSkill").replace("{s}", packName(PACKS.find((p) => p.id === next))) : "") : t("noSkills"));
 function pendingHtml() {
   const p = S.pending; if (!p) return "";
   return `<div class="msg" id="pending">${p.skill !== "chat" ? `<div class="route">${skillIcon(p.skill)} ${sl(p.skill)}</div>` : ""}

@@ -12,6 +12,9 @@ Idea2Proto turns a spoken or typed idea (Cantonese, English or 中英夾雜) int
 **Core flows**
 - **Quick build (default).** Idea → one fast structuring call (title, one-liner, user, core interaction, 3–4 screens, palette) → the shell is written locally from the palette, instantly → screens are generated two at a time and appear live. Target: first real screen in well under a minute.
 - **Idea Studio (deep mode).** For complex ideas: a groomed blueprint (personas, screens, branching decisions, facts, risks), a style board and optional market research feed the same staged build.
+- **One design skill per generation.** The first build applies one craft skill (premium craft for web prototypes, world weaving for games, head designer for design variants); each revision applies the next one in the order (head designer → Cantonese copywriter → frontend designer → Fable discipline, then it wraps). Skills switched off in the Skills tab are skipped. Short prompts generate faster, and each pass has one clear focus. The work log names this round's skill and the next.
+- **Planning never sits silent.** While the spec, blueprint or an edit plan is being written, a new progress line appears every 5 seconds with the time so far.
+- **First output fast.** The first screen gets a tight budget (about 80 lines) and is drawn into the preview while it streams; the work log records how long the first finished screen took.
 - **Iterate.** On a staged product, a change is planned first (quick call) and only the affected screens, or the shared CSS, are rewritten. Structural changes fall back to one whole-document edit.
 - **Check agent.** Every version is measured locally at 390px (layout, targets, contrast, labels, reachability, errors). Automatic fixes run only for hard failures; the expert review is one tap away.
 - **Agents.** Validator, prototype sprint and launch kit, each with at most two steps; independent steps run side by side.
